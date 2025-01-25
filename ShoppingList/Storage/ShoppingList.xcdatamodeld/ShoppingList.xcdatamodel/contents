@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23231" systemVersion="24B91" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="ListItemCoreData" representedClassName="ListItemCoreData" syncable="YES" codeGenerationType="class">
+        <attribute name="checked" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="quantity" attributeType="Integer 16" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="unit" attributeType="String"/>
+        <relationship name="shoppingList" maxCount="1" deletionRule="Nullify" destinationEntity="ShoppingListCoreData" inverseName="listItems" inverseEntity="ShoppingListCoreData"/>
+    </entity>
+    <entity name="ShoppingListCoreData" representedClassName="ShoppingListCoreData" syncable="YES" codeGenerationType="class">
+        <attribute name="completed" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="listId" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="pinned" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="title" attributeType="String" defaultValueString=""/>
+        <relationship name="listItems" toMany="YES" deletionRule="Nullify" destinationEntity="ListItemCoreData" inverseName="shoppingList" inverseEntity="ListItemCoreData"/>
+    </entity>
+</model>

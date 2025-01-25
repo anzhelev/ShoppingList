@@ -1,0 +1,36 @@
+"units.kg" = "кг";
+"units.liter" = "л";
+"units.pack" = "уп";
+"units.piece" = "шт";
+
+"buttons.pin" = "Закрепить";
+"buttons.unpin" = "Открепить";
+"buttons.edit" = "Редактировать";
+"buttons.restore" = "Восстановить";
+"buttons.delete" = "Удалить";
+"buttons.back" = "Назад";
+"buttons.done" = "Готово";
+"buttons.addProduct" = "Добавить продукт";
+"buttons.saveList" = "Сохранить список";
+"buttons.restoreList" = "Восстановить список";
+"buttons.removeCheckedItems" = "Всё куплено";
+"buttons.switchToMainScreen" = "Перейти на главную";
+
+"mainScreenViewController.active.title" = "Все ваши списки";
+"mainScreenViewController.active.swipeHint" = "Проведите, чтобы открыть\nзавершенные списки";
+"mainScreenViewController.completed.title" = "Завершенные списки";
+"mainScreenViewController.completed.swipeHint" = "Проведите, чтобы открыть все списки";
+"mainScreenViewController.stub" = "У вас еще нет списков покупок.\nСамое время создать первый!";
+
+"newListViewController.title" = "Новый список";
+"newListViewController.titlePlaceholder" = "Введите название списка";
+"newListViewController.itemPlaceholder" = "Продукт";
+"newListViewController.nameAlreadyUsed" = "Такой список уже есть";
+"newListViewController.wrongName" = "Такое название недопустимо";
+"newListViewController.emptyName" = "Вы не ввели название";
+"newListViewController.addProductHint" = "Не забудьте указать количество";
+
+"shoppingListViewController.checkAll" = "Отметить все продукты";
+
+"successView.congratulations" = "Поздравляем!";
+"successView.additional" = "Вы купили все из списка продуктов.\nВозвращайтесь снова с новыми\nсписками.";
