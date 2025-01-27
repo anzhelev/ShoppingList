@@ -7,7 +7,7 @@ protocol NewListViewModelProtocol {
     var needToClosePopUp: Observable<Bool> { get set }
     var popUpQuantity: Observable<Int> { get set }
     var popUpUnit: Observable<Int> { get set }
-    var needToShowPopUp: Observable<Int> { get set }
+    var needToShowPopUp: Observable<(Int, Int, Units)> { get set }
     var needToUpdateItem: Observable<(IndexPath,Bool)> { get set }
     var needToInsertItem: Observable<IndexPath> { get set }
     var needToRemoveItem: Observable<IndexPath> { get set }
@@ -30,7 +30,7 @@ final class NewListViewModel: NewListViewModelProtocol {
     var needToClosePopUp: Observable<Bool> = Observable(false)
     var popUpQuantity: Observable<Int> = Observable(nil)
     var popUpUnit: Observable<Int> = Observable(nil)
-    var needToShowPopUp: Observable<Int> = Observable(nil)
+    var needToShowPopUp: Observable<(Int, Int, Units)> = Observable(nil)
     var needToUpdateItem: Observable<(IndexPath,Bool)> = Observable(nil)
     var needToInsertItem: Observable<IndexPath> = Observable(nil)
     var needToRemoveItem: Observable<IndexPath> = Observable(nil)
@@ -261,11 +261,9 @@ extension NewListViewModel: NewListCellTitleDelegate {
 
 // MARK: - NewListCellItemDelegate
 extension NewListViewModel: NewListCellItemDelegate {
-    func updateNewListItem(in row: Int, with title: String?, quantity: Int, unit: Units) {
+    func updateNewListItem(in row: Int, with title: String?) {
         let oldItemState = listItems[row]
         listItems[row].title = title
-        listItems[row].quantity = quantity
-        listItems[row].unit = unit
         validateName(row: row)
         if listItems[row].error != oldItemState.error {
             userInteractionEnabled.value = false
@@ -277,7 +275,7 @@ extension NewListViewModel: NewListCellItemDelegate {
     }
     
     func editQuantityButtonPressed(in row: Int) {
-        needToShowPopUp.value = row
+        needToShowPopUp.value = (row, listItems[row].quantity ?? 1, listItems[row].unit ?? .piece)
     }
 }
 
@@ -297,64 +295,13 @@ extension NewListViewModel: NewListCellButtonDelegate {
 
 // MARK: - PopUpVCDelegate
 extension NewListViewModel: PopUpVCDelegate {
-    
-    func popUpView(for item: Int, isShowing : Bool) {
-        if isShowing {
-            popUpQuantity.value = listItems[item].quantity
-            
-            switch listItems[item].unit {
-            case .kg:
-                popUpUnit.value = 0
-            case .liter:
-                popUpUnit.value = 1
-            case .pack:
-                popUpUnit.value = 2
-            case .piece, .none:
-                popUpUnit.value = 3
-            }
-        }
-        userInteractionEnabled.value = !isShowing
-    }
-    
-    func unitSelected(item: Int, unit index: Int) {
-        var selectedUnit: Units
-        
-        switch index {
-        case 0:
-            selectedUnit = .kg
-        case 1:
-            selectedUnit = .liter
-        case 2:
-            selectedUnit = .pack
-        default:
-            selectedUnit = .piece
-        }
-        
-        if listItems[item].unit != selectedUnit {
-            listItems[item].unit = selectedUnit
-        }
+    func unitSelected(item: Int, unit: Units) {
+        listItems[item].unit = unit
         needToUpdateItem.value = (IndexPath(row: item, section: 0), false)
     }
     
-    func minusButtonPressed(item: Int) {
-        let quantity = listItems[item].quantity ?? 1
-        if listItems[item].quantity != max(quantity - 1, 1) {
-            listItems[item].quantity = max(quantity - 1, 1)
-            needToUpdateItem.value = (IndexPath(row: item, section: 0), false)
-            popUpQuantity.value = listItems[item].quantity
-        }
-    }
-    
-    func plusButtonPressed(item: Int) {
-        let quantity = listItems[item].quantity ?? 1
-        if listItems[item].quantity != max(quantity + 1, 99) {
-            listItems[item].quantity = min(quantity + 1, 99)
-            needToUpdateItem.value = (IndexPath(row: item, section: 0), false)
-            popUpQuantity.value = listItems[item].quantity
-        }
-    }
-    
-    func doneButtonPressed() {
-        needToClosePopUp.value = true
+    func quantitySelected(item: Int, quantity: Int) {
+        listItems[item].quantity = quantity
+        needToUpdateItem.value = (IndexPath(row: item, section: 0), false)
     }
 }

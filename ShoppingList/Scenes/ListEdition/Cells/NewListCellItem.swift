@@ -1,7 +1,7 @@
 import UIKit
 
 protocol NewListCellItemDelegate: AnyObject {
-    func updateNewListItem(in row: Int, with title: String?, quantity: Int, unit: Units)
+    func updateNewListItem(in row: Int, with title: String?)
     func editQuantityButtonPressed(in row: Int)
 }
 
@@ -101,7 +101,7 @@ final class NewListCellItem: UITableViewCell {
     
     // MARK: - IBAction
     @objc func itemUpdated() {
-        self.delegate?.updateNewListItem(in: row, with: itemNameField.text, quantity: quantity, unit: unit)
+        self.delegate?.updateNewListItem(in: row, with: itemNameField.text)
     }
     
     @objc func editQuantity() {

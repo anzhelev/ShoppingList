@@ -1,23 +1,9 @@
 import UIKit
 
-protocol PopUpVCDelegate: AnyObject {
-    var popUpQuantity: Observable<Int> { get set }
-    var popUpUnit: Observable<Int> { get set }
-    var needToClosePopUp: Observable<Bool> { get set }
-    func unitSelected(item: Int, unit index: Int)
-    func minusButtonPressed(item: Int)
-    func plusButtonPressed(item: Int)
-    func doneButtonPressed()
-    func popUpView(for item: Int, isShowing : Bool)
-}
-
 final class PopUpVC: UIViewController {
     
-    // MARK: - Public Properties
-    weak var delegate: PopUpVCDelegate?
-    
     // MARK: - Private Properties
-    private let item: Int
+    private let viewModel: PopUpViewModelProtocol?
     
     private lazy var unitSelector = {
         let selector = UISegmentedControl(
@@ -86,9 +72,8 @@ final class PopUpVC: UIViewController {
     }()
     
     // MARK: - Initializers
-    init(item: Int, delegate: PopUpVCDelegate? = nil) {
-        self.delegate = delegate
-        self.item = item
+    init(viewModel: PopUpViewModelProtocol) {
+        self.viewModel = viewModel
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -104,59 +89,48 @@ final class PopUpVC: UIViewController {
         setUIElements()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        delegate?.popUpView(for: item, isShowing: true)
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        delegate?.popUpView(for: item, isShowing: false)
-    }
-    
     // MARK: - Actions
     @objc private func unitSelected() {
-        delegate?.unitSelected(item: item, unit: unitSelector.selectedSegmentIndex)
+        viewModel?.unitSelected(unit: unitSelector.selectedSegmentIndex)
     }
     
     @objc private func doneButtonPressed() {
-        delegate?.doneButtonPressed()
+        viewModel?.doneButtonPressed()
     }
     
     @objc private func minusButtonPressed() {
-        delegate?.minusButtonPressed(item: item)
+        viewModel?.minusButtonPressed()
     }
     
     @objc private func plusButtonPressed() {
-        delegate?.plusButtonPressed(item: item)
+        viewModel?.plusButtonPressed()
     }
     
     // MARK: - Private Methods
     private func bindViewModel() {
-        delegate?.popUpUnit.bind {[weak self] unit in
-            guard let unit else {
-                return
-            }
-            self?.setUnitSelectorValue(unit: unit)
-        }
-        
-        delegate?.popUpQuantity.bind {[weak self] quantity in
-            guard let quantity else {
-                return
-            }
-            self?.quantityLabel.text = "\(quantity)"
-        }
-        
-        delegate?.needToClosePopUp.bind {[weak self] close in
-            guard let close else {
-                return
-            }
-            if close {
+        viewModel?.popUpBinding.bind { [weak self] value in
+            switch value {
+                
+            case .closePopUp:
                 self?.dismiss(animated: true)
+                
+            case .popUpQuantity(let quantity):
+                self?.quantityLabel.text = "\(quantity)"
+                
+            case .popUpUnit(let unit):
+                self?.setUnitSelectorValue(unit: unit)
+                
+            default:
+                return
             }
         }
     }
     
     private func setUIElements() {
         view.backgroundColor = .screenBgrPrimary
+        
+        quantityLabel.text = "\(viewModel?.getQuantity() ?? 1)"
+        setUnitSelectorValue(unit: viewModel?.getUnitIndex() ?? 3)
         
         [unitSelector, minusButton, plusButton, quantityLabel, doneButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false

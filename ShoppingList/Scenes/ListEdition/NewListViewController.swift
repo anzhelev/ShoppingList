@@ -89,11 +89,11 @@ class NewListViewController: UIViewController {
             self?.updateCompleteButton(isEnabled: state)
         }
         
-        viewModel.needToShowPopUp.bind {[weak self] row in
-            guard let row else {
+        viewModel.needToShowPopUp.bind {[weak self] value in
+            guard let value else {
                 return
             }
-            self?.showPopUpView(for: row)
+            self?.showPopUpView(for: value.0, quantity: value.1, unit: value.2)
         }
         
         viewModel.needToUpdateItem.bind {[weak self] value in
@@ -188,8 +188,8 @@ class NewListViewController: UIViewController {
         : completeButton.setTitleColor(.buttonTextSecondary, for: .normal)
     }
     
-    private func showPopUpView(for item: Int) {
-        let popUpView = PopUpVC(item: item, delegate: self.viewModel as? PopUpVCDelegate)
+    private func showPopUpView(for item: Int, quantity: Int, unit: Units) {
+        let popUpView = PopUpAssembler().build(item: item, delegate: self.viewModel as? PopUpVCDelegate, quantity: quantity, unit: unit)
         if let sheet = popUpView.sheetPresentationController {
             let detent: UISheetPresentationController.Detent = .custom(identifier: .init(rawValue: "custom")) { _ in 224 }
             sheet.detents = [detent]

@@ -1,7 +1,7 @@
 import UIKit
 
 protocol ShoppingListCellItemDelegate: AnyObject {
-    func updateShoppingListItem(in row: Int, with title: String, quantity: Int, unit: Units)
+    func updateShoppingListItem(in row: Int, with title: String)
     func editQuantityButtonPressed(in row: Int)
     func checkBoxTapped(in row: Int)
     func textFieldDidBeginEditing()
@@ -121,7 +121,7 @@ final class ShoppingListCellItem: UITableViewCell {
     
     // MARK: - IBAction
     @objc func itemUpdated() {
-        self.delegate?.updateShoppingListItem(in: row, with: itemNameField.text ?? .newListItemPlaceholder, quantity: quantity, unit: unit)
+        self.delegate?.updateShoppingListItem(in: row, with: itemNameField.text ?? .newListItemPlaceholder)
     }
     
     @objc func editQuantity() {

@@ -8,7 +8,7 @@ protocol ShoppingListViewModelProtocol {
     var needToClosePopUp: Observable<Bool> { get set }
     var popUpQuantity: Observable<Int> { get set }
     var popUpUnit: Observable<Int> { get set }
-    var needToShowPopUp: Observable<Int> { get set }
+    var needToShowPopUp: Observable<(Int, Int, Units)> { get set }
     var needToUpdateItem: Observable<([IndexPath],Bool)> { get set }
     var needToInsertItem: Observable<IndexPath> { get set }
     var needToMoveItem: Observable<(IndexPath,IndexPath)> { get set }
@@ -38,7 +38,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     var needToClosePopUp: Observable<Bool> = Observable(false)
     var popUpQuantity: Observable<Int> = Observable(nil)
     var popUpUnit: Observable<Int> = Observable(nil)
-    var needToShowPopUp: Observable<Int> = Observable(nil)
+    var needToShowPopUp: Observable<(Int, Int, Units)> = Observable(nil)
     var needToUpdateItem: Observable<([IndexPath],Bool)> = Observable(nil)
     var needToInsertItem: Observable<IndexPath> = Observable(nil)
     var needToMoveItem: Observable<(IndexPath,IndexPath)> = Observable(nil)
@@ -297,23 +297,18 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
 
 // MARK: - ShoppingListCellItemDelegate
 extension ShoppingListViewModel: ShoppingListCellItemDelegate {
-    func updateShoppingListItem(in row: Int, with title: String, quantity: Int, unit: Units) {
+    func updateShoppingListItem(in row: Int, with title: String) {
         checkBoxesAreBlocked = false
         let oldItemState = shoppingList[row]
         shoppingList[row].title = title
-        shoppingList[row].quantity = quantity
-        shoppingList[row].unit = unit
         validateName(row: row)
         if shoppingList[row].error != oldItemState.error {
             userInteractionEnabled.value = false
             needToUpdateItem.value = ([IndexPath(row: row, section: 0)], true)
         }
-        guard oldItemState.title == shoppingList[row].title,
-              oldItemState.quantity == shoppingList[row].quantity,
-              oldItemState.unit == shoppingList[row].unit
-        else {
+        
+        if oldItemState.title != shoppingList[row].title {
             saveListToStorage(duplicatePinned: false)
-            return
         }
     }
     
@@ -325,7 +320,7 @@ extension ShoppingListViewModel: ShoppingListCellItemDelegate {
         if checkBoxesAreBlocked {
             return
         }
-        needToShowPopUp.value = row
+        needToShowPopUp.value = (row, shoppingList[row].quantity, shoppingList[row].unit)
     }
     
     func checkBoxTapped(in row: Int) {
@@ -383,64 +378,87 @@ extension ShoppingListViewModel: ShoppingListCellButtonDelegate {
 
 // MARK: - PopUpVCDelegate
 extension ShoppingListViewModel: PopUpVCDelegate {
-    
-    func popUpView(for item: Int, isShowing : Bool) {
-        if isShowing {
-            popUpQuantity.value = shoppingList[item].quantity
-            
-            switch shoppingList[item].unit {
-            case .kg:
-                popUpUnit.value = 0
-            case .liter:
-                popUpUnit.value = 1
-            case .pack:
-                popUpUnit.value = 2
-            case .piece:
-                popUpUnit.value = 3
-            }
-        }
-        userInteractionEnabled.value = !isShowing
-    }
-    
-    func unitSelected(item: Int, unit index: Int) {
-        var selectedUnit: Units
-        
-        switch index {
-        case 0:
-            selectedUnit = .kg
-        case 1:
-            selectedUnit = .liter
-        case 2:
-            selectedUnit = .pack
-        default:
-            selectedUnit = .piece
-        }
-        
-        if shoppingList[item].unit != selectedUnit {
-            shoppingList[item].unit = selectedUnit
-        }
+    func unitSelected(item: Int, unit: Units) {
+        shoppingList[item].unit = unit
+//        needToUpdateItem.value = (IndexPath(row: item, section: 0), false)
         needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
     }
     
-    func minusButtonPressed(item: Int) {
-        let quantity = shoppingList[item].quantity
-        if shoppingList[item].quantity != max(quantity - 1, 1) {
-            shoppingList[item].quantity = max(quantity - 1, 1)
-            needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
-            popUpQuantity.value = shoppingList[item].quantity
-        }
-    }
-    
-    func plusButtonPressed(item: Int) {
-        let quantity = shoppingList[item].quantity
-        if shoppingList[item].quantity != max(quantity + 1, 99) {
-            shoppingList[item].quantity = min(quantity + 1, 99)
-            needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
-            popUpQuantity.value = shoppingList[item].quantity
-        }
-    }
-    
-    func doneButtonPressed() {
-        needToClosePopUp.value = true
+    func quantitySelected(item: Int, quantity: Int) {
+        shoppingList[item].quantity = quantity
+//        needToUpdateItem.value = (IndexPath(row: item, section: 0), false)
+        needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
     }
 }
+
+//// MARK: - PopUpVCDelegate
+//extension ShoppingListViewModel: PopUpVCDelegate {
+//    func unitSelected(item: Int, unit: Units) {
+//        
+//    }
+//    
+//    func quantitySelected(item: Int, quantity: Int) {
+//        
+//    }
+////    
+////    
+////    func popUpView(for item: Int, isShowing : Bool) {
+////        if isShowing {
+////            popUpQuantity.value = shoppingList[item].quantity
+////            
+////            switch shoppingList[item].unit {
+////            case .kg:
+////                popUpUnit.value = 0
+////            case .liter:
+////                popUpUnit.value = 1
+////            case .pack:
+////                popUpUnit.value = 2
+////            case .piece:
+////                popUpUnit.value = 3
+////            }
+////        }
+////        userInteractionEnabled.value = !isShowing
+////    }
+//    
+//    func unitSelected(item: Int, unit index: Int) {
+//        var selectedUnit: Units
+//        
+//        switch index {
+//        case 0:
+//            selectedUnit = .kg
+//        case 1:
+//            selectedUnit = .liter
+//        case 2:
+//            selectedUnit = .pack
+//        default:
+//            selectedUnit = .piece
+//        }
+//        
+//        if shoppingList[item].unit != selectedUnit {
+//            shoppingList[item].unit = selectedUnit
+//        }
+//        needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
+//    }
+//    
+//    func minusButtonPressed(item: Int) {
+//        let quantity = shoppingList[item].quantity
+//        if shoppingList[item].quantity != max(quantity - 1, 1) {
+//            shoppingList[item].quantity = max(quantity - 1, 1)
+//            needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
+//            popUpQuantity.value = shoppingList[item].quantity
+//        }
+//    }
+//    
+//    func plusButtonPressed(item: Int) {
+//        let quantity = shoppingList[item].quantity
+//        if shoppingList[item].quantity != max(quantity + 1, 99) {
+//            shoppingList[item].quantity = min(quantity + 1, 99)
+//            needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
+//            popUpQuantity.value = shoppingList[item].quantity
+//        }
+//    }
+//    
+//    func doneButtonPressed() {
+//        needToClosePopUp.value = true
+//    }
+//}
