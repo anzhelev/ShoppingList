@@ -14,6 +14,7 @@ protocol MainScreenViewModelProtocol {
     func deleteListButtonPressed(in row: Int)
     func getPrimaryButtonTitle(for row: Int) -> String
     func screenSwipePerformed(reversed: Bool)
+    func getStubState() -> Bool
 }
 
 final class MainScreenViewModel: MainScreenViewModelProtocol {
@@ -25,6 +26,7 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     private let storageService: StorageServiceProtocol
     private let completeMode: Bool
     private var shoppingLists: [ListInfo] = []
+    private var stubState: Bool = true
     
     //MARK: - Initializers
     init(storageService: StorageServiceProtocol, completeMode: Bool) {
@@ -62,6 +64,10 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
               pinned: completeMode ? false : shoppingLists[row].pinned,
               completeMode: completeMode
         )
+    }
+    
+    func getStubState() -> Bool {
+        stubState
     }
     
     // MARK: - Actions
@@ -115,15 +121,12 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     }
     
     private func updateStubState() {
-        mainScreenBinding.value = .showStub(
-            completeMode
-            ? shoppingLists.count + storageService
-                .getListsWithStatus(
-                    isCompleted: false
-                ).count == 0
-            
-            : shoppingLists.isEmpty
-        )
+        stubState = completeMode
+        ? shoppingLists.count + storageService
+            .getListsWithStatus(
+                isCompleted: false
+            ).count == 0
+        : shoppingLists.isEmpty
     }
     
     private func sortList() {

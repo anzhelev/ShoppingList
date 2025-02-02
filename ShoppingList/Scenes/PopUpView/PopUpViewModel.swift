@@ -1,18 +1,3 @@
-protocol PopUpViewModelProtocol {
-    var popUpBinding: Observable<PopUpBinding> { get set }
-    func getQuantity() -> Int
-    func getUnitIndex() -> Int    
-    func unitSelected(unit index: Int)
-    func minusButtonPressed()
-    func plusButtonPressed()
-    func doneButtonPressed()
-}
-
-protocol PopUpVCDelegate: AnyObject {
-    func unitSelected(item: Int, unit: Units)
-    func quantitySelected(item: Int, quantity: Int)
-}
-
 final class PopUpViewModel: PopUpViewModelProtocol {
     
     // MARK: - Public Properties

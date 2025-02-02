@@ -1,15 +1,10 @@
 import UIKit
 
-protocol NewListCellItemDelegate: AnyObject {
-    func updateNewListItem(in row: Int, with title: String?)
-    func editQuantityButtonPressed(in row: Int)
-}
-
 final class NewListCellItem: UITableViewCell {
     
     // MARK: - Public Properties
     static let reuseIdentifier = "newListCellItem"
-    weak var delegate: NewListCellItemDelegate?
+    weak var delegate: NewListCellDelegate?
     
     // MARK: - Private Properties
     private var row = 1
@@ -26,7 +21,6 @@ final class NewListCellItem: UITableViewCell {
         textField.font = .itemName
         textField.placeholder = .newListItemPlaceholder
         textField.clearButtonMode = .whileEditing
-        textField.addTarget(self, action: #selector(itemUpdated), for: .editingDidEnd)
         return textField
     }()
     
@@ -100,13 +94,8 @@ final class NewListCellItem: UITableViewCell {
     }
     
     // MARK: - IBAction
-    @objc func itemUpdated() {
-        self.delegate?.updateNewListItem(in: row, with: itemNameField.text)
-    }
-    
     @objc func editQuantity() {
         self.delegate?.editQuantityButtonPressed(in: row)
-        
     }
     
     // MARK: - Private Methods
@@ -138,9 +127,19 @@ final class NewListCellItem: UITableViewCell {
 
 // MARK: - UITextFieldDelegate
 extension NewListCellItem: UITextFieldDelegate {
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        self.delegate?.textFieldDidBeginEditing()
+    }
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        self.endEditing(true)
-        return false
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        textField.resignFirstResponder()
+        self.delegate?.updateNewListItem(in: row, with: itemNameField.text)
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {

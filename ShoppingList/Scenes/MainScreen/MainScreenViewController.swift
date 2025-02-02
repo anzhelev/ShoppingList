@@ -105,6 +105,7 @@ class MainScreenViewController: UIViewController {
         super.viewWillAppear(true)
         navigationController?.setNavigationBarHidden(true, animated: true)
         viewModel.viewWillAppear()
+        updateStub()
     }
     
     // MARK: - Navigation
@@ -133,7 +134,6 @@ class MainScreenViewController: UIViewController {
     // MARK: - Private Methods
     private func bindViewModel() {
         viewModel.mainScreenBinding.bind {[weak self] value in
-            
             switch value {
                 
             case .switchView(let mode, let reversed):
@@ -145,9 +145,6 @@ class MainScreenViewController: UIViewController {
             case .editList(let id):
                 self?.switchToNewListCreationVC(editList: id)
                 
-            case .showStub(let showStub):
-                self?.showStub(showStub)
-                
             case .reloadTable:
                 self?.reloadTable()
                 
@@ -156,6 +153,7 @@ class MainScreenViewController: UIViewController {
                 
             case .removeItem(let indexPath):
                 self?.removeItem(index: indexPath)
+                self?.updateStub()
                 
             default:
                 return
@@ -187,11 +185,12 @@ class MainScreenViewController: UIViewController {
         shoppingListsTable.endUpdates()
     }
     
-    private func showStub(_ show: Bool) {
-        stubLabel.isHidden = !show
-        arrowImageView.isHidden = !show
-        backgroundImageView.isHidden = show
-        shoppingListsTable.isHidden = show
+    private func updateStub() {
+        let stubStatus = viewModel.getStubState()
+        stubLabel.isHidden = !stubStatus
+        arrowImageView.isHidden = !stubStatus
+        backgroundImageView.isHidden = stubStatus
+        shoppingListsTable.isHidden = stubStatus
     }
     
     private func setUI() {

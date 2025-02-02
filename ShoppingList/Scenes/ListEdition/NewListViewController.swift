@@ -52,6 +52,7 @@ class NewListViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         viewModel.viewWillAppear()
+        updateCompleteButton()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -66,55 +67,34 @@ class NewListViewController: UIViewController {
     
     // MARK: - Private Methods
     private func bindViewModel() {
-        viewModel.userInteractionEnabled.bind {[weak self] enabled in
-            guard let enabled else {
-                return
-            }
-            self?.listItemsTable.isUserInteractionEnabled = enabled
-        }
-        
-        viewModel.switchToMainView.bind {[weak self] switchToMainView in
-            guard let switchToMainView else {
-                return
-            }
-            if switchToMainView {
+        viewModel.newListBinding.bind {[weak self] value in
+            
+            switch value {
+                
+            case .updateCompleteButtonState:
+                self?.updateCompleteButton()
+                
+            case .switchToMainView:
                 self?.switchToMainView()
-            }
-        }
-        
-        viewModel.needToUpdateCompleteButtonState.bind {[weak self] state in
-            guard let state else {
+                
+            case .showPopUp(let row, let quantity, let unit):
+                self?.showPopUpView(for: row, quantity: quantity, unit: unit)
+                
+            case .updateItem(let indexPath, let option):
+                self?.listItemsTable.isUserInteractionEnabled = !option
+                self?.reloadItem(index: indexPath, animated: option)
+                
+            case .insertItem(let indexPath):
+                self?.listItemsTable.isUserInteractionEnabled = false
+                self?.insertItem(index: indexPath)
+                
+            case .removeItem(let indexPath):
+                self?.listItemsTable.isUserInteractionEnabled = false
+                self?.removeItem(index: indexPath)
+                
+            default:
                 return
             }
-            self?.updateCompleteButton(isEnabled: state)
-        }
-        
-        viewModel.needToShowPopUp.bind {[weak self] value in
-            guard let value else {
-                return
-            }
-            self?.showPopUpView(for: value.0, quantity: value.1, unit: value.2)
-        }
-        
-        viewModel.needToUpdateItem.bind {[weak self] value in
-            guard let value else {
-                return
-            }
-            self?.reloadItem(index: value.0, animated: value.1)
-        }
-        
-        viewModel.needToInsertItem.bind {[weak self] indexPath in
-            guard let indexPath else {
-                return
-            }
-            self?.insertItem(index: indexPath)
-        }
-        
-        viewModel.needToRemoveItem.bind {[weak self] indexPath in
-            guard let indexPath else {
-                return
-            }
-            self?.removeItem(index: indexPath)
         }
     }
     
@@ -127,6 +107,8 @@ class NewListViewController: UIViewController {
         listItemsTable.performBatchUpdates {
             listItemsTable.reloadRows(at: [index], with: animated ? .automatic : .none)
         } completion: {_ in
+            self.updateCompleteButton()
+            self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
@@ -135,6 +117,8 @@ class NewListViewController: UIViewController {
         listItemsTable.performBatchUpdates {
             listItemsTable.insertRows(at: [index], with: .bottom)
         } completion: {_ in
+            self.updateCompleteButton()
+            self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
@@ -144,6 +128,8 @@ class NewListViewController: UIViewController {
             listItemsTable.deleteRows(at: [index], with: .top)
         } completion: {_ in
             self.listItemsTable.reloadData()
+            self.updateCompleteButton()
+            self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
@@ -179,13 +165,16 @@ class NewListViewController: UIViewController {
         navigationItem.titleView = titleView
     }
     
-    private func updateCompleteButton(isEnabled: Bool) {
-        completeButton.isEnabled = isEnabled
-        completeButton.backgroundColor = isEnabled ? .buttonBgrTertiary : .buttonBgrDisabled
+    private func updateCompleteButton() {
+        let enableState = viewModel.getCompleteButtonState()
+        completeButton.isEnabled = enableState
+        completeButton.backgroundColor = enableState ? .buttonBgrTertiary : .buttonBgrDisabled
         
-        isEnabled
+        enableState
         ? completeButton.setTitleColor(.buttonTextPrimary, for: .normal)
         : completeButton.setTitleColor(.buttonTextSecondary, for: .normal)
+        
+        self.viewModel.tableFinishedUpdating()
     }
     
     private func showPopUpView(for item: Int, quantity: Int, unit: Units) {
@@ -224,7 +213,7 @@ extension NewListViewController: UITableViewDataSource {
             ) as? NewListCellTitle else {
                 return UITableViewCell()
             }
-            cell.delegate = viewModel as? NewListCellTitleDelegate
+            cell.delegate = viewModel as? NewListCellDelegate
             cell.configure(with: cellParams.1)
             return cell
             
@@ -235,7 +224,7 @@ extension NewListViewController: UITableViewDataSource {
             ) as? NewListCellItem else {
                 return UITableViewCell()
             }
-            cell.delegate = viewModel as? NewListCellItemDelegate
+            cell.delegate = viewModel as? NewListCellDelegate
             cell.configure(with: cellParams.1)
             return cell
             
@@ -246,7 +235,7 @@ extension NewListViewController: UITableViewDataSource {
             ) as? NewListCellButton else {
                 return UITableViewCell()
             }
-            cell.delegate = viewModel as? NewListCellButtonDelegate
+            cell.delegate = viewModel as? NewListCellDelegate
             return cell
         }
     }

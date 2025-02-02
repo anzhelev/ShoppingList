@@ -1,16 +1,7 @@
 import Foundation
 
 protocol NewListViewModelProtocol {
-    var needToUpdateCompleteButtonState: Observable<Bool> { get set }
-    var userInteractionEnabled: Observable<Bool> { get set }
-    var switchToMainView: Observable<Bool> { get set }
-    var needToClosePopUp: Observable<Bool> { get set }
-    var popUpQuantity: Observable<Int> { get set }
-    var popUpUnit: Observable<Int> { get set }
-    var needToShowPopUp: Observable<(Int, Int, Units)> { get set }
-    var needToUpdateItem: Observable<(IndexPath,Bool)> { get set }
-    var needToInsertItem: Observable<IndexPath> { get set }
-    var needToRemoveItem: Observable<IndexPath> { get set }
+    var newListBinding: Observable<NewListBinding> { get set }
     func viewWillAppear()
     func viewWillDisappear()
     func completeButtonPressed()
@@ -18,22 +9,14 @@ protocol NewListViewModelProtocol {
     func getTableRowCount() -> Int
     func getRowHeight(for row: Int) -> CGFloat
     func getCellParams(for row: Int) -> (NewListCellType, NewListCellParams)
-    func tableFinishedUpdating()
+    func getCompleteButtonState() -> Bool
     func deleteItemButtonPressed(in row: Int)
+    func tableFinishedUpdating()
 }
 
 final class NewListViewModel: NewListViewModelProtocol {
     // MARK: - Public Properties
-    var userInteractionEnabled: Observable<Bool> = Observable(true)
-    var switchToMainView: Observable<Bool> = Observable(false)
-    var needToUpdateCompleteButtonState: Observable<Bool> = Observable(false)
-    var needToClosePopUp: Observable<Bool> = Observable(false)
-    var popUpQuantity: Observable<Int> = Observable(nil)
-    var popUpUnit: Observable<Int> = Observable(nil)
-    var needToShowPopUp: Observable<(Int, Int, Units)> = Observable(nil)
-    var needToUpdateItem: Observable<(IndexPath,Bool)> = Observable(nil)
-    var needToInsertItem: Observable<IndexPath> = Observable(nil)
-    var needToRemoveItem: Observable<IndexPath> = Observable(nil)
+    var newListBinding: Observable<NewListBinding> = Observable(nil)
     
     // MARK: - Private Properties
     private let storageService: StorageServiceProtocol
@@ -41,6 +24,9 @@ final class NewListViewModel: NewListViewModelProtocol {
     private var existingListNames = Set<String>()
     private var listItems: [NewListCellParams] = []
     private var editedList: ShopList?
+    private var autoSave = true
+    private var completeButtonIsEnabled: Bool = false
+    private var userIsTyping: Bool = false
     
     // MARK: - Initializers
     init(storageService: StorageServiceProtocol, editList: UUID?) {
@@ -50,13 +36,13 @@ final class NewListViewModel: NewListViewModelProtocol {
     
     // MARK: - Public Methods
     func viewWillAppear() {
+        self.existingListNames = storageService.getExistingListNames()
         setListItems()
         updateCompleteButtonState()
-        self.existingListNames = storageService.getExistingListNames()
     }
     
     func viewWillDisappear() {
-        if switchToMainView.value != true {
+        if autoSave {
             saveUserInputs()
         }
     }
@@ -94,23 +80,28 @@ final class NewListViewModel: NewListViewModelProtocol {
         )
     }
     
-    func tableFinishedUpdating() {
-        userInteractionEnabled.value = true
+    func getCompleteButtonState() -> Bool {
+        completeButtonIsEnabled
     }
+    
+    func tableFinishedUpdating() {
+        userIsTyping = false
+    }
+    
     
     // MARK: - Actions
     func completeButtonPressed() {
+        autoSave = false
         editList == nil
         ? storageService.saveNewList(list: buildNewList())
         : storageService.updateList(list: buildNewList())
-        switchToMainView.value = true
+        newListBinding.value = .switchToMainView
     }
     
     func deleteItemButtonPressed(in row: Int) {
         listItems.remove(at: row)
-        userInteractionEnabled.value = false
-        needToRemoveItem.value = IndexPath(row: row, section: 0)
         updateCompleteButtonState()
+        newListBinding.value = .removeItem(.init(row: row, section: 0))
     }
     
     // MARK: - Private Methods
@@ -133,36 +124,41 @@ final class NewListViewModel: NewListViewModelProtocol {
         listItems.append(.init(row: listItems.count, title: .buttonAddProduct))
     }
     
-    private func validateName(row: Int) {
+    @discardableResult
+    private func validateName(row: Int) -> Bool { // возвращает true если статус изменился
         guard let newTitle = listItems[row].title else {
-            return
+            return false
         }
+        
+        let oldErrorStatus = listItems[row].error
         
         if newTitle.isEmpty {
             listItems[row].error = .newListEmptyName
-            return
             
         } else if row == 0,
                   existingListNames.contains(newTitle.lowercased()) && editedList == nil {
             listItems[row].error = .newListNameAlreadyUsed
-            return
             
         } else if newTitle.replacingOccurrences(of: " ", with: "").isEmpty {
             listItems[row].error = .newListWrongName
-            return
+            
+        } else {
+            listItems[row].error = nil
         }
         
-        listItems[row].error = nil
+        return oldErrorStatus != listItems[row].error
     }
+    
     
     private func validateList() -> Bool {
         listItems.first(where: { $0.title == nil || $0.title?.isEmpty == true || $0.error != nil}) == nil
     }
     
-    private func updateCompleteButtonState() {
-        if needToUpdateCompleteButtonState.value != validateList() {
-            needToUpdateCompleteButtonState.value?.toggle()
-        }
+    @discardableResult
+    private func updateCompleteButtonState() -> Bool { // возвращает true если статус изменился
+        let oldState = completeButtonIsEnabled
+        completeButtonIsEnabled = validateList()
+        return oldState != completeButtonIsEnabled
     }
     
     private func buildNewList() -> ShopList {
@@ -217,6 +213,9 @@ final class NewListViewModel: NewListViewModelProtocol {
         }
         
         listItems = [.init(row: 0, title: UserDefaults.standard.string(forKey: "newListTitle"))]
+        if listItems[0].title != nil {
+            validateName(row: 0)
+        }
         let itemsCount = UserDefaults.standard.integer(forKey: "newListItemsCount")
         
         if itemsCount > 0 {
@@ -230,6 +229,9 @@ final class NewListViewModel: NewListViewModelProtocol {
                           checked: false
                          )
                 )
+                if listItems[i].title != nil {
+                    validateName(row: i)
+                }
             }
         }
         listItems.append(.init(row: listItems.count, title: .buttonAddProduct))
@@ -243,52 +245,64 @@ final class NewListViewModel: NewListViewModelProtocol {
     }
 }
 
-// MARK: - NewListCellTitleDelegate
-extension NewListViewModel: NewListCellTitleDelegate {
+// MARK: - NewListCellDelegate
+extension NewListViewModel: NewListCellDelegate {
+    
     func updateNewListTitle(with title: String?) {
-        let oldListTitleState = listItems[0]
         listItems[0].title = title
-        validateName(row: 0)
-        if listItems[0].error != oldListTitleState.error {
-            userInteractionEnabled.value = false
-            needToUpdateItem.value = (IndexPath(row: 0, section: 0), true)
-        }
-        if oldListTitleState.title != listItems[0].title {
-            updateCompleteButtonState()
-        }
-    }
-}
-
-// MARK: - NewListCellItemDelegate
-extension NewListViewModel: NewListCellItemDelegate {
-    func updateNewListItem(in row: Int, with title: String?) {
-        let oldItemState = listItems[row]
-        listItems[row].title = title
-        validateName(row: row)
-        if listItems[row].error != oldItemState.error {
-            userInteractionEnabled.value = false
-            needToUpdateItem.value = (IndexPath(row: row, section: 0), true)
-        }
-        if oldItemState.title != listItems[row].title {
-            updateCompleteButtonState()
+        let itemErrorUpdated = validateName(row: 0)
+        let buttonStateUpdated = updateCompleteButtonState()
+        
+        if itemErrorUpdated {
+            newListBinding.value = .updateItem(IndexPath(row: 0, section: 0), true)
+            
+        } else if buttonStateUpdated {
+            newListBinding.value = .updateCompleteButtonState
+            
+        } else {
+            userIsTyping = false
         }
     }
     
-    func editQuantityButtonPressed(in row: Int) {
-        needToShowPopUp.value = (row, listItems[row].quantity ?? 1, listItems[row].unit ?? .piece)
+    func updateNewListItem(in row: Int, with title: String?) {
+        listItems[row].title = title
+        let itemErrorUpdated = validateName(row: row)
+        let buttonStateUpdated = updateCompleteButtonState()
+        
+        if itemErrorUpdated {
+            newListBinding.value = .updateItem(IndexPath(row: row, section: 0), true)
+            
+        } else if buttonStateUpdated {
+            newListBinding.value = .updateCompleteButtonState
+            
+        } else {
+            userIsTyping = false
+        }
     }
-}
-
-// MARK: - NewListCellButtonDelegate
-extension NewListViewModel: NewListCellButtonDelegate {
+    
+    func getTextFieldEditState() -> Bool {
+        return userIsTyping
+    }
+    
+    func textFieldDidBeginEditing() {
+        userIsTyping = true
+    }
+    
+    func editQuantityButtonPressed(in row: Int) {
+        guard !userIsTyping,
+              completeButtonIsEnabled else { return }
+        newListBinding.value = .showPopUp(row, listItems[row].quantity ?? 1, listItems[row].unit ?? .piece)
+    }
+    
     func addNewItemButtonPressed() {
+        guard !userIsTyping,
+              completeButtonIsEnabled else { return }
         listItems.insert(.init(row: listItems.count - 1,
                                quantity: 1,
                                unit: .piece
                               ), at: listItems.count - 1
         )
-        userInteractionEnabled.value = false
-        needToInsertItem.value = IndexPath(row: listItems.count - 2, section: 0)
+        newListBinding.value = .insertItem(.init(row: listItems.count - 2, section: 0))
         updateCompleteButtonState()
     }
 }
@@ -297,11 +311,11 @@ extension NewListViewModel: NewListCellButtonDelegate {
 extension NewListViewModel: PopUpVCDelegate {
     func unitSelected(item: Int, unit: Units) {
         listItems[item].unit = unit
-        needToUpdateItem.value = (IndexPath(row: item, section: 0), false)
+        newListBinding.value = .updateItem(.init(row: item, section: 0), false)
     }
     
     func quantitySelected(item: Int, quantity: Int) {
         listItems[item].quantity = quantity
-        needToUpdateItem.value = (IndexPath(row: item, section: 0), false)
+        newListBinding.value = .updateItem(.init(row: item, section: 0), false)
     }
 }

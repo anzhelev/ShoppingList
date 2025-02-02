@@ -1,13 +1,9 @@
 import UIKit
 
-protocol NewListCellButtonDelegate: AnyObject {
-    func addNewItemButtonPressed()
-}
-
 final class NewListCellButton: UITableViewCell {    
     // MARK: - Public Properties
     static let reuseIdentifier = "newListCellButton"
-    weak var delegate: NewListCellButtonDelegate?
+    weak var delegate: NewListCellDelegate?
     
     // MARK: - Private Properties    
     private lazy var addButton = {

@@ -1,14 +1,10 @@
 import UIKit
 
-protocol NewListCellTitleDelegate: AnyObject {
-    func updateNewListTitle(with title: String?)
-}
-
 final class NewListCellTitle: UITableViewCell {
     
     // MARK: - Public Properties
     static let reuseIdentifier = "newListCellTitle"
-    weak var delegate: NewListCellTitleDelegate?
+    weak var delegate: NewListCellDelegate?
     
     // MARK: - Private Properties
     private let maxTitleLenght = 20
@@ -22,7 +18,6 @@ final class NewListCellTitle: UITableViewCell {
         textField.font = .itemName
         textField.placeholder = .newListTitlePlaceholder
         textField.clearButtonMode = .whileEditing
-        textField.addTarget(self, action: #selector(updateTitle), for: .editingDidEnd)
         return textField
     }()
     
@@ -63,11 +58,6 @@ final class NewListCellTitle: UITableViewCell {
         errorLabel.isHidden = params.error == nil
     }
     
-    // MARK: - IBAction
-    @objc func updateTitle() {
-        self.delegate?.updateNewListTitle(with: self.titleTextField.text)
-    }
-    
     // MARK: - Private Methods
     private func setUIElements() {
         self.backgroundColor = .screenBgrPrimary
@@ -90,9 +80,19 @@ final class NewListCellTitle: UITableViewCell {
 
 // MARK: - UITextFieldDelegate
 extension NewListCellTitle: UITextFieldDelegate {
+
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        self.delegate?.textFieldDidBeginEditing()
+    }
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        self.endEditing(true)
-        return false
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        textField.resignFirstResponder()
+        self.delegate?.updateNewListTitle(with: self.titleTextField.text)
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
