@@ -13,7 +13,7 @@
 "buttons.addProduct" = "Добавить продукт";
 "buttons.saveList" = "Сохранить список";
 "buttons.restoreList" = "Восстановить список";
-"buttons.removeCheckedItems" = "Всё куплено";
+"buttons.removeCheckedItems" = "Завершить покупки";
 "buttons.switchToMainScreen" = "Перейти на главную";
 
 "mainScreenViewController.active.title" = "Все ваши списки";
@@ -27,10 +27,10 @@
 "newListViewController.itemPlaceholder" = "Продукт";
 "newListViewController.nameAlreadyUsed" = "Такой список уже есть";
 "newListViewController.wrongName" = "Такое название недопустимо";
-"newListViewController.emptyName" = "Вы не ввели название";
+"newListViewController.emptyName" = "Введите название";
 "newListViewController.addProductHint" = "Не забудьте указать количество";
 
 "shoppingListViewController.checkAll" = "Отметить все продукты";
 
 "successView.congratulations" = "Поздравляем!";
-"successView.additional" = "Вы купили все из списка продуктов.\nВозвращайтесь снова с новыми\nсписками.";
+"successView.additional" = "Вы завершили покупки.\nВозвращайтесь снова с новыми\nсписками.";

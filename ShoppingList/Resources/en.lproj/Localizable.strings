@@ -13,7 +13,7 @@
 "buttons.addProduct" = "Add product";
 "buttons.saveList" = "Save list";
 "buttons.restoreList" = "Restore list";
-"buttons.removeCheckedItems" = "All purchased";
+"buttons.removeCheckedItems" = "Done with shopping";
 "buttons.switchToMainScreen" = "Return to main screen";
 
 "mainScreenViewController.active.title" = "All your lists";
@@ -27,10 +27,10 @@
 "newListViewController.itemPlaceholder" = "Product";
 "newListViewController.nameAlreadyUsed" = "This list already exists";
 "newListViewController.wrongName" = "This name is not allowed";
-"newListViewController.emptyName" = "You didn't enter a name";
+"newListViewController.emptyName" = "Enter a name";
 "newListViewController.addProductHint" = "Don't forget to specify the quantity";
 
 "shoppingListViewController.checkAll" = "Mark all products";
 
 "successView.congratulations" = "Congratulations!";
-"successView.additional" = "You bought everything on the list.\nCome back again with\nnew lists.";
+"successView.additional" = "You're done shopping.\nCome back again with\nnew lists.";

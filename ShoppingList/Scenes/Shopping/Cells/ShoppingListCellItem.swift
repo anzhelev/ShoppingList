@@ -1,17 +1,10 @@
 import UIKit
 
-protocol ShoppingListCellItemDelegate: AnyObject {
-    func updateShoppingListItem(in row: Int, with title: String)
-    func editQuantityButtonPressed(in row: Int)
-    func checkBoxTapped(in row: Int)
-    func textFieldDidBeginEditing()
-}
-
 final class ShoppingListCellItem: UITableViewCell {
     
     // MARK: - Public Properties
     static let reuseIdentifier = "shoppingListCellItem"
-    weak var delegate: ShoppingListCellItemDelegate?
+    weak var delegate: ShoppingListCellDelegate?
     
     // MARK: - Private Properties
     private var row = 1
@@ -105,13 +98,15 @@ final class ShoppingListCellItem: UITableViewCell {
         ? UIImage(named: "checkboxChecked")?.withTintColor(.unitSelectionBlockBgr, renderingMode: .alwaysOriginal)
         : UIImage(named: "checkboxEmpty")?.withTintColor(.textColorPrimary, renderingMode: .alwaysOriginal)
         
-        let attributeString = NSMutableAttributedString(string: params.title)
-        attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle,
-                                     value: params.checked ? 1: 0,
-                                     range: NSRange(location: 0, length: attributeString.length)
-        )
+//        if let title = params.title {
+            let attributeString = NSMutableAttributedString(string: params.title ?? "")
+            attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle,
+                                         value: params.checked ? 1: 0,
+                                         range: NSRange(location: 0, length: attributeString.length)
+            )
+            itemNameField.attributedText = attributeString
+//        }
         
-        itemNameField.attributedText = attributeString
         itemNameField.textColor = params.checked ? .textColorSecondary : .textColorPrimary
         quantityLabel.text = "\(quantity) \(NSLocalizedString(unit.rawValue, comment: ""))"
         separatorView.backgroundColor = params.error == nil ? .tableSeparator : .buttonBgrSecondary

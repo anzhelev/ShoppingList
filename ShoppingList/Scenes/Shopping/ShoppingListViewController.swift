@@ -95,70 +95,41 @@ class ShoppingListViewController: UIViewController {
     
     // MARK: - Private Methods
     private func bindViewModel() {
-        viewModel.userInteractionEnabled.bind {[weak self] enabled in
-            guard let enabled else {
-                return
-            }
-            self?.listItemsTable.isUserInteractionEnabled = enabled
-        }
-        
-        viewModel.switchToSuccessView.bind {[weak self] listName in
-            guard let listName else {
-                return
-            }
-            self?.switchToSuccessView(for: listName)
-        }
-        
-        viewModel.switchToMainView.bind {[weak self] value in
-            guard let value else {
-                return
-            }
-            if value {
+        viewModel.shoppingListBinding.bind {[weak self] value in
+            
+            switch value {
+                
+            case .switchToMainView:
                 self?.switchToMainView()
-            }
-        }
-        
-        viewModel.needToUpdateBottomButtonState.bind {[weak self] state in
-            guard let state else {
+                
+            case .switchToSuccessView(let listName):
+                self?.switchToSuccessView(for: listName)
+                
+            case .showPopUp(let row, let quantity, let unit):
+                self?.showPopUpView(for: row, quantity: quantity, unit: unit)
+                
+            case .updateCompleteButtonState:
+                self?.updateBottomButton()
+                
+            case .updateItem(let indexPath, let option):
+                self?.listItemsTable.isUserInteractionEnabled = !option
+                self?.reloadItem(index: indexPath, animated: option)
+                
+            case .insertItem(let indexPath):
+                self?.listItemsTable.isUserInteractionEnabled = false
+                self?.insertItem(index: indexPath)
+                
+            case .moveItem(let sourceIndexPath, let destinationIndexPath):
+                self?.listItemsTable.isUserInteractionEnabled = false
+                self?.moveItem(from: sourceIndexPath, to: destinationIndexPath)
+                
+            case .removeItem(let indexPath):
+                self?.listItemsTable.isUserInteractionEnabled = false
+                self?.removeItem(index: indexPath)
+                
+            default:
                 return
             }
-            self?.updateBottomButton(isEnabled: state)
-        }
-        
-        viewModel.needToShowPopUp.bind {[weak self] value in
-            guard let value else {
-                return
-            }
-            self?.showPopUpView(for: value.0, quantity: value.1, unit: value.2)
-//            self?.showPopUpView(for: row)
-        }
-        
-        viewModel.needToUpdateItem.bind {[weak self] value in
-            guard let value else {
-                return
-            }
-            self?.reloadItem(index: value.0, animated: value.1)
-        }
-        
-        viewModel.needToInsertItem.bind {[weak self] indexPath in
-            guard let indexPath else {
-                return
-            }
-            self?.insertItem(index: indexPath)
-        }
-        
-        viewModel.needToRemoveItem.bind {[weak self] indexPath in
-            guard let indexPath else {
-                return
-            }
-            self?.removeItem(index: indexPath)
-        }
-        
-        viewModel.needToMoveItem.bind {[weak self] value in
-            guard let value else {
-                return
-            }
-            self?.moveItem(from: value.0, to: value.1)
         }
     }
     
@@ -174,6 +145,7 @@ class ShoppingListViewController: UIViewController {
         listItemsTable.performBatchUpdates {
             listItemsTable.reloadRows(at: index, with: animated ? .automatic : .none)
         } completion: {_ in
+            self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
@@ -183,6 +155,7 @@ class ShoppingListViewController: UIViewController {
             listItemsTable.insertRows(at: [index], with: .bottom)
         } completion: {_ in
             self.listItemsTable.reloadData()
+            self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
@@ -192,6 +165,7 @@ class ShoppingListViewController: UIViewController {
             listItemsTable.moveRow(at: oldRow, to: newRow)
         } completion: {_ in
             self.listItemsTable.reloadData()
+            self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
@@ -201,6 +175,7 @@ class ShoppingListViewController: UIViewController {
             listItemsTable.deleteRows(at: [index], with: .top)
         } completion: {_ in
             self.listItemsTable.reloadData()
+            self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
@@ -257,7 +232,8 @@ class ShoppingListViewController: UIViewController {
         }
     }
     
-    private func updateBottomButton(isEnabled: Bool) {
+    private func updateBottomButton() {
+        let isEnabled = viewModel.getBottomButtonState()
         bottomButton.isEnabled = isEnabled
         bottomButton.backgroundColor = isEnabled ? .buttonBgrTertiary : .buttonBgrDisabled
         
@@ -302,7 +278,7 @@ extension ShoppingListViewController: UITableViewDataSource {
             ) as? ShoppingListCellItem else {
                 return UITableViewCell()
             }
-            cell.delegate = viewModel as? ShoppingListCellItemDelegate
+            cell.delegate = viewModel as? ShoppingListCellDelegate
             cell.configure(for: indexPath.row, with: cellParams.1)
             return cell
             
@@ -313,7 +289,7 @@ extension ShoppingListViewController: UITableViewDataSource {
             ) as? ShoppingListCellButton else {
                 return UITableViewCell()
             }
-            cell.delegate = viewModel as? ShoppingListCellButtonDelegate
+            cell.delegate = viewModel as? ShoppingListCellDelegate
             return cell
         }
     }

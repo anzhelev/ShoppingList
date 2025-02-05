@@ -1,18 +1,8 @@
 import Foundation
 
 protocol ShoppingListViewModelProtocol {
-    var needToUpdateBottomButtonState: Observable<Bool> { get set }
-    var userInteractionEnabled: Observable<Bool> { get set }
-    var switchToSuccessView: Observable<String> { get set }
-    var switchToMainView: Observable<Bool> { get set }
-    var needToClosePopUp: Observable<Bool> { get set }
-    var popUpQuantity: Observable<Int> { get set }
-    var popUpUnit: Observable<Int> { get set }
-    var needToShowPopUp: Observable<(Int, Int, Units)> { get set }
-    var needToUpdateItem: Observable<([IndexPath],Bool)> { get set }
-    var needToInsertItem: Observable<IndexPath> { get set }
-    var needToMoveItem: Observable<(IndexPath,IndexPath)> { get set }
-    var needToRemoveItem: Observable<IndexPath> { get set }
+    var shoppingListBinding: Observable<ShoppingListBinding> { get set }
+    
     func viewWillAppear()
     func listIsCompleted() -> Bool
     func checkAllSwitchIs(on: Bool)
@@ -26,23 +16,13 @@ protocol ShoppingListViewModelProtocol {
     func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams)
     func tableFinishedUpdating()
     func deleteItemButtonPressed(in row: Int)
-    func textFieldDidBeginEditing()
+    //    func textFieldDidBeginEditing()
+    func getBottomButtonState() -> Bool
 }
 
 final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     // MARK: - Public Properties
-    var userInteractionEnabled: Observable<Bool> = Observable(true)
-    var switchToSuccessView: Observable<String> = Observable(nil)
-    var switchToMainView: Observable<Bool> = Observable(nil)
-    var needToUpdateBottomButtonState: Observable<Bool> = Observable(false)
-    var needToClosePopUp: Observable<Bool> = Observable(false)
-    var popUpQuantity: Observable<Int> = Observable(nil)
-    var popUpUnit: Observable<Int> = Observable(nil)
-    var needToShowPopUp: Observable<(Int, Int, Units)> = Observable(nil)
-    var needToUpdateItem: Observable<([IndexPath],Bool)> = Observable(nil)
-    var needToInsertItem: Observable<IndexPath> = Observable(nil)
-    var needToMoveItem: Observable<(IndexPath,IndexPath)> = Observable(nil)
-    var needToRemoveItem: Observable<IndexPath> = Observable(nil)
+    var shoppingListBinding: Observable<ShoppingListBinding> = Observable(nil)
     
     // MARK: - Private Properties
     private let storageService: StorageServiceProtocol
@@ -50,7 +30,8 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     private var shoppingList: [ShopListCellParams] = []
     private var uncheckedItemsCount: Int = 0
     private var sortOrderAscending : Bool?
-    private var checkBoxesAreBlocked: Bool = false
+    private var userIsTyping: Bool = false
+    private var bottomButtonIsEnabled: Bool = false
     
     //MARK: - Initializers
     init(listInfo: ListInfo, storageService: StorageServiceProtocol) {
@@ -102,10 +83,13 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         )
     }
     
+    func getBottomButtonState() -> Bool {
+        bottomButtonIsEnabled
+    }
+    
     func tableFinishedUpdating() {
-        userInteractionEnabled.value = true
         saveListToStorage(duplicatePinned: false)
-        updateBottomButtonState()
+        userIsTyping = false
     }
     
     // MARK: - Actions
@@ -119,14 +103,14 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
             ? checkedItems.append(item)
             : uncheckedItems.append(item)
             
-            indexesToUpdate.append(IndexPath(row: index, section: 0))
+            indexesToUpdate.append(.init(row: index, section: 0))
         }
         
         if sortOrderAscending == true {
-            shoppingList = uncheckedItems.sorted{$0.title > $1.title}
+            shoppingList = uncheckedItems.sorted{$0.title ?? "" > $1.title ?? ""}
             sortOrderAscending?.toggle()
         } else {
-            shoppingList = uncheckedItems.sorted{$0.title < $1.title}
+            shoppingList = uncheckedItems.sorted{$0.title ?? "" < $1.title ?? ""}
             sortOrderAscending = true
         }
         
@@ -138,8 +122,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
                                   unit: .piece)
         )
         
-        userInteractionEnabled.value = false
-        needToUpdateItem.value = (indexesToUpdate, true)
+        shoppingListBinding.value = .updateItem(indexesToUpdate, true)
     }
     
     func checkAllSwitchIs(on: Bool) {
@@ -155,14 +138,14 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
             case true:
                 if !shoppingList[index].checked {
                     shoppingList[index].checked = true
-                    indexesToUpdate.append(IndexPath(row: index, section: 0))
+                    indexesToUpdate.append(.init(row: index, section: 0))
                     uncheckedItemsCount -= 1
                 }
                 
             case false:
                 if shoppingList[index].checked {
                     shoppingList[index].checked = false
-                    indexesToUpdate.append(IndexPath(row: index, section: 0))
+                    indexesToUpdate.append(.init(row: index, section: 0))
                     uncheckedItemsCount += 1
                 }
             }
@@ -171,12 +154,12 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         if indexesToUpdate.isEmpty {
             return
         }
-        userInteractionEnabled.value = false
-        needToUpdateItem.value = (indexesToUpdate, true)
+        shoppingListBinding.value = .updateItem(indexesToUpdate, true)
     }
     
     func rowMoved(from sourceIndex: Int, to destinationIndex: Int) {
         moveItemInArray(from: sourceIndex, to: destinationIndex)
+        tableFinishedUpdating()
     }
     
     func bottomButtonPressed() {
@@ -184,7 +167,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
             
         case true: // если смотрим завершенный список (проверить, есть ли активный закреп с таким названием)
             storageService.restoreList(with: currentListInfo.listId)
-            switchToMainView.value = true
+            shoppingListBinding.value = .switchToMainView
             
         case false: // если завершаем актив. список
             if currentListInfo.pinned {
@@ -199,8 +182,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
                 currentListInfo.setCompleted(to: true)
             }
             saveListToStorage(duplicatePinned: false)
-            
-            switchToSuccessView.value = currentListInfo.title
+            shoppingListBinding.value = .switchToSuccessView(currentListInfo.title)
         }
     }
     
@@ -209,8 +191,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
             uncheckedItemsCount -= 1
         }
         shoppingList.remove(at: row)
-        userInteractionEnabled.value = false
-        needToRemoveItem.value = IndexPath(row: row, section: 0)
+        shoppingListBinding.value = .removeItem(.init(row: row, section: 0))
     }
     
     // MARK: - Private Methods
@@ -243,17 +224,25 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         shoppingList.insert(place, at: destinationIndex)
     }
     
-    private func validateName(row: Int) {
-        if shoppingList[row].title.isEmpty {
-            shoppingList[row].title = .newListItemPlaceholder
-            shoppingList[row].error = .newListEmptyName
-            return
-        } else if shoppingList[row].title.replacingOccurrences(of: " ", with: "").isEmpty {
-            shoppingList[row].title = .newListItemPlaceholder
-            shoppingList[row].error = .newListWrongName
-            return
+    @discardableResult
+    private func validateName(row: Int) -> Bool { // возвращает true если статус изменился
+        guard let newTitle = shoppingList[row].title else {
+            return false
         }
-        shoppingList[row].error = nil
+        
+        let oldErrorStatus = shoppingList[row].error
+        
+        if newTitle.isEmpty {
+            shoppingList[row].error = .newListEmptyName
+            
+        } else if newTitle.replacingOccurrences(of: " ", with: "").isEmpty {
+            shoppingList[row].error = .newListWrongName
+            
+        } else {
+            shoppingList[row].error = nil
+        }
+        
+        return oldErrorStatus != shoppingList[row].error
     }
     
     private func updateBottomButtonState() {
@@ -261,16 +250,20 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         ? true
         : shoppingList.first(where: { $0.checked == false}) == nil
         
-        if needToUpdateBottomButtonState.value != newState {
-            needToUpdateBottomButtonState.value?.toggle()
+        if bottomButtonIsEnabled != newState {
+            bottomButtonIsEnabled.toggle()
         }
+    }
+    
+    private func validateList() -> Bool {
+        shoppingList.first(where: { $0.title == nil || $0.title?.isEmpty == true || $0.error != nil}) == nil
     }
     
     private func saveListToStorage(duplicatePinned: Bool) {
         var newListItems = [ListItem]()
         if shoppingList.count > 1 {
             for item in shoppingList[0...shoppingList.count - 2] {
-                newListItems.append(.init(name: item.title,
+                newListItems.append(.init(name: item.title ?? "",
                                           quantity: Int16(item.quantity),
                                           unit: item.unit.rawValue,
                                           checked: item.checked
@@ -296,83 +289,84 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
 }
 
 // MARK: - ShoppingListCellItemDelegate
-extension ShoppingListViewModel: ShoppingListCellItemDelegate {
+extension ShoppingListViewModel: ShoppingListCellDelegate {
     func updateShoppingListItem(in row: Int, with title: String) {
-        checkBoxesAreBlocked = false
-        let oldItemState = shoppingList[row]
-        shoppingList[row].title = title
-        validateName(row: row)
-        if shoppingList[row].error != oldItemState.error {
-            userInteractionEnabled.value = false
-            needToUpdateItem.value = ([IndexPath(row: row, section: 0)], true)
-        }
         
-        if oldItemState.title != shoppingList[row].title {
-            saveListToStorage(duplicatePinned: false)
+        let oldTitle = shoppingList[row].title
+        shoppingList[row].title = title
+        
+        if validateName(row: row) {
+            shoppingListBinding.value = .updateItem([.init(row: row, section: 0)], true)
+            
+        } else {
+            if oldTitle != title {
+                saveListToStorage(duplicatePinned: false)
+            }
+            userIsTyping = false
         }
+    }
+    
+    func getTextFieldEditState() -> Bool {
+        return userIsTyping
     }
     
     func textFieldDidBeginEditing() {
-        checkBoxesAreBlocked = true
+        userIsTyping = true
     }
     
     func editQuantityButtonPressed(in row: Int) {
-        if checkBoxesAreBlocked {
+        if userIsTyping {
             return
         }
-        needToShowPopUp.value = (row, shoppingList[row].quantity, shoppingList[row].unit)
+        
+        shoppingListBinding.value = .showPopUp(row, shoppingList[row].quantity, shoppingList[row].unit)
     }
     
     func checkBoxTapped(in row: Int) {
-        if currentListInfo.completed || checkBoxesAreBlocked {
+        if currentListInfo.completed || userIsTyping {
             return
         }
         let wasChecked = shoppingList[row].checked
         shoppingList[row].checked.toggle()
-        userInteractionEnabled.value = false
         
         if wasChecked {// cмена с отмеченного на неотмеченный
             if row > uncheckedItemsCount {
                 moveItemInArray(from: row, to: uncheckedItemsCount)
-                needToMoveItem.value = (IndexPath(row: row, section: 0),
-                                        IndexPath(row: uncheckedItemsCount, section: 0)
+                shoppingListBinding.value = .moveItem(.init(row: row, section: 0),
+                                                      .init(row: uncheckedItemsCount, section: 0)
                 )
                 
             } else {
-                needToUpdateItem.value = ([IndexPath(row: row, section: 0)], true)
+                shoppingListBinding.value = .updateItem([.init(row: row, section: 0)], true)
             }
             uncheckedItemsCount += 1
             
         } else {// смена с неотмеченного на отмеченный
             if row == uncheckedItemsCount - 1 {
-                needToUpdateItem.value = ([IndexPath(row: row, section: 0)], true)
-                
+                shoppingListBinding.value = .updateItem([.init(row: row, section: 0)], true)
             } else {
                 moveItemInArray(from: row, to: uncheckedItemsCount - 1)
-                needToMoveItem.value = (IndexPath(row: row, section: 0),
-                                        IndexPath(row: uncheckedItemsCount-1, section: 0)
+                shoppingListBinding.value = .moveItem(.init(row: row, section: 0),
+                                                      .init(row: uncheckedItemsCount-1, section: 0)
                 )
             }
             uncheckedItemsCount -= 1
         }
     }
-}
-
-// MARK: - ShoppingListCellButtonDelegate
-extension ShoppingListViewModel: ShoppingListCellButtonDelegate {
+    
     func addNewItemButtonPressed() {
-        if checkBoxesAreBlocked {
+        if userIsTyping || !validateList() {
             return
         }
         shoppingList.insert(.init(checked: false,
-                                  title: .newListItemPlaceholder,
                                   quantity: 1,
-                                  unit: .piece
-                                 ), at: uncheckedItemsCount
+                                  unit: .piece,
+                                  error: .newListEmptyName
+                                 ),
+                            at: uncheckedItemsCount
         )
         uncheckedItemsCount += 1
-        userInteractionEnabled.value = false
-        needToInsertItem.value = IndexPath(row: uncheckedItemsCount - 1, section: 0)
+        shoppingListBinding.value = .insertItem(.init(row: uncheckedItemsCount - 1, section: 0))
     }
 }
 
@@ -380,11 +374,11 @@ extension ShoppingListViewModel: ShoppingListCellButtonDelegate {
 extension ShoppingListViewModel: PopUpVCDelegate {
     func unitSelected(item: Int, unit: Units) {
         shoppingList[item].unit = unit
-        needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
+        shoppingListBinding.value = .updateItem([.init(row: item, section: 0)], false)
     }
     
     func quantitySelected(item: Int, quantity: Int) {
         shoppingList[item].quantity = quantity
-        needToUpdateItem.value = ([IndexPath(row: item, section: 0)], false)
+        shoppingListBinding.value = .updateItem([.init(row: item, section: 0)], false)
     }
 }
