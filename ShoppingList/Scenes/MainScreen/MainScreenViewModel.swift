@@ -13,7 +13,6 @@ protocol MainScreenViewModelProtocol {
     func editButtonPressed(in row: Int)
     func deleteListButtonPressed(in row: Int)
     func getPrimaryButtonTitle(for row: Int) -> String
-    func screenSwipePerformed(reversed: Bool)
     func getStubState() -> Bool
 }
 
@@ -23,14 +22,16 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     var mainScreenBinding: Observable<MainScreenBinding> = Observable(nil)
     
     // MARK: - Private Properties
+    private let coordinator: Coordinator
     private let storageService: StorageServiceProtocol
     private let completeMode: Bool
     private var shoppingLists: [ListInfo] = []
     private var stubState: Bool = true
     
     //MARK: - Initializers
-    init(storageService: StorageServiceProtocol, completeMode: Bool) {
-        self.storageService = storageService
+    init(coordinator: Coordinator, completeMode: Bool) {
+        self.coordinator = coordinator
+        self.storageService = coordinator.storageService
         self.completeMode = completeMode
     }
     
@@ -72,19 +73,15 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     
     // MARK: - Actions
     func listSelected(row: Int) {
-        mainScreenBinding.value = .showList(shoppingLists[row])
+        coordinator.switchToShoppingList(with: shoppingLists[row])
     }
     
     func addNewListButtonPressed() {
-        mainScreenBinding.value = .editList(nil)
+        coordinator.switchToListEditionView(editList: nil)
     }
     
     func editButtonPressed(in row: Int) {
-        mainScreenBinding.value = .editList(shoppingLists[row].listId)
-    }
-    
-    func screenSwipePerformed(reversed: Bool) {
-        mainScreenBinding.value = .switchView(!completeMode, reversed)
+        coordinator.switchToListEditionView(editList: shoppingLists[row].listId)        
     }
     
     func primaryActionButtonPressed(in row: Int) {

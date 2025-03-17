@@ -19,6 +19,7 @@ final class NewListViewModel: NewListViewModelProtocol {
     var newListBinding: Observable<NewListBinding> = Observable(nil)
     
     // MARK: - Private Properties
+    private let coordinator: Coordinator
     private let storageService: StorageServiceProtocol
     private let editList: UUID?
     private var existingListNames = Set<String>()
@@ -29,8 +30,9 @@ final class NewListViewModel: NewListViewModelProtocol {
     private var userIsTyping: Bool = false
     
     // MARK: - Initializers
-    init(storageService: StorageServiceProtocol, editList: UUID?) {
-        self.storageService = storageService
+    init(coordinator: Coordinator, editList: UUID?) {
+        self.coordinator = coordinator
+        self.storageService = coordinator.storageService
         self.editList = editList
     }
     
@@ -95,7 +97,7 @@ final class NewListViewModel: NewListViewModelProtocol {
         editList == nil
         ? storageService.saveNewList(list: buildNewList())
         : storageService.updateList(list: buildNewList())
-        newListBinding.value = .switchToMainView
+        coordinator.popToMainView()
     }
     
     func deleteItemButtonPressed(in row: Int) {

@@ -33,33 +33,9 @@ class MainScreenViewController: UIViewController {
     
     private let backgroundImageView = {
         let imageView = UIImageView(image: UIImage(named: "listBgrImage"))
+        imageView.alpha = 0.5
         imageView.isHidden = true
         return imageView
-    }()
-    
-    private let swipeHintView = {
-        let view = UIView()
-        view.backgroundColor = .clear
-        let leftArrowImageView = UIImageView(image: UIImage(named: "arrowLeft")?.withTintColor(.buttonBgrPrimary))
-        
-        let rightArrowImageView = UIImageView(image: UIImage(named: "arrowRight")?.withTintColor(.buttonBgrPrimary))
-        [leftArrowImageView, rightArrowImageView].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            view.addSubview($0)
-            $0.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        }
-        leftArrowImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        rightArrowImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        return view
-    }()
-    
-    private let swipeHintLabel = {
-        let swipeHintLabel = UILabel()
-        swipeHintLabel.textColor = .textColorPrimary
-        swipeHintLabel.font = .hintLabel
-        swipeHintLabel.numberOfLines = 2
-        swipeHintLabel.textAlignment = .center
-        return swipeHintLabel
     }()
     
     private lazy var addNewListButton = {
@@ -98,7 +74,6 @@ class MainScreenViewController: UIViewController {
         
         bindViewModel()
         setUI()
-        configureSwipe()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -108,42 +83,15 @@ class MainScreenViewController: UIViewController {
         updateStub()
     }
     
-    // MARK: - Navigation
-    func switchView(to completeMode: Bool, reverseAnimatiom: Bool) {
-        if reverseAnimatiom {
-            navigationController?.viewControllers = [MainScreenAssembler().build(completeMode: completeMode), self]
-            navigationController?.popViewController(animated: true)
-        } else {
-            navigationController?.pushViewController(MainScreenAssembler().build(completeMode: completeMode), animated: true)
-        }
-    }
-    
-    func switchToShoppingList(with listInfo: ListInfo) {
-        navigationController?.pushViewController(ShoppingListAssembler().build(listInfo: listInfo), animated: true)
-    }
-    
     // MARK: - Actions
     @objc private func addNewListButtonPressed() {
         viewModel.addNewListButtonPressed()
-    }
-    
-    @objc func swipeHandling(swipe: UISwipeGestureRecognizer) {
-        self.viewModel.screenSwipePerformed(reversed: swipe.direction == .right)
     }
     
     // MARK: - Private Methods
     private func bindViewModel() {
         viewModel.mainScreenBinding.bind {[weak self] value in
             switch value {
-                
-            case .switchView(let mode, let reversed):
-                self?.switchView(to: mode, reverseAnimatiom: reversed)
-                
-            case .showList(let value):
-                self?.switchToShoppingList(with: value)
-                
-            case .editList(let id):
-                self?.switchToNewListCreationVC(editList: id)
                 
             case .reloadTable:
                 self?.reloadTable()
@@ -159,11 +107,6 @@ class MainScreenViewController: UIViewController {
                 return
             }
         }
-    }
-    
-    private func switchToNewListCreationVC(editList: UUID?) {
-        setNavBarButtons ()
-        navigationController?.pushViewController(NewListAssembler().build(editList: editList), animated: true)
     }
     
     private func reloadTable() {
@@ -196,9 +139,8 @@ class MainScreenViewController: UIViewController {
     private func setUI() {
         self.view.backgroundColor = .screenBgrPrimary
         titleLabel.text = viewModel.getScreenTitle()
-        swipeHintLabel.text = viewModel.getSwipeHintText()
         
-        [titleLabel, stubLabel, swipeHintView, arrowImageView, swipeHintLabel, backgroundImageView, addNewListButton, shoppingListsTable].forEach {
+        [titleLabel, stubLabel, arrowImageView, backgroundImageView, addNewListButton, shoppingListsTable].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
@@ -217,13 +159,6 @@ class MainScreenViewController: UIViewController {
             addNewListButton.heightAnchor.constraint(equalToConstant: 50),
             addNewListButton.widthAnchor.constraint(equalTo: addNewListButton.heightAnchor),
             
-            swipeHintView.heightAnchor.constraint(equalToConstant: 30),
-            swipeHintView.bottomAnchor.constraint(equalTo: addNewListButton.topAnchor, constant: -20),
-            swipeHintView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            swipeHintView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            swipeHintLabel.centerXAnchor.constraint(equalTo: swipeHintView.centerXAnchor),
-            swipeHintView.centerYAnchor.constraint(equalTo: swipeHintLabel.centerYAnchor),
-            
             arrowImageView.topAnchor.constraint(equalTo: stubLabel.bottomAnchor, constant: 13),
             arrowImageView.bottomAnchor.constraint(equalTo: addNewListButton.topAnchor, constant: 10),
             arrowImageView.leadingAnchor.constraint(equalTo: addNewListButton.trailingAnchor, constant: -15),
@@ -232,32 +167,13 @@ class MainScreenViewController: UIViewController {
             backgroundImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             backgroundImageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 62),
             backgroundImageView.widthAnchor.constraint(equalTo: backgroundImageView.heightAnchor, multiplier: 250/113),
-            backgroundImageView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -166),
+            backgroundImageView.bottomAnchor.constraint(equalTo: addNewListButton.topAnchor, constant: -16),
             
             shoppingListsTable.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 28),
             shoppingListsTable.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             shoppingListsTable.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             shoppingListsTable.bottomAnchor.constraint(equalTo: backgroundImageView.bottomAnchor)
         ])
-    }
-    
-    private func setNavBarButtons () {
-        let backItem = UIBarButtonItem()
-        backItem.title = .buttonBack
-        backItem.tintColor = .buttonBgrPrimary
-        navigationItem.backBarButtonItem = backItem
-    }
-    
-    private func configureSwipe() {
-        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(swipeHandling(swipe:)))
-        swipeLeft.direction = .left
-        
-        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(swipeHandling(swipe:)))
-        swipeRight.direction = .right
-        
-        [swipeLeft, swipeRight].forEach {
-            self.view.addGestureRecognizer($0)
-        }
     }
 }
 

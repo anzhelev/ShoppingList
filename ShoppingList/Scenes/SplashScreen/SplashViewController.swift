@@ -22,8 +22,7 @@ class SplashViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        bindViewModel()
+   
         setUI()
     }
     
@@ -33,17 +32,6 @@ class SplashViewController: UIViewController {
     }
     
     // MARK: - Private Methods
-    private func bindViewModel() {
-        viewModel.switchToMainView.bind {[weak self] value in
-            guard let value else {
-                return
-            }
-            if value {
-                self?.switchToMainView()
-            }
-        }
-    }
-    
     private func setUI() {
         view.backgroundColor = .screenBgrPrimary
         transitionView.backgroundColor = .screenBgrPrimary
@@ -89,10 +77,5 @@ class SplashViewController: UIViewController {
         }, completion: {[weak self] sucsess in
             self?.viewModel.animationCompleted()
         })
-    }
-    
-    private func switchToMainView() {
-        navigationController?.setNavigationBarHidden(true, animated: false)
-        navigationController?.pushViewController(MainScreenAssembler().build(completeMode: false), animated: false)
     }
 }

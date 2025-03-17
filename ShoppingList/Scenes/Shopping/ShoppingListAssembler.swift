@@ -1,10 +1,9 @@
 import UIKit
 
 final class ShoppingListAssembler {
-    private let storageService = StorageService()
-    
-    public func build(listInfo: ListInfo) -> UIViewController {
-        let viewModel = ShoppingListViewModel(listInfo: listInfo, storageService: storageService)
+ 
+    public func build(coordinator: Coordinator, listInfo: ListInfo) -> UIViewController {
+        let viewModel = ShoppingListViewModel(coordinator: coordinator, listInfo: listInfo)
         let viewController = ShoppingListViewController(
             viewModel: viewModel
         )

@@ -2,7 +2,6 @@ import UIKit
 
 enum ShoppingListBinding {
     case updateCompleteButtonState
-    case switchToMainView
     case switchToSuccessView(String)
     case updateButtonState
     case showPopUp(Int, Int, Units)

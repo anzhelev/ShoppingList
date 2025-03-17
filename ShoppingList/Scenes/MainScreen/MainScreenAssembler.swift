@@ -1,13 +1,12 @@
 import UIKit
 
 final class MainScreenAssembler {
-    private let storageService = StorageService()
-    
-    public func build(
+
+    public func build(coordinator: Coordinator,
         completeMode: Bool
     ) -> UIViewController {
         let viewModel = MainScreenViewModel(
-            storageService: storageService,
+            coordinator: coordinator,
             completeMode: completeMode
         )
         let viewController = MainScreenViewController(

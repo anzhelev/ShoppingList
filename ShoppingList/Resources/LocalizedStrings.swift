@@ -7,6 +7,7 @@ extension String {
     static let buttonRestore = NSLocalizedString("buttons.restore", comment: "")
     static let buttonDelete = NSLocalizedString("buttons.delete", comment: "")
     static let buttonBack = NSLocalizedString("buttons.back", comment: "")
+    static let buttonCancel = NSLocalizedString("buttons.cancel", comment: "")
     static let buttonDone = NSLocalizedString("buttons.done", comment: "")
     static let buttonAddProduct = NSLocalizedString("buttons.addProduct", comment: "")
     static let buttonSaveList = NSLocalizedString("buttons.saveList", comment: "")
@@ -14,6 +15,10 @@ extension String {
     static let buttonRemoveCheckedItems = NSLocalizedString("buttons.removeCheckedItems", comment: "")
     static let buttonSwitchToMainScreen = NSLocalizedString("buttons.switchToMainScreen", comment: "")
     
+    static let tabBarTabsMainView = NSLocalizedString("tabBar.mainView", comment: "")
+    static let tabBarTabsArchiveView = NSLocalizedString("tabBar.archiveView", comment: "")
+    static let tabBarTabsSettingsView = NSLocalizedString("tabBar.settingsView", comment: "")
+
     static let mainScreenActiveTitle = NSLocalizedString("mainScreenViewController.active.title", comment: "")
     static let mainScreenActiveSwipeHint = NSLocalizedString("mainScreenViewController.active.swipeHint", comment: "")
     static let mainScreenCompletedTitle = NSLocalizedString("mainScreenViewController.completed.title", comment: "")

@@ -70,12 +70,8 @@ class NewListViewController: UIViewController {
         viewModel.newListBinding.bind {[weak self] value in
             
             switch value {
-                
             case .updateCompleteButtonState:
                 self?.updateCompleteButton()
-                
-            case .switchToMainView:
-                self?.switchToMainView()
                 
             case .showPopUp(let row, let quantity, let unit):
                 self?.showPopUpView(for: row, quantity: quantity, unit: unit)
@@ -99,8 +95,8 @@ class NewListViewController: UIViewController {
     }
     
     private func switchToMainView() {
-        navigationController?.viewControllers = [MainScreenAssembler().build(completeMode: false), self]
-        navigationController?.popViewController(animated: true)
+//        navigationController?.viewControllers = [MainScreenAssembler().build(completeMode: false), self]
+//        navigationController?.popViewController(animated: true)
     }
     
     private func reloadItem(index: IndexPath, animated: Bool) {

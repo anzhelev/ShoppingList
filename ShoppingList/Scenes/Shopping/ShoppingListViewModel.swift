@@ -9,7 +9,7 @@ protocol ShoppingListViewModelProtocol {
     func getBottomButtonName() -> String
     func rowMoved(from: Int, to: Int)
     func sortButtonPressed()
-    func bottomButtonPressed()
+    func doneButtonPressed()
     func getListTitle() -> String
     func getTableRowCount() -> Int
     func getRowHeight(for row: Int) -> CGFloat
@@ -25,6 +25,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     var shoppingListBinding: Observable<ShoppingListBinding> = Observable(nil)
     
     // MARK: - Private Properties
+    private let coordinator: Coordinator
     private let storageService: StorageServiceProtocol
     private var currentListInfo: ListInfo
     private var shoppingList: [ShopListCellParams] = []
@@ -34,9 +35,10 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     private var bottomButtonIsEnabled: Bool = false
     
     //MARK: - Initializers
-    init(listInfo: ListInfo, storageService: StorageServiceProtocol) {
+    init(coordinator: Coordinator, listInfo: ListInfo) {
         self.currentListInfo = listInfo
-        self.storageService = storageService
+        self.coordinator = coordinator
+        self.storageService = coordinator.storageService
     }
     
     // MARK: - Public Methods
@@ -162,27 +164,15 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         tableFinishedUpdating()
     }
     
-    func bottomButtonPressed() {
+    func doneButtonPressed() {
         switch currentListInfo.completed {
             
         case true: // если смотрим завершенный список (проверить, есть ли активный закреп с таким названием)
             storageService.restoreList(with: currentListInfo.listId)
-            shoppingListBinding.value = .switchToMainView
+            coordinator.popToMainView()
             
         case false: // если завершаем актив. список
-            if currentListInfo.pinned {
-                saveListToStorage(duplicatePinned: true)
-                if shoppingList.count > 1 {
-                    for index in 0...shoppingList.count - 2 {
-                        shoppingList[index].checked = false
-                    }
-                }
-                
-            } else {
-                currentListInfo.setCompleted(to: true)
-            }
-            saveListToStorage(duplicatePinned: false)
-            shoppingListBinding.value = .switchToSuccessView(currentListInfo.title)
+            coordinator.showSuccessView(delegate: self)
         }
     }
     
@@ -380,5 +370,30 @@ extension ShoppingListViewModel: PopUpVCDelegate {
     func quantitySelected(item: Int, quantity: Int) {
         shoppingList[item].quantity = quantity
         shoppingListBinding.value = .updateItem([.init(row: item, section: 0)], false)
+    }
+}
+
+// MARK: - PopUpVCDelegate
+extension ShoppingListViewModel: SuccessViewDelegate {
+    func confirmButtonPressed() {
+        if currentListInfo.pinned {
+            saveListToStorage(duplicatePinned: true)
+            if shoppingList.count > 1 {
+                for index in 0...shoppingList.count - 2 {
+                    shoppingList[index].checked = false
+                }
+            }
+            
+        } else {
+            currentListInfo.setCompleted(to: true)
+        }
+        saveListToStorage(duplicatePinned: false)
+        coordinator.dismissPopupVC()
+        coordinator.switchToMainView()
+//        coordinator.popToMainView()
+    }
+    
+    func cancelButtonPressed() {
+        coordinator.dismissPopupVC()
     }
 }

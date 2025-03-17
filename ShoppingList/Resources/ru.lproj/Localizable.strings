@@ -9,14 +9,19 @@
 "buttons.restore" = "Восстановить";
 "buttons.delete" = "Удалить";
 "buttons.back" = "Назад";
+"buttons.cancel" = "Oтмена";
 "buttons.done" = "Готово";
 "buttons.addProduct" = "Добавить продукт";
 "buttons.saveList" = "Сохранить список";
 "buttons.restoreList" = "Восстановить список";
 "buttons.removeCheckedItems" = "Завершить покупки";
-"buttons.switchToMainScreen" = "Перейти на главную";
+"buttons.switchToMainScreen" = "На главную";
 
-"mainScreenViewController.active.title" = "Все ваши списки";
+"tabBar.mainView" = "Мои списки";
+"tabBar.archiveView" = "Архив";
+"tabBar.settingsView" = "Настройки";
+
+"mainScreenViewController.active.title" = "Списки покупок";
 "mainScreenViewController.active.swipeHint" = "Проведите, чтобы открыть\nзавершенные списки";
 "mainScreenViewController.completed.title" = "Завершенные списки";
 "mainScreenViewController.completed.swipeHint" = "Проведите, чтобы открыть все списки";

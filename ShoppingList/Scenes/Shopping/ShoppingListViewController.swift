@@ -90,7 +90,7 @@ class ShoppingListViewController: UIViewController {
     }
     
     @objc private func bottomButtonPressed() {
-        viewModel.bottomButtonPressed()
+        viewModel.doneButtonPressed()
     }
     
     // MARK: - Private Methods
@@ -98,9 +98,6 @@ class ShoppingListViewController: UIViewController {
         viewModel.shoppingListBinding.bind {[weak self] value in
             
             switch value {
-                
-            case .switchToMainView:
-                self?.switchToMainView()
                 
             case .switchToSuccessView(let listName):
                 self?.switchToSuccessView(for: listName)
@@ -134,11 +131,7 @@ class ShoppingListViewController: UIViewController {
     }
     
     private func switchToSuccessView(for list: String) {
-        navigationController?.pushViewController(SuccessAssembler().build(for: list), animated: true)
-    }
-    
-    private func switchToMainView() {
-        navigationController?.pushViewController(MainScreenAssembler().build(completeMode: false), animated: true)
+//        navigationController?.pushViewController(SuccessViewAssembler().build(for: list), animated: true)
     }
     
     private func reloadItem(index: [IndexPath], animated: Bool) {

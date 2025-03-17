@@ -9,14 +9,19 @@
 "buttons.restore" = "Restore";
 "buttons.delete" = "Delete";
 "buttons.back" = "Back";
+"buttons.cancel" = "Cancel";
 "buttons.done" = "Done";
 "buttons.addProduct" = "Add product";
 "buttons.saveList" = "Save list";
 "buttons.restoreList" = "Restore list";
 "buttons.removeCheckedItems" = "Done with shopping";
-"buttons.switchToMainScreen" = "Return to main screen";
+"buttons.switchToMainScreen" = "To main screen";
 
-"mainScreenViewController.active.title" = "All your lists";
+"tabBar.mainView" = "My lists";
+"tabBar.archiveView" = "Archive";
+"tabBar.settingsView" = "Settings";
+
+"mainScreenViewController.active.title" = "Shopping lists";
 "mainScreenViewController.active.swipeHint" = "Swipe to open\ncompleted lists";
 "mainScreenViewController.completed.title" = "Completed lists";
 "mainScreenViewController.completed.swipeHint" = "Swipe to open all lists";

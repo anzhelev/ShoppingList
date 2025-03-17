@@ -1,25 +1,22 @@
 import UIKit
 
-final class SuccessViewModel {
+class SuccessViewModel {
+    weak var delegate: SuccessViewDelegate?
+    let successImage: UIImage? = UIImage(named: "successScreenImage")
+    let congratsLabel: String = .successViewCongratulations
+    let additionalLabel: String = .successViewAdditional
+    let confirmButtonTitle: String = .buttonSwitchToMainScreen
+    let cancelButtonTitle: String = .buttonCancel
     
-    // MARK: - Public Properties
-    var switchToMainView: Observable<Bool> = Observable(nil)
-    
-    // MARK: - Private Properties
-    private let listName: String
-    
-    //MARK: - Initializers
-    init(listName: String) {
-        self.listName = listName
+    init(delegate: SuccessViewDelegate) {
+        self.delegate = delegate
     }
     
-    // MARK: - Public Methods
-    func getListName() -> String {
-        listName
+    func confirmAction() {
+        delegate?.confirmButtonPressed()
     }
     
-    // MARK: - Actions
-    func buttonTapped() {
-        switchToMainView.value = true
+    func cancelAction() {
+        delegate?.cancelButtonPressed()
     }
 }

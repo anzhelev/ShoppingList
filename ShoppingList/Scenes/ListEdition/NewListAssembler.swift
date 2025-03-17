@@ -1,11 +1,10 @@
 import UIKit
 
 final class NewListAssembler {
-    private let storageService = StorageService()
     
-    public func build(editList: UUID?) -> UIViewController {
+    public func build(coordinator: Coordinator, editList: UUID?) -> UIViewController {
         let viewModel = NewListViewModel(
-            storageService: storageService,
+            coordinator: coordinator,
             editList: editList
         )
         let viewController = NewListViewController(
