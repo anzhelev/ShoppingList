@@ -9,11 +9,20 @@ extension String {
     static let buttonBack = NSLocalizedString("buttons.back", comment: "")
     static let buttonCancel = NSLocalizedString("buttons.cancel", comment: "")
     static let buttonDone = NSLocalizedString("buttons.done", comment: "")
+    static let buttonOk: String = NSLocalizedString("buttons.ok", comment: "")
     static let buttonAddProduct = NSLocalizedString("buttons.addProduct", comment: "")
     static let buttonSaveList = NSLocalizedString("buttons.saveList", comment: "")
     static let buttonRestoreList = NSLocalizedString("buttons.restoreList", comment: "")
     static let buttonRemoveCheckedItems = NSLocalizedString("buttons.removeCheckedItems", comment: "")
     static let buttonSwitchToMainScreen = NSLocalizedString("buttons.switchToMainScreen", comment: "")
+    
+    static let languageSystem = NSLocalizedString("languages.system", comment: "")
+    static let languageEnglish = NSLocalizedString("languages.english", comment: "")
+    static let languageRussian = NSLocalizedString("languages.russian", comment: "")
+    
+    static let themeLight = NSLocalizedString("themes.light", comment: "")
+    static let themeAutomatic = NSLocalizedString("themes.automatic", comment: "")
+    static let themeDark = NSLocalizedString("themes.dark", comment: "")
     
     static let tabBarTabsMainView = NSLocalizedString("tabBar.mainView", comment: "")
     static let tabBarTabsArchiveView = NSLocalizedString("tabBar.archiveView", comment: "")
@@ -36,4 +45,9 @@ extension String {
     static let shoppingListVCcheckAll = NSLocalizedString("shoppingListViewController.checkAll", comment: "")
     static let successViewCongratulations = NSLocalizedString("successView.congratulations", comment: "")
     static let successViewAdditional = NSLocalizedString("successView.additional", comment: "")
+    
+    static let settingsLanguageSectionTitle = NSLocalizedString("settings.languageSettings.title", comment: "")
+    static let settingsThemeSectionTitle = NSLocalizedString("settings.themeSettings.title", comment: "")
+    static let settingsAlertTitle = NSLocalizedString("settings.alert.title", comment: "")
+    static let settingsAlertMessage = NSLocalizedString("settings.alert.message", comment: "")
 }

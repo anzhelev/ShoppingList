@@ -8,7 +8,7 @@ struct Language {
 class LanguageManager {
     static let languageManager = LanguageManager()
     
-    var currentLanguage: String {
+    var currentLanguage: Int {
         get {
             getSavedLanguage()
         }
@@ -18,28 +18,23 @@ class LanguageManager {
     }
     
     let languages: [Language] = [
-        Language(name: "Системный", code: "system"),
-        Language(name: "Русский", code: "ru"),
-        Language(name: "Английский", code: "en")
+        Language(name: .languageSystem, code: "system"),
+        Language(name: .languageRussian, code: "ru"),
+        Language(name: .languageEnglish, code: "en")
     ]
     
     private let userDefaults = UserDefaults.standard
-    private let key = "selectedLanguage"
-
+    private let key = "AppleLanguages"
+    
     private init() { }
-
-    func getLanguage() -> String {
-        return currentLanguage
+    
+    private func getSavedLanguage() -> Int {
+        let storedLanguageCode = userDefaults.string(forKey: key) ?? Locale.preferredLanguages.first ?? "system"
+        return languages.firstIndex(where: { $0.code == storedLanguageCode}) ?? 0
     }
     
-    func setLanguage() {
-            }
-    
-    private func getSavedLanguage() -> String {
-        return userDefaults.string(forKey: key) ?? Locale.preferredLanguages.first ?? "ru"
-    }
-    
-    private func saveLanguage(_ language: String) {
-        userDefaults.set(language, forKey: key)
+    private func saveLanguage(_ language: Int) {
+        userDefaults.set([languages[language].code], forKey: key)
+        userDefaults.synchronize()
     }
 }

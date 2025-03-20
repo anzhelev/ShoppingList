@@ -11,11 +11,25 @@
 "buttons.back" = "Back";
 "buttons.cancel" = "Cancel";
 "buttons.done" = "Done";
+"buttons.ok" = "Ok";
 "buttons.addProduct" = "Add product";
 "buttons.saveList" = "Save list";
 "buttons.restoreList" = "Restore list";
 "buttons.removeCheckedItems" = "Done with shopping";
 "buttons.switchToMainScreen" = "To main screen";
+
+"languages.system" = "System";
+"languages.english" = "English";
+"languages.russian" = "Русский";
+
+"themes.light" = "Light";
+"themes.automatic" = "Automatic";
+"themes.dark" = "Dark";
+
+"settings.languageSettings.title" = "Language";
+"settings.themeSettings.title" = "Theme";
+"settings.alert.title" = "Attention!";
+"settings.alert.message" = "Restart the app \nto apply this setting";
 
 "tabBar.mainView" = "My lists";
 "tabBar.archiveView" = "Archive";

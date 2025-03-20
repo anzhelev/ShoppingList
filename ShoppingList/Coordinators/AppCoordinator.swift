@@ -2,11 +2,12 @@ import UIKit
 protocol Coordinator {
     var storageService: StorageService { get }
     var currentTheme: Int { get set }
-    var languageManager: LanguageManager { get }
+//    var languageManager: LanguageManager { get }
+    var currentLanguage: Int { get set }
     
     func start()
     func applyCurrentTheme()
-    func setLanguage()
+    func getLanguages() -> [Language]
     func showTabBarVC()
     func switchToShoppingList(with listInfo: ListInfo)
     func switchToListEditionView(editList: UUID?)
@@ -29,7 +30,16 @@ final class AppCoordinator: Coordinator {
         }
     }
     
-    let languageManager = LanguageManager.languageManager
+    var currentLanguage: Int {
+        get {
+            languageManager.currentLanguage
+        }
+        set {
+            languageManager.currentLanguage = newValue
+        }
+    }
+    
+    private let languageManager = LanguageManager.languageManager
     private let themeManager = ThemeManager.themeManager
     
     private let window: UIWindow
@@ -50,12 +60,12 @@ final class AppCoordinator: Coordinator {
         themeManager.applyCurrentTheme(for: window)
     }
     
-    func setLanguage() {
-        languageManager.setLanguage()
-    }
+    func getLanguages() -> [Language] {
+        languageManager.languages
+    }    
     
     func showTabBarVC() {
-        window.rootViewController = self.navigationController
+        window.rootViewController = navigationController
         window.makeKeyAndVisible()
         let tabBarController = TabBarController(coordinator: self)
         navigationController.pushViewController(tabBarController, animated: false)
@@ -86,7 +96,6 @@ final class AppCoordinator: Coordinator {
     func dismissPopupVC() {
         navigationController.dismiss(animated: true)
     }
-    
     
     func popToMainView() {
         navigationController.popToRootViewController(animated: true)

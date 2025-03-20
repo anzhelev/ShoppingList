@@ -11,11 +11,25 @@
 "buttons.back" = "Назад";
 "buttons.cancel" = "Oтмена";
 "buttons.done" = "Готово";
+"buttons.ok" = "ОК";
 "buttons.addProduct" = "Добавить продукт";
 "buttons.saveList" = "Сохранить список";
 "buttons.restoreList" = "Восстановить список";
 "buttons.removeCheckedItems" = "Завершить покупки";
 "buttons.switchToMainScreen" = "На главную";
+
+"languages.system" = "Язык системы";
+"languages.english" = "English";
+"languages.russian" = "Русский";
+
+"themes.light" = "Светлая";
+"themes.automatic" = "Авто";
+"themes.dark" = "Темная";
+
+"settings.languageSettings.title" = "Язык";
+"settings.themeSettings.title" = "Тема";
+"settings.alert.title" = "Внимание!";
+"settings.alert.message" = "Для применения настройки языка \nперезапустите приложение";
 
 "tabBar.mainView" = "Мои списки";
 "tabBar.archiveView" = "Архив";

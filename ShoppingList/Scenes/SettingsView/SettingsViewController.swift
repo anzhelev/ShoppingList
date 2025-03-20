@@ -7,7 +7,7 @@ final class SettingsViewController: UIViewController {
     
     private let themeLabel = UILabel()
     private lazy var themeSegmentedControl: UISegmentedControl = {
-        var view = UISegmentedControl(items: ["Light", "Automatic", "Dark"])
+        var view = UISegmentedControl(items: viewModel.themes)
         view.selectedSegmentIndex = viewModel.getTheme()
         view.addTarget(self, action: #selector(themeChanged), for: .valueChanged)
         return view
@@ -19,6 +19,7 @@ final class SettingsViewController: UIViewController {
         table.register(LanguageCell.self, forCellReuseIdentifier: LanguageCell.reuseIdentifier)
         table.delegate = self
         table.dataSource = self
+        table.isScrollEnabled = false
         table.showsVerticalScrollIndicator = false
         table.separatorStyle = .singleLine
         table.separatorColor = .tableSeparator
@@ -43,7 +44,7 @@ final class SettingsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //        bindViewModel()
+        bindViewModel()
         setupUI()
     }
     
@@ -51,29 +52,24 @@ final class SettingsViewController: UIViewController {
     @objc private func themeChanged() {
         viewModel.setTheme(themeIndex: themeSegmentedControl.selectedSegmentIndex)
     }
-    
-    @objc private func languageChanged() {
-        
-    }
-    
+
     @objc private func fontSizeChanged() {
         
     }
     
     // MARK: - Private Methods
-    //    private func bindViewModel() {
-    //        viewModel.settingsBinding.bind {[weak self] value in
-    //            guard let value else {
-    //                return
-    //            }
-    //
-    //            switch value {
-    //
-    //            case .updateTheme(let theme):
-    //                self?.applyTheme(with: theme)
-    //            }
-    //        }
-    //    }
+    private func bindViewModel() {
+        viewModel.settingsBinding.bind {[weak self] value in
+            guard let value else {
+                return
+            }
+            switch value {
+            case .showAlert(let title, let message, let buttonName):
+                self?.showAlert(with: title, message: message, buttonTitle: buttonName)
+                self?.reloadLanguageSelectionTable()
+            }
+        }
+    }
     
     private func setVStackView(title: String, option: UIView) -> UIView {
         let titleLabel = UILabel()
@@ -93,8 +89,8 @@ final class SettingsViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         let stackView = UIStackView(arrangedSubviews: [
-            setVStackView(title: "Язык приложения", option: languageSelectionTable),
-            setVStackView(title: "Цветовая схема", option: themeSegmentedControl),
+            setVStackView(title: viewModel.languageStackTitle, option: languageSelectionTable),
+            setVStackView(title: viewModel.themeStackTitle, option: themeSegmentedControl),
             //            setVStackView(title: "Размер шрифта", option: fontSizeSegmentedControl)
         ]
         )
@@ -114,6 +110,19 @@ final class SettingsViewController: UIViewController {
         
         themeSegmentedControl.addTarget(self, action: #selector(themeChanged), for: .valueChanged)
         //        fontSizeSegmentedControl.addTarget(self, action: #selector(fontSizeChanged), for: .valueChanged)
+    }
+    
+    private func reloadLanguageSelectionTable() {
+        languageSelectionTable.reloadData()
+    }
+    
+    private func showAlert(with title: String, message: String, buttonTitle: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: buttonTitle, style: .default, handler: nil)
+        alert.addAction(action)
+        
+        self.present(alert, animated: true, completion: nil)
     }
 }
 
