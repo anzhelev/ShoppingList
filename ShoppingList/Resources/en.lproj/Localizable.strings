@@ -3,6 +3,8 @@
 "units.pack" = "pk";
 "units.piece" = "pc";
 
+"formatter.dateFormat" = "MM.dd.yyyy";
+
 "buttons.pin" = "Pin";
 "buttons.unpin" = "Unpin";
 "buttons.edit" = "Edit";
@@ -29,9 +31,9 @@
 "settings.languageSettings.title" = "Language";
 "settings.themeSettings.title" = "Theme";
 "settings.alert.title" = "Attention!";
-"settings.alert.message" = "Restart the app \nto apply this setting";
+"settings.alert.message" = "Please restart the app for\nthe language changes to take effect";
 
-"tabBar.mainView" = "My lists";
+"tabBar.mainView" = "Shopping lists";
 "tabBar.archiveView" = "Archive";
 "tabBar.settingsView" = "Settings";
 

@@ -30,25 +30,7 @@ class LanguageCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // Настройка интерфейса
-    private func setupUI() {
-        self.backgroundColor = .gray.withAlphaComponent(0.05)
-        self.selectionStyle = .none
-        self.layer.masksToBounds = true
-        self.layer.cornerRadius = 10
-        
-        contentView.addSubview(languageLabel)
-        
-        NSLayoutConstraint.activate([
-            languageLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            languageLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            languageLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            languageLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
-        ])
-    }
-    
     func configure(with params: LanguageCellParams) {
-        
         languageLabel.text = params.name
         accessoryType = params.isSelected ? .checkmark : .none
                 
@@ -66,5 +48,22 @@ class LanguageCell: UITableViewCell {
         separatorInset = params.separator
         ? UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         : UIEdgeInsets(top: 0, left: self.bounds.width + 40, bottom: 0, right: 0)
+    }
+    
+    // Настройка интерфейса
+    private func setupUI() {
+        self.backgroundColor = .gray.withAlphaComponent(0.05)
+        self.selectionStyle = .none
+        self.layer.masksToBounds = true
+        self.layer.cornerRadius = 10
+        
+        contentView.addSubview(languageLabel)
+        
+        NSLayoutConstraint.activate([
+            languageLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            languageLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            languageLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            languageLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
+        ])
     }
 }

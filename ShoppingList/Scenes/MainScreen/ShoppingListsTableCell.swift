@@ -6,36 +6,11 @@ final class ShoppingListsTableCell: UITableViewCell {
     static let reuseIdentifier = "shoppingListsTableCell"
     
     // MARK: - Private Properties
-    private let pinImageView = {
-        UIImageView(image: UIImage(named: "pin")?.withTintColor(.textColorPrimary))
-    }()
-    
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .textColorPrimary
-        label.font = .itemName
-        label.textAlignment = .left
-        return label
-    }()
-    
-    private let pinnedTitleLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .textColorPrimary
-        label.font = .itemName
-        label.textAlignment = .left
-        return label
-    }()
-    
-    private let rightSideImageView = UIImageView()
-    
-    private lazy var rightSideView = {
-        let view = UIView()
-        rightSideImageView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(rightSideImageView)
-        rightSideImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        rightSideImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        return view
-    }()
+    private let pinImageView = UIImageView(image: UIImage(named: "pin")?.withTintColor(.textColorPrimary))
+    private let chevronImageView = UIImageView()
+    private var mainStackView = UIStackView()
+    private lazy var listTitleLabel = createLabel(font: .itemName)
+    private lazy var listDateLabel = createLabel(font: .hintLabel)
     
     // MARK: - Initializers
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -58,18 +33,18 @@ final class ShoppingListsTableCell: UITableViewCell {
     func configure(with params: MainScreenTableCellParams) {
         self.selectionStyle = .none
         
-        pinImageView.isHidden = !params.pinned
-        pinnedTitleLabel.isHidden = !params.pinned
-        titleLabel.isHidden = params.pinned
+        mainStackView.arrangedSubviews[0].isHidden = !params.pinned
         
-        titleLabel.text = params.title
-        pinnedTitleLabel.text = params.title
+        listTitleLabel.text = params.title
         
-        titleLabel.textColor = params.completeMode
+        listTitleLabel.textColor = params.completeMode
         ? .textColorSecondary
         : .textColorPrimary
         
-        rightSideImageView.image = params.completeMode
+        listDateLabel.text = params.date
+        listDateLabel.textColor = .textColorTertiary
+        
+        chevronImageView.image = params.completeMode
         ? UIImage(named: "listCheckmark")?.withTintColor(.buttonBgrPrimary)
         : UIImage(named: "arrowRight")?.withTintColor(.listItemRightArrow)
         
@@ -80,23 +55,49 @@ final class ShoppingListsTableCell: UITableViewCell {
     
     // MARK: - Private Methods
     private func setUIElements() {
-        self.backgroundColor = .screenBgrPrimary
-        [pinImageView, titleLabel, pinnedTitleLabel, rightSideView].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            contentView.addSubview($0)
-            $0.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
-        }
+        self.backgroundColor = .clear
+        
+        let chevronView = UIView()
+        chevronView.addSubview(chevronImageView)
+        let labelStackView = createLabelStackView(labels: [listTitleLabel, listDateLabel])
+        mainStackView = createMainStackView(labels: [pinImageView, labelStackView, chevronView])
+        
+        [mainStackView, chevronImageView].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+        contentView.addSubview(mainStackView)
         
         NSLayoutConstraint.activate([
-            pinImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            mainStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            mainStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            mainStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
+            mainStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             pinImageView.widthAnchor.constraint(equalToConstant: 16),
-            pinnedTitleLabel.leadingAnchor.constraint(equalTo: pinImageView.trailingAnchor, constant: 8),
-            pinnedTitleLabel.trailingAnchor.constraint(equalTo: rightSideView.leadingAnchor, constant: -16),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            titleLabel.trailingAnchor.constraint(equalTo: rightSideView.leadingAnchor, constant: -16),
-            rightSideView.widthAnchor.constraint(equalToConstant: 17),
-            rightSideView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            rightSideView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            chevronImageView.centerYAnchor.constraint(equalTo: chevronView.centerYAnchor),
+            chevronImageView.trailingAnchor.constraint(equalTo: chevronView.trailingAnchor),
+            chevronView.widthAnchor.constraint(equalToConstant: 17)
         ])
+    }
+    
+    private func createMainStackView(labels: [UIView]) -> UIStackView {
+        let stackView = UIStackView(arrangedSubviews: labels)
+        stackView.axis = .horizontal
+        stackView.distribution = .fillProportionally
+        stackView.alignment = .center
+        stackView.spacing = 8
+        return stackView
+    }
+    
+    private func createLabelStackView(labels: [UIView]) -> UIStackView {
+        let stackView = UIStackView(arrangedSubviews: labels)
+        stackView.axis = .vertical
+        stackView.distribution = .fillProportionally
+        stackView.spacing = 8
+        return stackView
+    }
+    
+    private func createLabel(font: UIFont) -> UILabel {
+        let label = UILabel()
+        label.font = font
+        label.textAlignment = .left
+        return label
     }
 }

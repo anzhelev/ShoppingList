@@ -6,7 +6,7 @@ final class TabBarController: UITabBarController {
 
     private let mainViewTabBarItem = UITabBarItem(
         title: .tabBarTabsMainView,
-        image: UIImage(systemName: "list.star"),
+        image: UIImage(systemName: "list.bullet.clipboard"),
         tag: 0
     )
 
@@ -18,7 +18,7 @@ final class TabBarController: UITabBarController {
 
     private let settingsTabBarItem = UITabBarItem(
         title: .tabBarTabsSettingsView,
-        image: UIImage(systemName: "gearshape"),
+        image: UIImage(systemName: "gear.badge"),
         tag: 0
     )
 
@@ -35,7 +35,7 @@ final class TabBarController: UITabBarController {
         super.viewDidLoad()
 
         view.backgroundColor = .screenBgrPrimary
-        tabBar.unselectedItemTintColor = .textColorPrimary
+        tabBar.unselectedItemTintColor = .tabbarInactiveTabs
 
         setTabs()
     }

@@ -27,6 +27,11 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     private let completeMode: Bool
     private var shoppingLists: [ListInfo] = []
     private var stubState: Bool = true
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = .dateFormat
+        return formatter
+    }()
     
     //MARK: - Initializers
     init(coordinator: Coordinator, completeMode: Bool) {
@@ -61,6 +66,7 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     
     func getCellParams(for row: Int) -> MainScreenTableCellParams {
         .init(title: shoppingLists[row].title,
+              date: dateFormatter.string(from: shoppingLists[row].date),
               separator: row == self.shoppingLists.count - 1 ? false : true,
               pinned: completeMode ? false : shoppingLists[row].pinned,
               completeMode: completeMode

@@ -3,6 +3,8 @@
 "units.pack" = "уп";
 "units.piece" = "шт";
 
+"formatter.dateFormat" = "dd.MM.yyyy";
+
 "buttons.pin" = "Закрепить";
 "buttons.unpin" = "Открепить";
 "buttons.edit" = "Редактировать";
@@ -31,7 +33,7 @@
 "settings.alert.title" = "Внимание!";
 "settings.alert.message" = "Для применения настройки языка \nперезапустите приложение";
 
-"tabBar.mainView" = "Мои списки";
+"tabBar.mainView" = "Списки покупок";
 "tabBar.archiveView" = "Архив";
 "tabBar.settingsView" = "Настройки";
 
