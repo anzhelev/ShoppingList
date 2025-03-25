@@ -1,12 +1,6 @@
-//
-//  LanguageCell.swift
-//  ShoppingList
-//
-//  Created by Andrey Zhelev on 13.03.2025.
-//
 import UIKit
 
-class LanguageCell: UITableViewCell {
+class SettingsLanguageCell: UITableViewCell {
     
     // Идентификатор ячейки
     static let reuseIdentifier = "LanguageCell"

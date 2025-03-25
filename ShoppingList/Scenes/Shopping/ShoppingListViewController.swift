@@ -50,7 +50,7 @@ class ShoppingListViewController: UIViewController {
         button.setTitle(viewModel.getBottomButtonName(), for: .normal)
         button.setTitleColor(.buttonTextPrimary, for: .normal)
         button.titleLabel?.font = .listScreenTitle
-        button.backgroundColor = .buttonBgrPrimary
+        button.backgroundColor = .buttonBgrTertiary
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(bottomButtonPressed), for: .touchUpInside)
         return button
@@ -99,14 +99,8 @@ class ShoppingListViewController: UIViewController {
             
             switch value {
                 
-            case .switchToSuccessView(let listName):
-                self?.switchToSuccessView(for: listName)
-                
             case .showPopUp(let row, let quantity, let unit):
                 self?.showPopUpView(for: row, quantity: quantity, unit: unit)
-                
-            case .updateCompleteButtonState:
-                self?.updateBottomButton()
                 
             case .updateItem(let indexPath, let option):
                 self?.listItemsTable.isUserInteractionEnabled = !option
@@ -128,10 +122,6 @@ class ShoppingListViewController: UIViewController {
                 return
             }
         }
-    }
-    
-    private func switchToSuccessView(for list: String) {
-//        navigationController?.pushViewController(SuccessViewAssembler().build(for: list), animated: true)
     }
     
     private func reloadItem(index: [IndexPath], animated: Bool) {
@@ -223,16 +213,6 @@ class ShoppingListViewController: UIViewController {
             sortButton.addTarget(self, action: #selector(sortButtonPressed), for: .touchUpInside)
             navigationItem.rightBarButtonItem = UIBarButtonItem(customView: sortButton)
         }
-    }
-    
-    private func updateBottomButton() {
-        let isEnabled = viewModel.getBottomButtonState()
-        bottomButton.isEnabled = isEnabled
-        bottomButton.backgroundColor = isEnabled ? .buttonBgrTertiary : .buttonBgrDisabled
-        
-        isEnabled
-        ? bottomButton.setTitleColor(.buttonTextPrimary, for: .normal)
-        : bottomButton.setTitleColor(.buttonTextSecondary, for: .normal)
     }
     
     private func showPopUpView(for item: Int, quantity: Int, unit: Units) {

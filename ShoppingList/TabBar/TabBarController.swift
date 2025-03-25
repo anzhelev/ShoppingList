@@ -40,8 +40,7 @@ final class TabBarController: UITabBarController {
         setTabs()
     }
 
-    private func setTabs() {
-        
+    private func setTabs() {        
         let mainScreenView = MainScreenAssembler().build(coordinator: coordinator, completeMode: false)
         mainScreenView.tabBarItem = mainViewTabBarItem
         
@@ -50,9 +49,6 @@ final class TabBarController: UITabBarController {
         
         let settingsView = SettingsAssembler().build(coordinator: coordinator)
         settingsView.tabBarItem = settingsTabBarItem
-
-//        let navigationMainScreenView = UINavigationController(rootViewController: mainScreenView)
-//        let navigationArchiveView = UINavigationController(rootViewController: archiveView)
 
         viewControllers = [mainScreenView, archiveView, settingsView]
     }

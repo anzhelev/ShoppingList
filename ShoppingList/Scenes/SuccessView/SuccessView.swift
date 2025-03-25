@@ -32,13 +32,13 @@ class SuccessView: UIView {
         return label
     }
     
-    private func createButton(title: String, action: Selector) -> UIButton {
+    private func createButton(title: String, cancelMode: Bool, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
         button.setTitleColor(.buttonTextPrimary, for: .normal)
-        button.backgroundColor = .buttonBgrTertiary
+        button.backgroundColor = cancelMode ? .buttonBgrSecondary : .buttonBgrTertiary
         button.titleLabel?.font = .listScreenTitle
-        button.layer.cornerRadius = 10
+        button.layer.cornerRadius = 16
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }
@@ -66,13 +66,19 @@ class SuccessView: UIView {
             spacing: 6
         )
         
-        let buttonStack = createStackView(
-            arrangedSubviews: [
-                createButton(title: viewModel.confirmButtonTitle, action: #selector(confirmButtonTapped)),
-                createButton(title: viewModel.cancelButtonTitle, action: #selector(cancelButtonTapped))
-            ],
-            spacing: 8
+        let confirmButton = createButton(
+            title: viewModel.confirmButtonTitle,
+            cancelMode: false,
+            action: #selector(confirmButtonTapped)
         )
+        
+        let cancelButton = createButton(
+            title: viewModel.cancelButtonTitle,
+            cancelMode: true,
+            action: #selector(cancelButtonTapped)
+        )
+        
+        let buttonStack = createStackView(arrangedSubviews: [confirmButton, cancelButton], spacing: 8)
         
         let mainStackView = createStackView(arrangedSubviews: [logoImageView, labelStack, buttonStack], spacing: 10)
         mainStackView.alignment = .center
@@ -84,7 +90,9 @@ class SuccessView: UIView {
             mainStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20),
             mainStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
             mainStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0),
-            buttonStack.widthAnchor.constraint(equalTo: mainStackView.widthAnchor, multiplier: 0.8)
+            buttonStack.widthAnchor.constraint(equalTo: mainStackView.widthAnchor, multiplier: 0.8),
+            confirmButton.heightAnchor.constraint(equalToConstant: 40),
+            cancelButton.heightAnchor.constraint(equalTo: confirmButton.heightAnchor)
         ])
     }
 }

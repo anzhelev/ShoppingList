@@ -16,7 +16,7 @@ final class SettingsViewController: UIViewController {
     private let languageLabel = UILabel()
     private lazy var languageSelectionTable: UITableView = {
         let table = UITableView()
-        table.register(LanguageCell.self, forCellReuseIdentifier: LanguageCell.reuseIdentifier)
+        table.register(SettingsLanguageCell.self, forCellReuseIdentifier: SettingsLanguageCell.reuseIdentifier)
         table.delegate = self
         table.dataSource = self
         table.isScrollEnabled = false
@@ -52,7 +52,7 @@ final class SettingsViewController: UIViewController {
     @objc private func themeChanged() {
         viewModel.setTheme(themeIndex: themeSegmentedControl.selectedSegmentIndex)
     }
-
+    
     @objc private func fontSizeChanged() {
         
     }
@@ -109,7 +109,7 @@ final class SettingsViewController: UIViewController {
         ])
         
         themeSegmentedControl.addTarget(self, action: #selector(themeChanged), for: .valueChanged)
-        //        fontSizeSegmentedControl.addTarget(self, action: #selector(fontSizeChanged), for: .valueChanged)
+        //TODO:        fontSizeSegmentedControl.addTarget(self, action: #selector(fontSizeChanged), for: .valueChanged)
     }
     
     private func reloadLanguageSelectionTable() {
@@ -134,7 +134,7 @@ extension SettingsViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: LanguageCell.reuseIdentifier, for: indexPath) as! LanguageCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: SettingsLanguageCell.reuseIdentifier, for: indexPath) as! SettingsLanguageCell
         
         cell.configure(with: viewModel.getCellParams(for: indexPath.row))
         return cell

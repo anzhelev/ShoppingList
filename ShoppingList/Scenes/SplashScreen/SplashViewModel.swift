@@ -11,7 +11,6 @@ final class SplashViewModel {
     }
     
     func animationCompleted() {
-//        switchToMainView.value = true
         coordinator.showTabBarVC()
     }
 }

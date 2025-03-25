@@ -1,9 +1,3 @@
-//
-//  SuccessViewAssembler.swift
-//  ShoppingList
-//
-//  Created by Andrey Zhelev on 16.03.2025.
-//
 import UIKit
 
 final class SuccessViewAssembler {

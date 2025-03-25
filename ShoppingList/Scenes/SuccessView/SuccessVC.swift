@@ -28,7 +28,7 @@ class SuccessVC: UIViewController {
             popupView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             popupView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             popupView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
-            popupView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.5)
+            popupView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.6)
         ])
     }
 }

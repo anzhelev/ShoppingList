@@ -16,8 +16,6 @@ protocol ShoppingListViewModelProtocol {
     func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams)
     func tableFinishedUpdating()
     func deleteItemButtonPressed(in row: Int)
-    //    func textFieldDidBeginEditing()
-    func getBottomButtonState() -> Bool
 }
 
 final class ShoppingListViewModel: ShoppingListViewModelProtocol {
@@ -83,10 +81,6 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
                       error: shoppingList[row].error
                      )
         )
-    }
-    
-    func getBottomButtonState() -> Bool {
-        bottomButtonIsEnabled
     }
     
     func tableFinishedUpdating() {
@@ -390,7 +384,6 @@ extension ShoppingListViewModel: SuccessViewDelegate {
         saveListToStorage(duplicatePinned: false)
         coordinator.dismissPopupVC()
         coordinator.switchToMainView()
-//        coordinator.popToMainView()
     }
     
     func cancelButtonPressed() {
