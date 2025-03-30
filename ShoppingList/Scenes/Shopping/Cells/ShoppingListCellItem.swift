@@ -8,7 +8,7 @@ final class ShoppingListCellItem: UITableViewCell {
     
     // MARK: - Private Properties
     private var row = 1
-    private var quantity = 1
+    private var quantity: Float = 1
     private var unit: Units = .piece
     private let maxNameleLenght = 15
     
@@ -98,17 +98,19 @@ final class ShoppingListCellItem: UITableViewCell {
         ? UIImage(named: "checkboxChecked")?.withTintColor(.unitSelectionBlockBgr, renderingMode: .alwaysOriginal)
         : UIImage(named: "checkboxEmpty")?.withTintColor(.textColorPrimary, renderingMode: .alwaysOriginal)
         
-//        if let title = params.title {
-            let attributeString = NSMutableAttributedString(string: params.title ?? "")
-            attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle,
-                                         value: params.checked ? 1: 0,
-                                         range: NSRange(location: 0, length: attributeString.length)
-            )
-            itemNameField.attributedText = attributeString
-//        }
+        let attributeString = NSMutableAttributedString(string: params.title ?? "")
+        attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle,
+                                     value: params.checked ? 1: 0,
+                                     range: NSRange(location: 0, length: attributeString.length)
+        )
+        itemNameField.attributedText = attributeString
         
         itemNameField.textColor = params.checked ? .textColorSecondary : .textColorPrimary
-        quantityLabel.text = "\(quantity) \(NSLocalizedString(unit.rawValue, comment: ""))"
+        let quantityAsString = quantity.rounded(.towardZero) == quantity
+        ? String(Int(quantity))
+        : String(format: "%.1f", quantity)
+        
+        quantityLabel.text = quantityAsString + " \(NSLocalizedString(unit.rawValue, comment: ""))"
         separatorView.backgroundColor = params.error == nil ? .tableSeparator : .buttonBgrSecondary
         errorLabel.text = params.error
         errorLabel.isHidden = params.error == nil

@@ -6,21 +6,23 @@ final class PopUpViewModel: PopUpViewModelProtocol {
     
     // MARK: - Private Properties
     private let item: Int
-    private var quantity: Int
+    private var quantity: Float
     private var unit: Units
     
-
+    
     // MARK: - Initializers
-    init(item: Int, delegate: PopUpVCDelegate?, quantity: Int, unit: Units) {
+    init(item: Int, delegate: PopUpVCDelegate?, quantity: Float, unit: Units) {
         self.item = item
         self.delegate = delegate
         self.quantity = quantity
         self.unit = unit
     }
-
+    
     // MARK: - Public Methods
-    func getQuantity() -> Int {
-        quantity
+    func getQuantity() -> String {
+        quantity.rounded(.towardZero) == quantity
+        ? String(Int(quantity))
+        : String(format: "%.1f", quantity)
     }
     
     func getUnitIndex() -> Int {
@@ -41,19 +43,45 @@ final class PopUpViewModel: PopUpViewModelProtocol {
         popUpBinding.value = .closePopUp
     }
     
-    func minusButtonPressed() {
-        if quantity > 1 {
-            quantity -= 1
-            popUpBinding.value = .popUpQuantity(quantity)
-            delegate?.quantitySelected(item: item, quantity: quantity)
-        }
+    func minusButtonPressed(for value: String?) {
+        let quantityAsFloat = Float(value ?? "") ?? 0
+        quantity = max(0.1, quantityAsFloat - 0.1)
+        quantity = (quantity * 10).rounded(.toNearestOrAwayFromZero) / 10
+        
+        let quantityAsString = quantity.rounded(.towardZero) == quantity
+        ? String(Int(quantity))
+        : String(format: "%.1f", quantity)
+        
+        popUpBinding.value = .popUpQuantity(quantityAsString)
+        delegate?.quantitySelected(item: item, quantity: quantity)
     }
     
-    func plusButtonPressed() {
-        if quantity < 99 {
-            quantity += 1
-            popUpBinding.value = .popUpQuantity(quantity)
-            delegate?.quantitySelected(item: item, quantity: quantity)
-        }
+    func plusButtonPressed(for value: String?) {
+        let quantityAsFloat = Float(value ?? "") ?? 0
+        quantity = min(quantityAsFloat + 0.1, 999.9)
+        
+        quantity = (quantity * 10).rounded(.toNearestOrAwayFromZero) / 10
+        let quantityAsString = quantity.rounded(.towardZero) == quantity
+        ? String(Int(quantity))
+        : String(format: "%.1f", quantity)
+        
+        popUpBinding.value = .popUpQuantity(quantityAsString)
+        delegate?.quantitySelected(item: item, quantity: quantity)
+    }
+    
+    func clearButtonPressed() {
+        popUpBinding.value = .popUpQuantity("")
+        delegate?.quantitySelected(item: item, quantity: quantity)
+    }
+    
+    func quantityUpdated(with value: String?) {
+        let quantityAsFloat = Float(value ?? "") ?? 1
+        quantity = (quantityAsFloat * 10).rounded(.toNearestOrAwayFromZero) / 10
+        let quantityAsString = quantity.rounded(.towardZero) == quantity
+        ? String(Int(quantity))
+        : String(format: "%.1f", quantity)
+        
+        popUpBinding.value = .popUpQuantity(quantityAsString)
+        delegate?.quantitySelected(item: item, quantity: quantity)
     }
 }

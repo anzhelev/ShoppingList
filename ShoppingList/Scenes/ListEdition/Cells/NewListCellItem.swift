@@ -8,7 +8,7 @@ final class NewListCellItem: UITableViewCell {
     
     // MARK: - Private Properties
     private var row = 1
-    private var quantity = 1
+    private var quantity: Float = 1
     private var unit: Units = .piece
     private let maxNameleLenght = 15
     

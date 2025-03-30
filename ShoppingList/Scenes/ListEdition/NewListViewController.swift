@@ -94,11 +94,6 @@ class NewListViewController: UIViewController {
         }
     }
     
-    private func switchToMainView() {
-//        navigationController?.viewControllers = [MainScreenAssembler().build(completeMode: false), self]
-//        navigationController?.popViewController(animated: true)
-    }
-    
     private func reloadItem(index: IndexPath, animated: Bool) {
         listItemsTable.performBatchUpdates {
             listItemsTable.reloadRows(at: [index], with: animated ? .automatic : .none)
@@ -173,7 +168,7 @@ class NewListViewController: UIViewController {
         self.viewModel.tableFinishedUpdating()
     }
     
-    private func showPopUpView(for item: Int, quantity: Int, unit: Units) {
+    private func showPopUpView(for item: Int, quantity: Float, unit: Units) {
         let popUpView = PopUpAssembler().build(item: item, delegate: self.viewModel as? PopUpVCDelegate, quantity: quantity, unit: unit)
         if let sheet = popUpView.sheetPresentationController {
             let detent: UISheetPresentationController.Detent = .custom(identifier: .init(rawValue: "custom")) { _ in 224 }

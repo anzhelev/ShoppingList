@@ -14,6 +14,7 @@ protocol ShoppingListViewModelProtocol {
     func getTableRowCount() -> Int
     func getRowHeight(for row: Int) -> CGFloat
     func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams)
+    func isDropAllowed(for row: Int) -> Bool
     func tableFinishedUpdating()
     func deleteItemButtonPressed(in row: Int)
 }
@@ -81,6 +82,10 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
                       error: shoppingList[row].error
                      )
         )
+    }
+    
+    func isDropAllowed(for row: Int) -> Bool {
+        row < uncheckedItemsCount
     }
     
     func tableFinishedUpdating() {
@@ -186,7 +191,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         loadedItems.enumerated().forEach {index, item in
             shoppingList.append(.init(checked: item.checked,
                                       title: item.name,
-                                      quantity: Int(item.quantity),
+                                      quantity: Float(item.quantity),
                                       unit: Units(rawValue: item.unit) ?? .piece
                                      )
             )
@@ -248,7 +253,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         if shoppingList.count > 1 {
             for item in shoppingList[0...shoppingList.count - 2] {
                 newListItems.append(.init(name: item.title ?? "",
-                                          quantity: Int16(item.quantity),
+                                          quantity: Float(item.quantity),
                                           unit: item.unit.rawValue,
                                           checked: item.checked
                                          )
@@ -361,7 +366,7 @@ extension ShoppingListViewModel: PopUpVCDelegate {
         shoppingListBinding.value = .updateItem([.init(row: item, section: 0)], false)
     }
     
-    func quantitySelected(item: Int, quantity: Int) {
+    func quantitySelected(item: Int, quantity: Float) {
         shoppingList[item].quantity = quantity
         shoppingListBinding.value = .updateItem([.init(row: item, section: 0)], false)
     }

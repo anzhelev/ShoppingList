@@ -1,7 +1,7 @@
 import UIKit
 
 final class PopUpAssembler {
-    public func build(item: Int, delegate: PopUpVCDelegate?, quantity: Int, unit: Units) -> UIViewController {
+    public func build(item: Int, delegate: PopUpVCDelegate?, quantity: Float, unit: Units) -> UIViewController {
         let viewModel = PopUpViewModel(
             item: item,
             delegate: delegate,

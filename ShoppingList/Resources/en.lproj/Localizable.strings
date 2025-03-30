@@ -20,6 +20,12 @@
 "buttons.removeCheckedItems" = "Done with shopping";
 "buttons.switchToMainScreen" = "To main screen";
 
+"dropdown.share" = "Share with...";
+"dropdown.sorting" = "Sorting";
+"dropdown.duplicate" = "Duplicate";
+"dropdown.remind" = "Remind";
+"dropdown.reset" = "Reset input fields";
+
 "languages.system" = "System";
 "languages.english" = "English";
 "languages.russian" = "Русский";

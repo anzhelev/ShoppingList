@@ -1,6 +1,6 @@
 struct ListItem {
     let name: String
-    let quantity: Int16
+    let quantity: Float
     let unit: Units.RawValue
     let checked: Bool
 }

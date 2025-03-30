@@ -1,5 +1,5 @@
 enum PopUpBinding {
     case closePopUp
-    case popUpQuantity(Int)
+    case popUpQuantity(String)
     case popUpUnit(Int)
 }

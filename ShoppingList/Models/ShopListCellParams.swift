@@ -1,7 +1,7 @@
 struct ShopListCellParams {
     var checked: Bool
     var title: String?
-    var quantity: Int
+    var quantity: Float
     var unit: Units
     var error: String?
 }

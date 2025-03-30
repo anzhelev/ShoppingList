@@ -117,7 +117,7 @@ final class NewListViewModel: NewListViewModelProtocol {
         for (index, item) in (editedList?.items ?? []).enumerated() {
             listItems.append(.init(row: index + 1,
                                    title: item.name,
-                                   quantity: Int(item.quantity),
+                                   quantity: Float(item.quantity),
                                    unit: Units(rawValue: item.unit) ?? .piece,
                                    checked: item.checked
                                   )
@@ -168,7 +168,7 @@ final class NewListViewModel: NewListViewModelProtocol {
         if listItems.count > 2 {
             for item in listItems[1...listItems.count - 2] {
                 newListItems.append(.init(name: item.title ?? .newListItemPlaceholder,
-                                          quantity: Int16(item.quantity ?? 1),
+                                          quantity: Float(item.quantity ?? 1),
                                           unit: item.unit?.rawValue ?? Units.piece.rawValue,
                                           checked: item.checked ?? false
                                          )
@@ -225,7 +225,7 @@ final class NewListViewModel: NewListViewModelProtocol {
                 listItems.append(
                     .init(row: i,
                           title: UserDefaults.standard.string(forKey: "newListItem\(i).title"),
-                          quantity: UserDefaults.standard.integer(forKey: "newListItem\(i).quantity"),
+                          quantity: UserDefaults.standard.float(forKey: "newListItem\(i).quantity"),
                           unit: Units(rawValue: UserDefaults.standard.string(forKey: "newListItem\(i).unit")
                                       ?? Units.piece.rawValue) ?? .piece,
                           checked: false
@@ -316,7 +316,7 @@ extension NewListViewModel: PopUpVCDelegate {
         newListBinding.value = .updateItem(.init(row: item, section: 0), false)
     }
     
-    func quantitySelected(item: Int, quantity: Int) {
+    func quantitySelected(item: Int, quantity: Float) {
         listItems[item].quantity = quantity
         newListBinding.value = .updateItem(.init(row: item, section: 0), false)
     }

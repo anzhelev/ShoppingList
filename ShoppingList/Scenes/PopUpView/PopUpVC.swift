@@ -5,6 +5,10 @@ final class PopUpVC: UIViewController {
     // MARK: - Private Properties
     private let viewModel: PopUpViewModelProtocol?
     
+    private let maxIntegerPlaces = 3
+    private let maxDecimalPlaces = 1
+    private let decimalSeparator = "."
+    
     private lazy var unitSelector = {
         let selector = UISegmentedControl(
             items: [NSLocalizedString(Units.kg.rawValue, comment: ""),
@@ -52,12 +56,15 @@ final class PopUpVC: UIViewController {
         )
     }()
     
-    private lazy var quantityLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .textColorPrimary
-        label.font = .itemName
-        label.textAlignment = .center
-        return label
+    private lazy var quantityTextField: UITextField = {
+        let textField = UITextField()
+        textField.delegate = self
+        textField.textColor = .textColorPrimary
+        textField.font = .itemName
+        textField.textAlignment = .center
+        textField.keyboardType = .numberPad
+        textField.inputAccessoryView = createKeyboardToolbar()
+        return textField
     }()
     
     private lazy var doneButton: UIButton = {
@@ -99,11 +106,28 @@ final class PopUpVC: UIViewController {
     }
     
     @objc private func minusButtonPressed() {
-        viewModel?.minusButtonPressed()
+        viewModel?.minusButtonPressed(for: quantityTextField.text)
     }
     
     @objc private func plusButtonPressed() {
-        viewModel?.plusButtonPressed()
+        viewModel?.plusButtonPressed(for: quantityTextField.text)
+    }
+    
+    @objc private func insertDecimalSeparator() {
+        guard let currentText = quantityTextField.text else { return }
+        
+        if !currentText.contains(decimalSeparator) {
+            quantityTextField.insertText(decimalSeparator)
+        }
+    }
+    
+    @objc private func clearText() {
+        quantityTextField.text = ""
+    }
+    
+    @objc private func endEditing() {
+        quantityTextField.resignFirstResponder()
+        viewModel?.quantityUpdated(with: quantityTextField.text)
     }
     
     // MARK: - Private Methods
@@ -115,7 +139,7 @@ final class PopUpVC: UIViewController {
                 self?.dismiss(animated: true)
                 
             case .popUpQuantity(let quantity):
-                self?.quantityLabel.text = "\(quantity)"
+                self?.quantityTextField.text = quantity
                 
             case .popUpUnit(let unit):
                 self?.setUnitSelectorValue(unit: unit)
@@ -126,13 +150,50 @@ final class PopUpVC: UIViewController {
         }
     }
     
+    private func createKeyboardToolbar() -> UIToolbar {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        
+        let clearButton = UIBarButtonItem(
+            title: "Очистить",
+            style: .plain,
+            target: self,
+            action: #selector(clearText))
+       
+        let separatorButton = UIBarButtonItem(
+            title: decimalSeparator,
+            style: .plain,
+            target: self,
+            action: #selector(insertDecimalSeparator)
+        )
+        
+        separatorButton.tintColor = .textColorPrimary
+        
+        let flexibleSpace = UIBarButtonItem(
+            barButtonSystemItem: .flexibleSpace,
+            target: nil,
+            action: nil
+        )
+        
+        let doneButton = UIBarButtonItem(
+            title: "Готово",
+            style: .done,
+            target: self,
+            action: #selector(endEditing)
+        )
+        
+        toolbar.items = [clearButton, flexibleSpace, separatorButton, flexibleSpace, doneButton]
+        
+        return toolbar
+    }
+
     private func setUIElements() {
         view.backgroundColor = .screenBgrPrimary
         
-        quantityLabel.text = "\(viewModel?.getQuantity() ?? 1)"
+        quantityTextField.text = viewModel?.getQuantity() ?? "1"
         setUnitSelectorValue(unit: viewModel?.getUnitIndex() ?? 3)
         
-        [unitSelector, minusButton, plusButton, quantityLabel, doneButton].forEach {
+        [unitSelector, minusButton, plusButton, quantityTextField, doneButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
@@ -141,7 +202,7 @@ final class PopUpVC: UIViewController {
             $0.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
         }
         
-        [unitSelector, quantityLabel, doneButton].forEach {
+        [unitSelector, quantityTextField, doneButton].forEach {
             $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         }
         
@@ -151,18 +212,39 @@ final class PopUpVC: UIViewController {
         }
         
         NSLayoutConstraint.activate([
+            unitSelector.topAnchor.constraint(equalTo: view.topAnchor, constant: 24),
             unitSelector.heightAnchor.constraint(equalToConstant: 32),
             minusButton.topAnchor.constraint(equalTo: unitSelector.bottomAnchor, constant: 15),
-            quantityLabel.centerYAnchor.constraint(equalTo: minusButton.centerYAnchor),
+            quantityTextField.centerYAnchor.constraint(equalTo: minusButton.centerYAnchor),
             plusButton.centerYAnchor.constraint(equalTo: minusButton.centerYAnchor),
             plusButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             doneButton.topAnchor.constraint(equalTo: plusButton.bottomAnchor, constant: 32),
-            doneButton.heightAnchor.constraint(equalToConstant: 48),
-            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24)
+            doneButton.heightAnchor.constraint(equalToConstant: 48)
         ])
     }
     
     private func setUnitSelectorValue(unit: Int) {
         unitSelector.selectedSegmentIndex = unit
+    }
+}
+
+// MARK: - UITextFieldDelegate
+extension PopUpVC: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard let currentText = textField.text else { return true }
+        
+        let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
+        
+        if let separatorRange = newText.range(of: decimalSeparator) {
+            let decimalPart = newText[separatorRange.upperBound...]
+            let integerPart = newText[..<separatorRange.lowerBound]
+            return decimalPart.count <= maxDecimalPlaces && integerPart.count <= maxIntegerPlaces
+        } else {
+            return newText.count <= maxIntegerPlaces
+        }
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        endEditing()
     }
 }

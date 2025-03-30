@@ -206,16 +206,44 @@ class ShoppingListViewController: UIViewController {
         navigationItem.titleView = titleView
         
         if !viewModel.listIsCompleted() {
-            let sortButton = UIButton()
-            sortButton.setImage(
-                UIImage(named: "buttonSort")?.withTintColor(.sortButton,
-                                                            renderingMode: .alwaysOriginal), for: .normal)
-            sortButton.addTarget(self, action: #selector(sortButtonPressed), for: .touchUpInside)
+            let sortButton = setMenuButton() //UIButton()
             navigationItem.rightBarButtonItem = UIBarButtonItem(customView: sortButton)
         }
     }
     
-    private func showPopUpView(for item: Int, quantity: Int, unit: Units) {
+    private func setMenuButton() -> UIButton {
+        let button = UIButton(type: .system)
+        button.setImage(
+            UIImage(named: "buttonMenu")?.withTintColor(.buttonBgrPrimary,
+                                                        renderingMode: .alwaysOriginal), for: .normal)
+        
+        let option1 = UIAction(title: .dropdownShare, image: UIImage(systemName: "square.and.arrow.up")) { _ in
+            
+        }
+        
+        let option2 = UIAction(title: .dropdownSorting, image: UIImage(systemName: "arrow.up.arrow.down")) { _ in
+            self.viewModel.sortButtonPressed()
+        }
+        
+        let option3 = UIAction(title: .dropdownDuplicate, image: UIImage(systemName: "plus.square.on.square")) { _ in
+            
+        }
+        
+        let option4 = UIAction(title: .dropdownRemind, image: UIImage(systemName: "bell")) { _ in
+            
+        }
+        
+        let menu = UIMenu(children: [option1, option2, option3, option4])
+        
+        
+        // Настраиваем кнопку
+        button.menu = menu
+        button.showsMenuAsPrimaryAction = true // Открывает меню по тапу, а не по долгому нажатию
+        
+        return button
+    }
+    
+    private func showPopUpView(for item: Int, quantity: Float, unit: Units) {
         let popUpView = PopUpAssembler().build(item: item, delegate: self.viewModel as? PopUpVCDelegate, quantity: quantity, unit: unit)
         if let sheet = popUpView.sheetPresentationController {
             let detent: UISheetPresentationController.Detent = .custom(identifier: .init(rawValue: "custom")) { _ in 224 }
@@ -289,7 +317,7 @@ extension ShoppingListViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        return true
+        viewModel.isDropAllowed(for: indexPath.row)
     }
     
     func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
@@ -307,7 +335,9 @@ extension ShoppingListViewController: UITableViewDropDelegate {
     
     func tableView(_ tableView: UITableView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UITableViewDropProposal {
         
-        session.items.count == 1 && tableView.hasActiveDrag
+        let isdropAllowed = viewModel.isDropAllowed(for: destinationIndexPath?.row ?? viewModel.getTableRowCount() - 1)
+        
+        return session.items.count == 1 && tableView.hasActiveDrag && isdropAllowed
         ? UITableViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
         : UITableViewDropProposal(operation: .cancel)
     }

@@ -1,7 +1,7 @@
 struct NewListCellParams {
     var row: Int
     var title: String?
-    var quantity: Int?
+    var quantity: Float?
     var unit: Units?
     var checked: Bool?
     var error: String?

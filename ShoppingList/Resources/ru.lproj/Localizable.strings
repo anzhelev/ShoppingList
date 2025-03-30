@@ -20,6 +20,12 @@
 "buttons.removeCheckedItems" = "Завершить покупки";
 "buttons.switchToMainScreen" = "На главную";
 
+"dropdown.share" = "Поделиться с ...";
+"dropdown.sorting" = "Сортировка";
+"dropdown.duplicate" = "Дублировать";
+"dropdown.remind" = "Напомнить";
+"dropdown.reset" = "Очистить поля ввода";
+
 "languages.system" = "Язык системы";
 "languages.english" = "English";
 "languages.russian" = "Русский";

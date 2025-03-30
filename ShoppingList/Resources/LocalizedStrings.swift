@@ -18,6 +18,12 @@ extension String {
     static let buttonRemoveCheckedItems = NSLocalizedString("buttons.removeCheckedItems", comment: "")
     static let buttonSwitchToMainScreen = NSLocalizedString("buttons.switchToMainScreen", comment: "")
     
+    static let dropdownShare = NSLocalizedString("dropdown.share", comment: "")
+    static let dropdownSorting: String = NSLocalizedString("dropdown.sorting", comment: "")
+    static let dropdownDuplicate: String = NSLocalizedString("dropdown.duplicate", comment: "")
+    static let dropdownRemind: String = NSLocalizedString("dropdown.remind", comment: "")
+    static let dropdownReset: String = NSLocalizedString("dropdown.reset", comment: "")
+    
     static let languageSystem = NSLocalizedString("languages.system", comment: "")
     static let languageEnglish = NSLocalizedString("languages.english", comment: "")
     static let languageRussian = NSLocalizedString("languages.russian", comment: "")
