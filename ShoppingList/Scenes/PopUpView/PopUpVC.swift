@@ -60,8 +60,13 @@ final class PopUpVC: UIViewController {
         let textField = UITextField()
         textField.delegate = self
         textField.textColor = .textColorPrimary
-        textField.font = .itemName
+        textField.font = .mainScreenStub
         textField.textAlignment = .center
+        textField.borderStyle = .roundedRect
+        textField.layer.cornerRadius = 18
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 1
+        textField.layer.borderColor = UIColor.listItemRightArrow.cgColor
         textField.keyboardType = .numberPad
         textField.inputAccessoryView = createKeyboardToolbar()
         return textField

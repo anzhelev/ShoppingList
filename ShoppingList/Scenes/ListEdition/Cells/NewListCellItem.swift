@@ -32,21 +32,11 @@ final class NewListCellItem: UITableViewCell {
         return label
     }()
     
-    private lazy var addQuantityButton = {
+    private let arrowImageView = UIImageView(image: UIImage(named: "arrowRight")?.withTintColor(.listItemRightArrow))
+    
+    private lazy var quantityButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(editQuantity), for: .touchUpInside)
-        let arrowImageView = UIImageView(image: UIImage(named: "arrowRight")?.withTintColor(.listItemRightArrow))
-        [quantityLabel, arrowImageView].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            button.addSubview($0)
-            $0.centerYAnchor.constraint(equalTo: button.centerYAnchor).isActive = true
-        }
-        quantityLabel.leadingAnchor.constraint(equalTo: button.leadingAnchor).isActive = true
-        arrowImageView.leadingAnchor.constraint(equalTo: quantityLabel.trailingAnchor, constant: 10).isActive = true
-        arrowImageView.trailingAnchor.constraint(equalTo: button.trailingAnchor).isActive = true
-        arrowImageView.heightAnchor.constraint(equalToConstant: 14).isActive = true
-        arrowImageView.widthAnchor.constraint(equalToConstant: 8).isActive = true
-        
         return button
     }()
     
@@ -87,7 +77,12 @@ final class NewListCellItem: UITableViewCell {
         
         itemNameField.text = params.title
         itemNameField.textColor = params.error == nil ? .textColorPrimary : .buttonBgrSecondary
-        quantityLabel.text = "\(quantity) \(NSLocalizedString(unit.rawValue, comment: ""))"
+        
+        let quantityAsString = quantity.rounded(.towardZero) == quantity
+        ? String(Int(quantity))
+        : String(format: "%.1f", quantity)
+        
+        quantityLabel.text = quantityAsString + " \(NSLocalizedString(unit.rawValue, comment: ""))"
         separatorView.backgroundColor = params.error == nil ? .tableSeparator : .buttonBgrSecondary
         errorLabel.text = params.error
         errorLabel.isHidden = params.error == nil
@@ -101,27 +96,63 @@ final class NewListCellItem: UITableViewCell {
     // MARK: - Private Methods
     private func setUIElements() {
         self.backgroundColor = .screenBgrPrimary
-        [itemNameField, addQuantityButton, separatorView, errorLabel].forEach {
+        
+        let quantityButtonStack = setQuantityButtonStack(subviews: [quantityLabel, arrowImageView])
+        let itemStack = setItemHorizontalStack(subviews: [itemNameField, quantityButton])
+        
+        quantityButton.addSubview(quantityButtonStack)
+        
+        [itemStack, quantityButtonStack, quantityLabel, arrowImageView, separatorView, errorLabel].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        
+        [itemStack, separatorView, errorLabel].forEach {
             contentView.addSubview($0)
         }
         
         NSLayoutConstraint.activate([
-            itemNameField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            itemNameField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            itemNameField.heightAnchor.constraint(equalToConstant: 44),
-            addQuantityButton.widthAnchor.constraint(equalToConstant: 85),
-            addQuantityButton.leadingAnchor.constraint(equalTo: itemNameField.trailingAnchor, constant: 10),
-            addQuantityButton.centerYAnchor.constraint(equalTo: itemNameField.centerYAnchor),
-            addQuantityButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            separatorView.bottomAnchor.constraint(equalTo: itemNameField.bottomAnchor),
-            separatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            itemStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            itemStack.heightAnchor.constraint(equalToConstant: 44),
+            itemStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            itemStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: -16),
+            
+            quantityButton.heightAnchor.constraint(equalTo: itemStack.heightAnchor),
+            quantityButtonStack.centerYAnchor.constraint(equalTo: quantityButton.centerYAnchor),
+            quantityButtonStack.leadingAnchor.constraint(equalTo: quantityButton.leadingAnchor),
+            quantityButtonStack.trailingAnchor.constraint(equalTo: quantityButton.trailingAnchor),
+            
+            
+            arrowImageView.heightAnchor.constraint(equalToConstant: 15),
+            arrowImageView.widthAnchor.constraint(equalToConstant: 8),
+            
+            separatorView.bottomAnchor.constraint(equalTo: itemStack.bottomAnchor),
+            separatorView.leadingAnchor.constraint(equalTo: itemStack.leadingAnchor),
             separatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             separatorView.heightAnchor.constraint(equalToConstant: 0.5),
-            errorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            errorLabel.topAnchor.constraint(equalTo: itemNameField.bottomAnchor),
+            
+            errorLabel.leadingAnchor.constraint(equalTo: itemStack.leadingAnchor),
+            errorLabel.topAnchor.constraint(equalTo: itemStack.bottomAnchor),
             errorLabel.heightAnchor.constraint(equalToConstant: 29)
         ])
+    }
+    
+    private func setQuantityButtonStack(subviews: [UIView]) -> UIStackView {
+        let stackView = UIStackView(arrangedSubviews: subviews)
+        stackView.isUserInteractionEnabled = false
+        stackView.axis = .horizontal
+        stackView.distribution = .fillProportionally
+        stackView.alignment = .center
+        stackView.spacing = 8
+        return stackView
+    }
+    
+    private func setItemHorizontalStack(subviews: [UIView]) -> UIStackView {
+        let stackView = UIStackView(arrangedSubviews: subviews)
+        stackView.axis = .horizontal
+        stackView.distribution = .fillProportionally
+        stackView.alignment = .center
+        stackView.spacing = 8
+        return stackView
     }
 }
 

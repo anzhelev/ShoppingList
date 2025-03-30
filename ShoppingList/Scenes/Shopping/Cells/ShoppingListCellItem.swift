@@ -17,12 +17,7 @@ final class ShoppingListCellItem: UITableViewCell {
     private lazy var checkBoxButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(checkBoxTapped), for: .touchUpInside)
-        checkBoxImageView.translatesAutoresizingMaskIntoConstraints = false
         button.addSubview(checkBoxImageView)
-        checkBoxImageView.centerXAnchor.constraint(equalTo: button.centerXAnchor).isActive = true
-        checkBoxImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor).isActive = true
-        checkBoxImageView.heightAnchor.constraint(equalToConstant: 33).isActive = true
-        checkBoxImageView.widthAnchor.constraint(equalTo: checkBoxImageView.heightAnchor).isActive = true
         return button
     }()
     
@@ -47,21 +42,11 @@ final class ShoppingListCellItem: UITableViewCell {
         return label
     }()
     
-    private lazy var addQuantityButton = {
+    private let arrowImageView = UIImageView(image: UIImage(named: "arrowRight")?.withTintColor(.listItemRightArrow))
+    
+    private lazy var quantityButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(editQuantity), for: .touchUpInside)
-        let arrowImageView = UIImageView(image: UIImage(named: "arrowRight")?.withTintColor(.listItemRightArrow))
-        [quantityLabel, arrowImageView].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            button.addSubview($0)
-            $0.centerYAnchor.constraint(equalTo: button.centerYAnchor).isActive = true
-        }
-        quantityLabel.leadingAnchor.constraint(equalTo: button.leadingAnchor).isActive = true
-        arrowImageView.leadingAnchor.constraint(equalTo: quantityLabel.trailingAnchor, constant: 10).isActive = true
-        arrowImageView.trailingAnchor.constraint(equalTo: button.trailingAnchor, constant: -16).isActive = true
-        arrowImageView.heightAnchor.constraint(equalToConstant: 14).isActive = true
-        arrowImageView.widthAnchor.constraint(equalToConstant: 8).isActive = true
-        
         return button
     }()
     
@@ -130,10 +115,20 @@ final class ShoppingListCellItem: UITableViewCell {
     }
     
     // MARK: - Private Methods
+    
     private func setUIElements() {
         self.backgroundColor = .screenBgrPrimary
-        [checkBoxButton, itemNameField, addQuantityButton, separatorView, errorLabel].forEach {
+        
+        let quantityButtonStack = setQuantityButtonStack(subviews: [quantityLabel, arrowImageView])
+        let itemStack = setItemHorizontalStack(subviews: [itemNameField, quantityButton])
+        
+        quantityButton.addSubview(quantityButtonStack)
+        
+        [checkBoxImageView, checkBoxButton, itemStack, quantityButtonStack, quantityLabel, arrowImageView, separatorView, errorLabel].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        
+        [checkBoxButton, itemStack, separatorView, errorLabel].forEach {
             contentView.addSubview($0)
         }
         
@@ -141,23 +136,52 @@ final class ShoppingListCellItem: UITableViewCell {
             checkBoxButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             checkBoxButton.widthAnchor.constraint(equalToConstant: 44),
             checkBoxButton.heightAnchor.constraint(equalTo: checkBoxButton.widthAnchor),
-            checkBoxButton.centerYAnchor.constraint(equalTo: itemNameField.centerYAnchor),
-            itemNameField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            itemNameField.leadingAnchor.constraint(equalTo: checkBoxButton.trailingAnchor, constant: 21),
-            itemNameField.heightAnchor.constraint(equalToConstant: 44),
+            checkBoxButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             
-            addQuantityButton.widthAnchor.constraint(equalToConstant: 85),
-            addQuantityButton.leadingAnchor.constraint(equalTo: itemNameField.trailingAnchor, constant: 10),
-            addQuantityButton.centerYAnchor.constraint(equalTo: itemNameField.centerYAnchor),
-            addQuantityButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            separatorView.bottomAnchor.constraint(equalTo: itemNameField.bottomAnchor),
-            separatorView.leadingAnchor.constraint(equalTo: itemNameField.leadingAnchor),
+            checkBoxImageView.centerXAnchor.constraint(equalTo: checkBoxButton.centerXAnchor),
+            checkBoxImageView.centerYAnchor.constraint(equalTo: checkBoxButton.centerYAnchor),
+            
+            itemStack.centerYAnchor.constraint(equalTo: checkBoxButton.centerYAnchor),
+            itemStack.leadingAnchor.constraint(equalTo: checkBoxButton.trailingAnchor, constant: 21),
+            itemStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: -16),
+            
+            quantityButton.heightAnchor.constraint(equalTo: checkBoxButton.heightAnchor),
+            quantityButtonStack.centerYAnchor.constraint(equalTo: quantityButton.centerYAnchor),
+            quantityButtonStack.leadingAnchor.constraint(equalTo: quantityButton.leadingAnchor),
+            quantityButtonStack.trailingAnchor.constraint(equalTo: quantityButton.trailingAnchor),
+            
+            
+            arrowImageView.heightAnchor.constraint(equalToConstant: 15),
+            arrowImageView.widthAnchor.constraint(equalToConstant: 8),
+            
+            separatorView.bottomAnchor.constraint(equalTo: itemStack.bottomAnchor),
+            separatorView.leadingAnchor.constraint(equalTo: itemStack.leadingAnchor),
             separatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             separatorView.heightAnchor.constraint(equalToConstant: 0.5),
-            errorLabel.leadingAnchor.constraint(equalTo: itemNameField.leadingAnchor),
-            errorLabel.topAnchor.constraint(equalTo: itemNameField.bottomAnchor),
+            
+            errorLabel.leadingAnchor.constraint(equalTo: itemStack.leadingAnchor),
+            errorLabel.topAnchor.constraint(equalTo: itemStack.bottomAnchor),
             errorLabel.heightAnchor.constraint(equalToConstant: 29)
         ])
+    }
+    
+    private func setQuantityButtonStack(subviews: [UIView]) -> UIStackView {
+        let stackView = UIStackView(arrangedSubviews: subviews)
+        stackView.isUserInteractionEnabled = false
+        stackView.axis = .horizontal
+        stackView.distribution = .fillProportionally
+        stackView.alignment = .center
+        stackView.spacing = 8
+        return stackView
+    }
+    
+    private func setItemHorizontalStack(subviews: [UIView]) -> UIStackView {
+        let stackView = UIStackView(arrangedSubviews: subviews)
+        stackView.axis = .horizontal
+        stackView.distribution = .fillProportionally
+        stackView.alignment = .center
+        stackView.spacing = 8
+        return stackView
     }
 }
 

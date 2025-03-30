@@ -45,12 +45,19 @@ final class PopUpViewModel: PopUpViewModelProtocol {
     
     func minusButtonPressed(for value: String?) {
         let quantityAsFloat = Float(value ?? "") ?? 0
-        quantity = max(0.1, quantityAsFloat - 0.1)
-        quantity = (quantity * 10).rounded(.toNearestOrAwayFromZero) / 10
         
-        let quantityAsString = quantity.rounded(.towardZero) == quantity
-        ? String(Int(quantity))
-        : String(format: "%.1f", quantity)
+        var quantityAsString: String = ""
+        
+        switch unit {
+        case .kg, .liter:
+            quantity = (max(0.1, quantityAsFloat - 0.1) * 10).rounded(.toNearestOrAwayFromZero) / 10
+            quantityAsString = quantity.rounded(.towardZero) == quantity
+            ? String(Int(quantity))
+            : String(format: "%.1f", quantity)
+        case .pack, .piece:
+            quantity = max(1, quantityAsFloat - 1).rounded(.up)
+            quantityAsString = String(Int(quantity))
+        }
         
         popUpBinding.value = .popUpQuantity(quantityAsString)
         delegate?.quantitySelected(item: item, quantity: quantity)
@@ -58,12 +65,19 @@ final class PopUpViewModel: PopUpViewModelProtocol {
     
     func plusButtonPressed(for value: String?) {
         let quantityAsFloat = Float(value ?? "") ?? 0
-        quantity = min(quantityAsFloat + 0.1, 999.9)
         
-        quantity = (quantity * 10).rounded(.toNearestOrAwayFromZero) / 10
-        let quantityAsString = quantity.rounded(.towardZero) == quantity
-        ? String(Int(quantity))
-        : String(format: "%.1f", quantity)
+        var quantityAsString: String = ""
+        
+        switch unit {
+        case .kg, .liter:
+            quantity = (min(quantityAsFloat + 0.1, 1000) * 10).rounded(.toNearestOrAwayFromZero) / 10
+            quantityAsString = quantity.rounded(.towardZero) == quantity
+            ? String(Int(quantity))
+            : String(format: "%.1f", quantity)
+        case .pack, .piece:
+            quantity = min(1000, quantityAsFloat + 1).rounded(.down)
+            quantityAsString = String(Int(quantity))
+        }
         
         popUpBinding.value = .popUpQuantity(quantityAsString)
         delegate?.quantitySelected(item: item, quantity: quantity)
