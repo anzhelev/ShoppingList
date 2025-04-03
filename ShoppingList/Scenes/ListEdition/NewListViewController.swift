@@ -118,7 +118,6 @@ class NewListViewController: UIViewController {
         listItemsTable.performBatchUpdates {
             listItemsTable.deleteRows(at: [index], with: .top)
         } completion: {_ in
-            self.listItemsTable.reloadData()
             self.updateCompleteButton()
             self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()

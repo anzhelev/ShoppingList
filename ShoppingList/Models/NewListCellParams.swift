@@ -5,6 +5,7 @@ struct NewListCellParams {
     var unit: Units?
     var checked: Bool?
     var error: String?
+    var startEditing: Bool?
 }
 
 enum NewListCellType {

@@ -86,6 +86,9 @@ final class NewListCellItem: UITableViewCell {
         separatorView.backgroundColor = params.error == nil ? .tableSeparator : .buttonBgrSecondary
         errorLabel.text = params.error
         errorLabel.isHidden = params.error == nil
+        if params.startEditing == true {
+            itemNameField.becomeFirstResponder()
+        }
     }
     
     // MARK: - IBAction
@@ -114,13 +117,13 @@ final class NewListCellItem: UITableViewCell {
             itemStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             itemStack.heightAnchor.constraint(equalToConstant: 44),
             itemStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            itemStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: -16),
+            itemStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: -6),
             
             quantityButton.heightAnchor.constraint(equalTo: itemStack.heightAnchor),
             quantityButtonStack.centerYAnchor.constraint(equalTo: quantityButton.centerYAnchor),
             quantityButtonStack.leadingAnchor.constraint(equalTo: quantityButton.leadingAnchor),
             quantityButtonStack.trailingAnchor.constraint(equalTo: quantityButton.trailingAnchor),
-            
+            quantityButtonStack.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
             
             arrowImageView.heightAnchor.constraint(equalToConstant: 15),
             arrowImageView.widthAnchor.constraint(equalToConstant: 8),
@@ -142,16 +145,16 @@ final class NewListCellItem: UITableViewCell {
         stackView.axis = .horizontal
         stackView.distribution = .fillProportionally
         stackView.alignment = .center
-        stackView.spacing = 8
+        stackView.spacing = 6
         return stackView
     }
     
     private func setItemHorizontalStack(subviews: [UIView]) -> UIStackView {
         let stackView = UIStackView(arrangedSubviews: subviews)
         stackView.axis = .horizontal
-        stackView.distribution = .fillProportionally
+        stackView.distribution = .fill
         stackView.alignment = .center
-        stackView.spacing = 8
+        stackView.spacing = 6
         return stackView
     }
 }
@@ -165,11 +168,13 @@ extension NewListCellItem: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
+//        print("@@@textFieldShouldReturn")
         return true
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         textField.resignFirstResponder()
+//        print("@@@textFieldDidEndEditing")
         self.delegate?.updateNewListItem(in: row, with: itemNameField.text)
     }
     

@@ -10,7 +10,7 @@ final class ShoppingListCellItem: UITableViewCell {
     private var row = 1
     private var quantity: Float = 1
     private var unit: Units = .piece
-    private let maxNameleLenght = 15
+    private let maxNameleLenght = 25
     
     private let checkBoxImageView = UIImageView()
     
@@ -142,13 +142,14 @@ final class ShoppingListCellItem: UITableViewCell {
             checkBoxImageView.centerYAnchor.constraint(equalTo: checkBoxButton.centerYAnchor),
             
             itemStack.centerYAnchor.constraint(equalTo: checkBoxButton.centerYAnchor),
-            itemStack.leadingAnchor.constraint(equalTo: checkBoxButton.trailingAnchor, constant: 21),
-            itemStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: -16),
+            itemStack.leadingAnchor.constraint(equalTo: checkBoxButton.trailingAnchor, constant: 16),
+            itemStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: -8),
             
             quantityButton.heightAnchor.constraint(equalTo: checkBoxButton.heightAnchor),
             quantityButtonStack.centerYAnchor.constraint(equalTo: quantityButton.centerYAnchor),
             quantityButtonStack.leadingAnchor.constraint(equalTo: quantityButton.leadingAnchor),
             quantityButtonStack.trailingAnchor.constraint(equalTo: quantityButton.trailingAnchor),
+            quantityButtonStack.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
             
             
             arrowImageView.heightAnchor.constraint(equalToConstant: 15),
@@ -167,20 +168,21 @@ final class ShoppingListCellItem: UITableViewCell {
     
     private func setQuantityButtonStack(subviews: [UIView]) -> UIStackView {
         let stackView = UIStackView(arrangedSubviews: subviews)
+        stackView.sizeToFit()
         stackView.isUserInteractionEnabled = false
         stackView.axis = .horizontal
         stackView.distribution = .fillProportionally
         stackView.alignment = .center
-        stackView.spacing = 8
+        stackView.spacing = 6
         return stackView
     }
     
     private func setItemHorizontalStack(subviews: [UIView]) -> UIStackView {
         let stackView = UIStackView(arrangedSubviews: subviews)
         stackView.axis = .horizontal
-        stackView.distribution = .fillProportionally
+        stackView.distribution = .fill
         stackView.alignment = .center
-        stackView.spacing = 8
+        stackView.spacing = 6
         return stackView
     }
 }

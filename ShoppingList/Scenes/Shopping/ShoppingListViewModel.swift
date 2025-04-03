@@ -66,7 +66,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         switch row {
             
         case shoppingList.count - 1:
-            52
+            currentListInfo.completed || shoppingList[row].error == nil ? 52 : 81
             
         default:
             shoppingList[row].error == nil ? 52 : 81
@@ -74,7 +74,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     }
     
     func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams) {
-        return (row == shoppingList.count - 1 ? .button : .item,
+        return (row == shoppingList.count - 1 && !currentListInfo.completed ? .button : .item,
                 .init(checked: shoppingList[row].checked,
                       title: shoppingList[row].title,
                       quantity: shoppingList[row].quantity,
@@ -85,7 +85,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     }
     
     func isDropAllowed(for row: Int) -> Bool {
-        row < uncheckedItemsCount
+        row < uncheckedItemsCount && !currentListInfo.completed
     }
     
     func tableFinishedUpdating() {
@@ -117,11 +117,13 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         
         shoppingList += checkedItems
         
-        shoppingList.append(.init(checked: true,
-                                  title: .buttonAddProduct,
-                                  quantity: 1,
-                                  unit: .piece)
-        )
+        if !currentListInfo.completed {
+            shoppingList.append(.init(checked: true,
+                                      title: .buttonAddProduct,
+                                      quantity: 1,
+                                      unit: .piece)
+            )
+        }
         
         shoppingListBinding.value = .updateItem(indexesToUpdate, true)
     }
@@ -199,11 +201,13 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
                 uncheckedItemsCount += 1
             }
         }
-        shoppingList.append(.init(checked: true,
-                                  title: .buttonAddProduct,
-                                  quantity: 1,
-                                  unit: .piece)
-        )
+        if !currentListInfo.completed{
+            shoppingList.append(.init(checked: true,
+                                      title: .buttonAddProduct,
+                                      quantity: 1,
+                                      unit: .piece)
+            )
+        }
     }
     
     private func moveItemInArray(from sourceIndex: Int, to destinationIndex: Int) {
@@ -372,7 +376,7 @@ extension ShoppingListViewModel: PopUpVCDelegate {
     }
 }
 
-// MARK: - PopUpVCDelegate
+// MARK: - SuccessViewDelegate
 extension ShoppingListViewModel: SuccessViewDelegate {
     func confirmButtonPressed() {
         if currentListInfo.pinned {

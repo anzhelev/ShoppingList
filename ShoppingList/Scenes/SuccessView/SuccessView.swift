@@ -35,7 +35,7 @@ class SuccessView: UIView {
     private func createButton(title: String, cancelMode: Bool, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
-        button.setTitleColor(.buttonTextPrimary, for: .normal)
+        button.setTitleColor(cancelMode ? .white : .buttonTextPrimary, for: .normal)
         button.backgroundColor = cancelMode ? .buttonBgrSecondary : .buttonBgrTertiary
         button.titleLabel?.font = .listScreenTitle
         button.layer.cornerRadius = 16

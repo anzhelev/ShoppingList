@@ -28,6 +28,12 @@ final class NewListViewModel: NewListViewModelProtocol {
     private var autoSave = true
     private var completeButtonIsEnabled: Bool = false
     private var userIsTyping: Bool = false
+    private lazy var concurrentQueue: DispatchQueue = {
+        return DispatchQueue(
+            label: "queueWithBarriers",
+            attributes: .concurrent
+        )
+    }()
     
     // MARK: - Initializers
     init(coordinator: Coordinator, editList: UUID?) {
@@ -77,7 +83,8 @@ final class NewListViewModel: NewListViewModelProtocol {
                       title: listItems[row].title,
                       quantity: listItems[row].quantity,
                       unit: listItems[row].unit,
-                      error: listItems[row].error
+                      error: listItems[row].error,
+                      startEditing: listItems[row].startEditing
                      )
         )
     }
@@ -101,9 +108,13 @@ final class NewListViewModel: NewListViewModelProtocol {
     }
     
     func deleteItemButtonPressed(in row: Int) {
-        listItems.remove(at: row)
-        updateCompleteButtonState()
-        newListBinding.value = .removeItem(.init(row: row, section: 0))
+        concurrentQueue.async {
+            self.listItems.remove(at: row)
+        }
+        concurrentQueue.async(flags: .barrier) {
+            self.updateCompleteButtonState()
+            self.newListBinding.value = .removeItem(.init(row: row, section: 0))
+        }
     }
     
     // MARK: - Private Methods
@@ -118,8 +129,7 @@ final class NewListViewModel: NewListViewModelProtocol {
             listItems.append(.init(row: index + 1,
                                    title: item.name,
                                    quantity: Float(item.quantity),
-                                   unit: Units(rawValue: item.unit) ?? .piece,
-                                   checked: item.checked
+                                   unit: Units(rawValue: item.unit) ?? .piece
                                   )
             )
         }
@@ -128,17 +138,16 @@ final class NewListViewModel: NewListViewModelProtocol {
     
     @discardableResult
     private func validateName(row: Int) -> Bool { // возвращает true если статус изменился
-        guard let newTitle = listItems[row].title else {
-            return false
-        }
-        
         let oldErrorStatus = listItems[row].error
         
-        if newTitle.isEmpty {
+        guard let newTitle = listItems[row].title,
+              !newTitle.isEmpty else {
             listItems[row].error = .newListEmptyName
-            
-        } else if row == 0,
-                  existingListNames.contains(newTitle.lowercased()) && editedList == nil {
+            return oldErrorStatus != listItems[row].error
+        }
+        
+        if row == 0,
+           existingListNames.contains(newTitle.lowercased()) && editedList == nil {
             listItems[row].error = .newListNameAlreadyUsed
             
         } else if newTitle.replacingOccurrences(of: " ", with: "").isEmpty {
@@ -282,9 +291,9 @@ extension NewListViewModel: NewListCellDelegate {
         }
     }
     
-    func getTextFieldEditState() -> Bool {
-        return userIsTyping
-    }
+    //    func getTextFieldEditState() -> Bool {
+    //        userIsTyping
+    //    }
     
     func textFieldDidBeginEditing() {
         userIsTyping = true
@@ -299,12 +308,18 @@ extension NewListViewModel: NewListCellDelegate {
     func addNewItemButtonPressed() {
         guard !userIsTyping,
               completeButtonIsEnabled else { return }
-        listItems.insert(.init(row: listItems.count - 1,
-                               quantity: 1,
-                               unit: .piece
-                              ), at: listItems.count - 1
-        )
-        newListBinding.value = .insertItem(.init(row: listItems.count - 2, section: 0))
+        concurrentQueue.async {
+            self.listItems.insert(.init(row: self.listItems.count - 1,
+                                        quantity: 1,
+                                        unit: .piece,
+                                        startEditing: true
+                                       ), at: self.listItems.count - 1
+            )
+        }
+        concurrentQueue.async(flags: .barrier) {
+            self.newListBinding.value = .insertItem(.init(row: self.listItems.count - 2, section: 0))
+        }
+        
         updateCompleteButtonState()
     }
 }
