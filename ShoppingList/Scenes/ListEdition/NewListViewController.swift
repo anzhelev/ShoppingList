@@ -67,36 +67,41 @@ class NewListViewController: UIViewController {
     
     // MARK: - Private Methods
     private func bindViewModel() {
-        viewModel.newListBinding.bind {[weak self] value in
-            
-            switch value {
-            case .updateCompleteButtonState:
-                self?.updateCompleteButton()
-                
-            case .showPopUp(let row, let quantity, let unit):
-                self?.showPopUpView(for: row, quantity: quantity, unit: unit)
-                
-            case .updateItem(let indexPath, let option):
-                self?.listItemsTable.isUserInteractionEnabled = !option
-                self?.reloadItem(index: indexPath, animated: option)
-                
-            case .insertItem(let indexPath):
-                self?.listItemsTable.isUserInteractionEnabled = false
-                self?.insertItem(index: indexPath)
-                
-            case .removeItem(let indexPath):
-                self?.listItemsTable.isUserInteractionEnabled = false
-                self?.removeItem(index: indexPath)
-                
-            default:
-                return
+        viewModel.newListBinding.bind {[weak self] tasks in
+            guard let tasks else { return }
+            for task in tasks {
+                switch task {
+                case .interactionEnabled(let state):
+                    self?.listItemsTable.isUserInteractionEnabled = state
+                    
+                case .updateCompleteButtonState:
+                    self?.updateCompleteButton()
+                    
+                case .showPopUp(let row, let quantity, let unit):
+                    self?.showPopUpView(for: row, quantity: quantity, unit: unit)
+                    
+                case .updateItems(let indexes, let option):
+                    self?.listItemsTable.isUserInteractionEnabled = !option
+                    self?.reloadItems(indexes: indexes, animated: option)
+                    
+                case .insertItem(let indexPath):
+                    self?.listItemsTable.isUserInteractionEnabled = false
+                    self?.insertItem(index: indexPath)
+                    
+                case .removeItem(let indexPath):
+                    self?.listItemsTable.isUserInteractionEnabled = false
+                    self?.removeItem(index: indexPath)
+                    
+                case .reloadTable:
+                    self?.listItemsTable.reloadData()
+                }
             }
         }
     }
     
-    private func reloadItem(index: IndexPath, animated: Bool) {
+    private func reloadItems(indexes: [IndexPath], animated: Bool) {
         listItemsTable.performBatchUpdates {
-            listItemsTable.reloadRows(at: [index], with: animated ? .automatic : .none)
+            listItemsTable.reloadRows(at: indexes, with: animated ? .automatic : .none)
         } completion: {_ in
             self.updateCompleteButton()
             self.listItemsTable.isUserInteractionEnabled = true

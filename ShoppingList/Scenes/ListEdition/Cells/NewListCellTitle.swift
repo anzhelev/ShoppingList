@@ -82,7 +82,7 @@ final class NewListCellTitle: UITableViewCell {
 extension NewListCellTitle: UITextFieldDelegate {
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.delegate?.textFieldDidBeginEditing()
+        self.delegate?.textFieldDidBeginEditing(in: 0)
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

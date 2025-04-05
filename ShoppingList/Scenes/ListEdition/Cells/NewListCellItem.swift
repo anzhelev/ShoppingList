@@ -163,7 +163,7 @@ final class NewListCellItem: UITableViewCell {
 extension NewListCellItem: UITextFieldDelegate {
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.delegate?.textFieldDidBeginEditing()
+        self.delegate?.textFieldDidBeginEditing(in: row)
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
