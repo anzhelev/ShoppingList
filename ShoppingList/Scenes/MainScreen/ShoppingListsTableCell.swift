@@ -55,7 +55,7 @@ final class ShoppingListsTableCell: UITableViewCell {
     
     // MARK: - Private Methods
     private func setUIElements() {
-        self.backgroundColor = .clear
+        self.backgroundColor = .screenBgrPrimary
         
         let chevronView = UIView()
         chevronView.addSubview(chevronImageView)

@@ -28,20 +28,13 @@ final class NewListViewModel: NewListViewModelProtocol {
     private var listItems: [NewListCellParams] = []
     private var editedList: ShopList?
     private var autoSave = true
+    private var userIsTyping: Bool = false
+    private var tableIsUpdating: Bool = false
+    private var completeButtonState: Bool = true
+    
     private var listIsValid: Bool {
         validateList()
     }
-    private var userIsTyping: Bool = false {
-        didSet {
-//            print("@@@ userIsTyping =", userIsTyping)
-        }
-    }
-    private var tableIsUpdating: Bool = false {
-        didSet {
-//            print("@@@ tableIsUpdating =", tableIsUpdating)
-        }
-    }
-    private var completeButtonState: Bool = true
     
     private var state: States? {
         didSet {
@@ -121,7 +114,7 @@ final class NewListViewModel: NewListViewModelProtocol {
                       quantity: listItems[row].quantity,
                       unit: listItems[row].unit,
                       error: listItems[row].error,
-                      startEditing: listItems[row].startEditing ?? false || listItems[row].error != nil
+                      startEditing: listItems[row].startEditing
                      )
         )
     }
@@ -151,122 +144,97 @@ final class NewListViewModel: NewListViewModelProtocol {
         switch state {
             
         case .loadList:
-            dispatcher.async {
-                self.setListItems()
-            }
-            
-            dispatcher.asyncBarrier {
-                self.state = .validateNames(itemUpdated: nil)
-            }
+            setListItems()
+            state = .validateNames(itemUpdated: nil)
             
         case .validateNames(itemUpdated: let itemUpdated):
             var indexesToReload: [IndexPath] = []
             var bindingTasks = [NewListBinding]()
             
-            dispatcher.asyncBarrier {
-                if let itemUpdated {
-                    if self.validateName(row: itemUpdated) {
-                        indexesToReload.append(IndexPath(row: itemUpdated, section: 0))
-                    }
-                } else {
-                    for row in 0...self.listItems.count - 2 {
-                        if self.validateName(row: row) {
-                            indexesToReload.append(IndexPath(row: row, section: 0))
-                        }
+            if let itemUpdated {
+                if validateName(row: itemUpdated) {
+                    indexesToReload.append(IndexPath(row: itemUpdated, section: 0))
+                }
+            } else {
+                for row in 0...listItems.count - 2 {
+                    if validateName(row: row) {
+                        indexesToReload.append(IndexPath(row: row, section: 0))
                     }
                 }
             }
             
-            dispatcher.asyncBarrier {
-                if !indexesToReload.isEmpty {
-                    bindingTasks.append(.updateItems(indexesToReload, true))
-                    self.tableIsUpdating = true
-                    self.newListBinding.value = bindingTasks
-                } else if self.updateCompleteButtonState() {
-                    self.newListBinding.value = [.updateCompleteButtonState]
-                }
+            if !indexesToReload.isEmpty {
+                bindingTasks.append(.updateItems(indexesToReload, true))
+                tableIsUpdating = true
+                newListBinding.value = bindingTasks
+            } else if updateCompleteButtonState() {
+                newListBinding.value = [.updateCompleteButtonState]
             }
             
         case .startEditing(row: let row, field: let field):
-            dispatcher.asyncBarrier {
-                switch field {
-                case .name:
-                    self.userIsTyping = true
-                case .quantity:
-                    guard !self.userIsTyping else { return }
-                    self.newListBinding.value = [.showPopUp(self.listItems[row].id, self.listItems[row].quantity ?? 1, self.listItems[row].unit ?? .piece)]
-                }
+            switch field {
+            case .name:
+                userIsTyping = true
+            case .quantity:
+                guard !userIsTyping else { return }
+                newListBinding.value = [.showPopUp(listItems[row].id, listItems[row].quantity ?? 1, listItems[row].unit ?? .piece)]
             }
             
         case .itemModified(row: let row, newValue: let newValue):
-            dispatcher.asyncBarrier {
-                switch newValue {
-                case .name(let newName):
-                    self.listItems[row].title = newName
-                    self.state = .validateNames(itemUpdated: row)                    
-                case .quantity(let newQuantity):
-                    self.listItems[row].quantity = newQuantity
-                    self.tableIsUpdating = true
-                    self.newListBinding.value = [.updateItems([.init(row: row, section: 0)], false)]
-                case .unit(let newUnit):
-                    self.listItems[row].unit = newUnit
-                    self.tableIsUpdating = true
-                    self.newListBinding.value = [.updateItems([.init(row: row, section: 0)], false)]
-                }
-                self.userIsTyping = false
+            switch newValue {
+            case .name(let newName):
+                listItems[row].title = newName
+                state = .validateNames(itemUpdated: row)
+            case .quantity(let newQuantity):
+                listItems[row].quantity = newQuantity
+                tableIsUpdating = true
+                newListBinding.value = [.updateItems([.init(row: row, section: 0)], false)]
+            case .unit(let newUnit):
+                listItems[row].unit = newUnit
+                tableIsUpdating = true
+                newListBinding.value = [.updateItems([.init(row: row, section: 0)], false)]
             }
- 
+            userIsTyping = false
+            
         case .addNewItem:
-            dispatcher.asyncBarrier {
-                guard self.addNewItemButtonIsEnabled else {
-                    print("@@@", !self.userIsTyping, !self.tableIsUpdating, self.listIsValid)
-                    return
-                }
-                DispatchQueue.main.async {
-                    let newItemIndex = self.listItems.count - 1
-                    self.listItems.insert(.init(id: UUID(),
-                                                quantity: 1,
-                                                unit: .piece,
-                                                startEditing: true
-                                               ), at: newItemIndex
-                    )
-                    
-                    self.tableIsUpdating = true
-                    self.newListBinding.value = [
-                        .insertItem(.init(row: self.listItems.count - 2, section: 0)),
-                        .updateCompleteButtonState
-                    ]
-                }
+            guard self.addNewItemButtonIsEnabled else {
+                return
+            }
+            
+            DispatchQueue.main.async {
+                let newItemIndex = self.listItems.count - 1
+                self.listItems.insert(.init(id: UUID(),
+                                            quantity: 1,
+                                            unit: .piece,
+                                            startEditing: true
+                                           ), at: newItemIndex
+                )
+                self.tableIsUpdating = true
+                self.newListBinding.value = [
+                    .insertItem(.init(row: self.listItems.count - 2, section: 0)),
+                    .updateCompleteButtonState
+                ]
             }
             
         case .deleteItem(row: let row):
-            dispatcher.asyncBarrier {
+            DispatchQueue.main.async {
                 self.listItems.remove(at: row)
-            }
-            dispatcher.asyncBarrier {
                 self.tableIsUpdating = true
                 self.newListBinding.value = [.removeItem(.init(row: row, section: 0))]
-            }
-            dispatcher.asyncBarrier {
-                self.state = .validateNames(itemUpdated: nil)
             }
             
         case .completeButtonPressed:
             guard !userIsTyping else { return }
             
-            dispatcher.asyncBarrier {
-                self.state = .validateNames(itemUpdated: nil)
-            }
+            state = .validateNames(itemUpdated: nil)
             
-            dispatcher.asyncBarrier {
-                if self.listIsValid {
-                    DispatchQueue.main.async {
-                        self.autoSave = false
-                        self.editList == nil
-                        ? self.storageService.saveNewList(list: self.buildNewList())
-                        : self.storageService.updateList(list: self.buildNewList())
-                        self.coordinator.popToMainView()
-                    }
+            if listIsValid {
+                DispatchQueue.main.async {
+                    self.autoSave = false
+                    self.editList == nil
+                    ? self.storageService.saveNewList(list: self.buildNewList())
+                    : self.storageService.updateList(list: self.buildNewList())
+                    self.coordinator.popToMainView()
                 }
             }
             
@@ -280,8 +248,9 @@ final class NewListViewModel: NewListViewModelProtocol {
                 .init(id: UUID(), title: nil),
                 .init(id: UUID(), title: .buttonAddProduct)
             ]
-            self.tableIsUpdating = true
+            tableIsUpdating = true
             newListBinding.value = [.reloadTable]
+            
         default:
             break
         }
@@ -421,7 +390,6 @@ final class NewListViewModel: NewListViewModelProtocol {
     
     private func validateList() -> Bool {
         listItems.first(where: { $0.title == nil || $0.title?.isEmpty == true || $0.error != nil}) == nil
-        //        listItems.first(where: {$0.error != nil}) == nil
     }
     
 }
