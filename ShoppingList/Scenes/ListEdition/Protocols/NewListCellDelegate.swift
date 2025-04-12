@@ -1,8 +1,10 @@
+import Foundation
+
 protocol NewListCellDelegate: AnyObject {
     func updateNewListTitle(with title: String?)
-    func updateNewListItem(in row: Int, with title: String?)
+    func updateNewListItem(id: UUID, with title: String?)
 //    func getTextFieldEditState() -> Bool
-    func textFieldDidBeginEditing(in row: Int)
+    func textFieldDidBeginEditing(id: UUID)
     func addNewItemButtonPressed()
-    func editQuantityButtonPressed(in row: Int)
+    func editQuantityButtonPressed(id: UUID)
 }

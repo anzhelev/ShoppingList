@@ -99,8 +99,8 @@ class ShoppingListViewController: UIViewController {
             
             switch value {
                 
-            case .showPopUp(let row, let quantity, let unit):
-                self?.showPopUpView(for: row, quantity: quantity, unit: unit)
+            case .showPopUp(let id, let quantity, let unit):
+                self?.showPopUpView(for: id, quantity: quantity, unit: unit)
                 
             case .updateItem(let indexPath, let option):
                 self?.listItemsTable.isUserInteractionEnabled = !option
@@ -243,8 +243,8 @@ class ShoppingListViewController: UIViewController {
         return button
     }
     
-    private func showPopUpView(for item: Int, quantity: Float, unit: Units) {
-        let popUpView = PopUpAssembler().build(item: item, delegate: self.viewModel as? PopUpVCDelegate, quantity: quantity, unit: unit)
+    private func showPopUpView(for itemID: UUID, quantity: Float, unit: Units) {
+        let popUpView = PopUpAssembler().build(itemID: itemID, delegate: self.viewModel as? PopUpVCDelegate, quantity: quantity, unit: unit)
         if let sheet = popUpView.sheetPresentationController {
             let detent: UISheetPresentationController.Detent = .custom(identifier: .init(rawValue: "custom")) { _ in 224 }
             sheet.detents = [detent]
@@ -280,7 +280,7 @@ extension ShoppingListViewController: UITableViewDataSource {
                 return UITableViewCell()
             }
             cell.delegate = viewModel as? ShoppingListCellDelegate
-            cell.configure(for: indexPath.row, with: cellParams.1)
+            cell.configure(with: cellParams.1)
             return cell
             
         case .button:

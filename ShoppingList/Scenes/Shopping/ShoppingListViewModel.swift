@@ -75,7 +75,8 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     
     func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams) {
         return (row == shoppingList.count - 1 && !currentListInfo.completed ? .button : .item,
-                .init(checked: shoppingList[row].checked,
+                .init(id: shoppingList[row].id,
+                      checked: shoppingList[row].checked,
                       title: shoppingList[row].title,
                       quantity: shoppingList[row].quantity,
                       unit: shoppingList[row].unit,
@@ -118,7 +119,8 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         shoppingList += checkedItems
         
         if !currentListInfo.completed {
-            shoppingList.append(.init(checked: true,
+            shoppingList.append(.init(id: UUID(),
+                                      checked: true,
                                       title: .buttonAddProduct,
                                       quantity: 1,
                                       unit: .piece)
@@ -191,7 +193,8 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
             return
         }
         loadedItems.enumerated().forEach {index, item in
-            shoppingList.append(.init(checked: item.checked,
+            shoppingList.append(.init(id: UUID(),
+                                      checked: item.checked,
                                       title: item.name,
                                       quantity: Float(item.quantity),
                                       unit: Units(rawValue: item.unit) ?? .piece
@@ -202,7 +205,8 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
             }
         }
         if !currentListInfo.completed{
-            shoppingList.append(.init(checked: true,
+            shoppingList.append(.init(id: UUID(),
+                                      checked: true,
                                       title: .buttonAddProduct,
                                       quantity: 1,
                                       unit: .piece)
@@ -283,13 +287,14 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
 
 // MARK: - ShoppingListCellItemDelegate
 extension ShoppingListViewModel: ShoppingListCellDelegate {
-    func updateShoppingListItem(in row: Int, with title: String) {
+
+    func updateShoppingListItem(cellID: UUID, with title: String) {
+        let cellRow = getItemRowBy(id: cellID)
+        let oldTitle = shoppingList[cellRow].title
+        shoppingList[cellRow].title = title
         
-        let oldTitle = shoppingList[row].title
-        shoppingList[row].title = title
-        
-        if validateName(row: row) {
-            shoppingListBinding.value = .updateItem([.init(row: row, section: 0)], true)
+        if validateName(row: cellRow) {
+            shoppingListBinding.value = .updateItem([.init(row: cellRow, section: 0)], true)
             
         } else {
             if oldTitle != title {
@@ -307,18 +312,21 @@ extension ShoppingListViewModel: ShoppingListCellDelegate {
         userIsTyping = true
     }
     
-    func editQuantityButtonPressed(in row: Int) {
+    func editQuantityButtonPressed(cellID: UUID) {
         if userIsTyping {
             return
         }
         
-        shoppingListBinding.value = .showPopUp(row, shoppingList[row].quantity, shoppingList[row].unit)
+        let row = getItemRowBy(id: cellID)
+        shoppingListBinding.value = .showPopUp(cellID, shoppingList[row].quantity, shoppingList[row].unit)
     }
     
-    func checkBoxTapped(in row: Int) {
+    func checkBoxTapped(cellID: UUID) {
         if currentListInfo.completed || userIsTyping {
             return
         }
+        let row = getItemRowBy(id: cellID)
+        
         let wasChecked = shoppingList[row].checked
         shoppingList[row].checked.toggle()
         
@@ -351,7 +359,8 @@ extension ShoppingListViewModel: ShoppingListCellDelegate {
         if userIsTyping || !validateList() {
             return
         }
-        shoppingList.insert(.init(checked: false,
+        shoppingList.insert(.init(id: UUID(),
+                                  checked: false,
                                   quantity: 1,
                                   unit: .piece,
                                   error: .newListEmptyName
@@ -361,18 +370,22 @@ extension ShoppingListViewModel: ShoppingListCellDelegate {
         uncheckedItemsCount += 1
         shoppingListBinding.value = .insertItem(.init(row: uncheckedItemsCount - 1, section: 0))
     }
+    
+    private func getItemRowBy(id: UUID) -> Int {
+        shoppingList.firstIndex(where: { $0.id == id }) ?? 0
+    }
 }
 
 // MARK: - PopUpVCDelegate
 extension ShoppingListViewModel: PopUpVCDelegate {
-    func unitSelected(item: Int, unit: Units) {
-        shoppingList[item].unit = unit
-        shoppingListBinding.value = .updateItem([.init(row: item, section: 0)], false)
+    func unitSelected(itemID: UUID, unit: Units) {
+        shoppingList[getItemRowBy(id: itemID)].unit = unit
+        shoppingListBinding.value = .updateItem([.init(row: getItemRowBy(id: itemID), section: 0)], false)
     }
     
-    func quantitySelected(item: Int, quantity: Float) {
-        shoppingList[item].quantity = quantity
-        shoppingListBinding.value = .updateItem([.init(row: item, section: 0)], false)
+    func quantitySelected(itemID: UUID, quantity: Float) {
+        shoppingList[getItemRowBy(id: itemID)].quantity = quantity
+        shoppingListBinding.value = .updateItem([.init(row: getItemRowBy(id: itemID), section: 0)], false)
     }
 }
 

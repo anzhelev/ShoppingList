@@ -7,7 +7,7 @@ final class ShoppingListCellItem: UITableViewCell {
     weak var delegate: ShoppingListCellDelegate?
     
     // MARK: - Private Properties
-    private var row = 1
+    private var cellID = UUID()
     private var quantity: Float = 1
     private var unit: Units = .piece
     private let maxNameleLenght = 25
@@ -74,8 +74,8 @@ final class ShoppingListCellItem: UITableViewCell {
     }
     
     // MARK: - Public Methods
-    func configure(for row: Int, with params: ShopListCellParams) {
-        self.row = row
+    func configure(with params: ShopListCellParams) {
+        self.cellID = params.id
         self.quantity = params.quantity
         self.unit = params.unit
         
@@ -103,15 +103,15 @@ final class ShoppingListCellItem: UITableViewCell {
     
     // MARK: - IBAction
     @objc func itemUpdated() {
-        self.delegate?.updateShoppingListItem(in: row, with: itemNameField.text ?? .newListItemPlaceholder)
+        self.delegate?.updateShoppingListItem(cellID: cellID, with: itemNameField.text ?? .newListItemPlaceholder)
     }
     
     @objc func editQuantity() {
-        self.delegate?.editQuantityButtonPressed(in: row)
+        self.delegate?.editQuantityButtonPressed(cellID: cellID)
     }
     
     @objc func checkBoxTapped() {
-        self.delegate?.checkBoxTapped(in: row)
+        self.delegate?.checkBoxTapped(cellID: cellID)
     }
     
     // MARK: - Private Methods

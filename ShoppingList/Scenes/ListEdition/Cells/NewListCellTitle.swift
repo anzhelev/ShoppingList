@@ -8,6 +8,7 @@ final class NewListCellTitle: UITableViewCell {
     
     // MARK: - Private Properties
     private let maxTitleLenght = 20
+    private var cellID: UUID?
     
     private lazy var titleTextField = {
         let textField = UITextField()
@@ -51,6 +52,7 @@ final class NewListCellTitle: UITableViewCell {
     
     // MARK: - Public Methods
     func configure(with params: NewListCellParams) {
+        cellID = params.id
         titleTextField.text = params.title
         titleTextField.textColor = params.error == nil ? .textColorPrimary : .buttonBgrSecondary
         separatorView.backgroundColor = params.error == nil ? .tableSeparator : .buttonBgrSecondary
@@ -82,7 +84,7 @@ final class NewListCellTitle: UITableViewCell {
 extension NewListCellTitle: UITextFieldDelegate {
 
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.delegate?.textFieldDidBeginEditing(in: 0)
+        self.delegate?.textFieldDidBeginEditing(id: cellID ?? UUID())
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

@@ -1,5 +1,7 @@
+import Foundation
+
 struct NewListCellParams {
-    var row: Int
+    var id: UUID
     var title: String?
     var quantity: Float?
     var unit: Units?

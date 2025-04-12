@@ -1,7 +1,7 @@
 import UIKit
 
 enum ShoppingListBinding {
-    case showPopUp(Int, Float, Units)
+    case showPopUp(UUID, Float, Units)
     case updateItem([IndexPath], Bool)
     case insertItem(IndexPath)
     case moveItem(IndexPath, IndexPath)

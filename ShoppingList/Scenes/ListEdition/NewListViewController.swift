@@ -77,8 +77,8 @@ class NewListViewController: UIViewController {
                 case .updateCompleteButtonState:
                     self?.updateCompleteButton()
                     
-                case .showPopUp(let row, let quantity, let unit):
-                    self?.showPopUpView(for: row, quantity: quantity, unit: unit)
+                case .showPopUp(let id, let quantity, let unit):
+                    self?.showPopUpView(for: id, quantity: quantity, unit: unit)
                     
                 case .updateItems(let indexes, let option):
                     self?.listItemsTable.isUserInteractionEnabled = !option
@@ -94,6 +94,7 @@ class NewListViewController: UIViewController {
                     
                 case .reloadTable:
                     self?.listItemsTable.reloadData()
+                    self?.viewModel.tableFinishedUpdating()
                 }
             }
         }
@@ -103,7 +104,6 @@ class NewListViewController: UIViewController {
         listItemsTable.performBatchUpdates {
             listItemsTable.reloadRows(at: indexes, with: animated ? .automatic : .none)
         } completion: {_ in
-            self.updateCompleteButton()
             self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
@@ -113,7 +113,6 @@ class NewListViewController: UIViewController {
         listItemsTable.performBatchUpdates {
             listItemsTable.insertRows(at: [index], with: .bottom)
         } completion: {_ in
-            self.updateCompleteButton()
             self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
@@ -123,7 +122,6 @@ class NewListViewController: UIViewController {
         listItemsTable.performBatchUpdates {
             listItemsTable.deleteRows(at: [index], with: .top)
         } completion: {_ in
-            self.updateCompleteButton()
             self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
@@ -169,11 +167,11 @@ class NewListViewController: UIViewController {
         ? completeButton.setTitleColor(.buttonTextPrimary, for: .normal)
         : completeButton.setTitleColor(.buttonTextSecondary, for: .normal)
         
-        self.viewModel.tableFinishedUpdating()
+//        self.viewModel.tableFinishedUpdating()
     }
     
-    private func showPopUpView(for item: Int, quantity: Float, unit: Units) {
-        let popUpView = PopUpAssembler().build(item: item, delegate: self.viewModel as? PopUpVCDelegate, quantity: quantity, unit: unit)
+    private func showPopUpView(for id: UUID, quantity: Float, unit: Units) {
+        let popUpView = PopUpAssembler().build(itemID: id, delegate: self.viewModel as? PopUpVCDelegate, quantity: quantity, unit: unit)
         if let sheet = popUpView.sheetPresentationController {
             let detent: UISheetPresentationController.Detent = .custom(identifier: .init(rawValue: "custom")) { _ in 224 }
             sheet.detents = [detent]

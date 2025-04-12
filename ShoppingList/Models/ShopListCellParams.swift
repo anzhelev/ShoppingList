@@ -1,4 +1,7 @@
+import Foundation
+
 struct ShopListCellParams {
+    var id: UUID
     var checked: Bool
     var title: String?
     var quantity: Float

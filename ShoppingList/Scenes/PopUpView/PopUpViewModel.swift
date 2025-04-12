@@ -1,3 +1,5 @@
+import Foundation
+
 final class PopUpViewModel: PopUpViewModelProtocol {
     
     // MARK: - Public Properties
@@ -5,14 +7,14 @@ final class PopUpViewModel: PopUpViewModelProtocol {
     var popUpBinding: Observable<PopUpBinding> = Observable(nil)
     
     // MARK: - Private Properties
-    private let item: Int
+    private let itemID: UUID
     private var quantity: Float
     private var unit: Units
     
     
     // MARK: - Initializers
-    init(item: Int, delegate: PopUpVCDelegate?, quantity: Float, unit: Units) {
-        self.item = item
+    init(itemID: UUID, delegate: PopUpVCDelegate?, quantity: Float, unit: Units) {
+        self.itemID = itemID
         self.delegate = delegate
         self.quantity = quantity
         self.unit = unit
@@ -35,7 +37,7 @@ final class PopUpViewModel: PopUpViewModelProtocol {
         
         if self.unit != selectedUnit {
             self.unit = selectedUnit
-            delegate?.unitSelected(item: item, unit: self.unit)
+            delegate?.unitSelected(itemID: itemID, unit: self.unit)
         }
     }
     
@@ -60,7 +62,7 @@ final class PopUpViewModel: PopUpViewModelProtocol {
         }
         
         popUpBinding.value = .popUpQuantity(quantityAsString)
-        delegate?.quantitySelected(item: item, quantity: quantity)
+        delegate?.quantitySelected(itemID: itemID, quantity: quantity)
     }
     
     func plusButtonPressed(for value: String?) {
@@ -80,12 +82,12 @@ final class PopUpViewModel: PopUpViewModelProtocol {
         }
         
         popUpBinding.value = .popUpQuantity(quantityAsString)
-        delegate?.quantitySelected(item: item, quantity: quantity)
+        delegate?.quantitySelected(itemID: itemID, quantity: quantity)
     }
     
     func clearButtonPressed() {
         popUpBinding.value = .popUpQuantity("")
-        delegate?.quantitySelected(item: item, quantity: quantity)
+        delegate?.quantitySelected(itemID: itemID, quantity: quantity)
     }
     
     func quantityUpdated(with value: String?) {
@@ -96,6 +98,6 @@ final class PopUpViewModel: PopUpViewModelProtocol {
         : String(format: "%.1f", quantity)
         
         popUpBinding.value = .popUpQuantity(quantityAsString)
-        delegate?.quantitySelected(item: item, quantity: quantity)
+        delegate?.quantitySelected(itemID: itemID, quantity: quantity)
     }
 }

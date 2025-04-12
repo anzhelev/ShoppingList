@@ -1,4 +1,6 @@
+import Foundation
+
 protocol PopUpVCDelegate: AnyObject {
-    func unitSelected(item: Int, unit: Units)
-    func quantitySelected(item: Int, quantity: Float)
+    func unitSelected(itemID: UUID, unit: Units)
+    func quantitySelected(itemID: UUID, quantity: Float)
 }

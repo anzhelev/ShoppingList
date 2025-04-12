@@ -7,7 +7,7 @@ final class NewListCellItem: UITableViewCell {
     weak var delegate: NewListCellDelegate?
     
     // MARK: - Private Properties
-    private var row = 1
+    private var cellID = UUID()
     private var quantity: Float = 1
     private var unit: Units = .piece
     private let maxNameleLenght = 15
@@ -71,7 +71,7 @@ final class NewListCellItem: UITableViewCell {
     
     // MARK: - Public Methods
     func configure(with params: NewListCellParams) {
-        self.row = params.row
+        self.cellID = params.id
         self.quantity = params.quantity ?? 1
         self.unit = params.unit ?? .piece
         
@@ -93,7 +93,7 @@ final class NewListCellItem: UITableViewCell {
     
     // MARK: - IBAction
     @objc func editQuantity() {
-        self.delegate?.editQuantityButtonPressed(in: row)
+        self.delegate?.editQuantityButtonPressed(id: cellID)
     }
     
     // MARK: - Private Methods
@@ -163,7 +163,7 @@ final class NewListCellItem: UITableViewCell {
 extension NewListCellItem: UITextFieldDelegate {
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.delegate?.textFieldDidBeginEditing(in: row)
+        self.delegate?.textFieldDidBeginEditing(id: cellID)
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -175,7 +175,7 @@ extension NewListCellItem: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         textField.resignFirstResponder()
 //        print("@@@textFieldDidEndEditing")
-        self.delegate?.updateNewListItem(in: row, with: itemNameField.text)
+        self.delegate?.updateNewListItem(id: cellID, with: itemNameField.text)
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
