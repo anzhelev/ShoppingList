@@ -22,7 +22,6 @@ final class NewListViewModel: NewListViewModelProtocol {
     // MARK: - Private Properties
     private let coordinator: Coordinator
     private let storageService: StorageServiceProtocol
-    private let dispatcher = ConcurrentDispatcher()
     private let editList: UUID?
     private var existingListNames = Set<String>()
     private var listItems: [NewListCellParams] = []

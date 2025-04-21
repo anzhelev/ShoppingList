@@ -59,7 +59,7 @@ final class PopUpVC: UIViewController {
     private lazy var quantityTextField: UITextField = {
         let textField = UITextField()
         textField.delegate = self
-        textField.textColor = .textColorPrimary
+        textField.textColor = .buttonBgrPrimary
         textField.font = .mainScreenStub
         textField.textAlignment = .center
         textField.borderStyle = .roundedRect
@@ -67,6 +67,7 @@ final class PopUpVC: UIViewController {
         textField.layer.masksToBounds = true
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.listItemRightArrow.cgColor
+        textField.backgroundColor = .screenBgrPrimary
         textField.keyboardType = .numberPad
         textField.inputAccessoryView = createKeyboardToolbar()
         return textField
@@ -221,6 +222,8 @@ final class PopUpVC: UIViewController {
             unitSelector.heightAnchor.constraint(equalToConstant: 32),
             minusButton.topAnchor.constraint(equalTo: unitSelector.bottomAnchor, constant: 15),
             quantityTextField.centerYAnchor.constraint(equalTo: minusButton.centerYAnchor),
+            quantityTextField.widthAnchor.constraint(equalToConstant: 80),
+            quantityTextField.heightAnchor.constraint(equalToConstant: 38),
             plusButton.centerYAnchor.constraint(equalTo: minusButton.centerYAnchor),
             plusButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             doneButton.topAnchor.constraint(equalTo: plusButton.bottomAnchor, constant: 32),

@@ -1,6 +1,6 @@
 import UIKit
 
-class NewListViewController: UIViewController {
+class NewListViewController: UIViewController, KeyboardHandler {
     
     // MARK: - Private Properties
     private let viewModel: NewListViewModelProtocol
@@ -31,6 +31,9 @@ class NewListViewController: UIViewController {
         return button
     }()
     
+    var keyboardWillShowAction: ((Notification) -> Void)?
+    var keyboardWillHideAction: ((Notification) -> Void)?
+    
     // MARK: - Initializers
     init(viewModel: NewListViewModelProtocol) {
         self.viewModel = viewModel
@@ -45,6 +48,8 @@ class NewListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         hideKeyboardWhenTappedAround()
+        setupKeyboardHandling()
+        setupKeyboardActions()
         bindViewModel()
         setUI()
     }
@@ -58,6 +63,10 @@ class NewListViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
         viewModel.viewWillDisappear()
+    }
+    
+    deinit {
+        removeKeyboardHandling()
     }
     
     // MARK: - Actions
@@ -166,8 +175,37 @@ class NewListViewController: UIViewController {
         enableState
         ? completeButton.setTitleColor(.buttonTextPrimary, for: .normal)
         : completeButton.setTitleColor(.buttonTextSecondary, for: .normal)
+    }
+    
+    private func setupKeyboardActions() {
         
-//        self.viewModel.tableFinishedUpdating()
+        keyboardWillShowAction = { [weak self] notification in
+            guard let userInfo = notification.userInfo,
+                  let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+                  let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval,
+                  let curve = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt
+            else { return }
+            
+            let keyboardHeight = keyboardFrame.height
+            let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight, right: 0)
+            
+            UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve)) {
+                self?.listItemsTable.contentInset = contentInsets
+                self?.listItemsTable.scrollIndicatorInsets = contentInsets
+            }
+        }
+        
+        keyboardWillHideAction = { [weak self] notification in
+            guard let userInfo = notification.userInfo,
+                  let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval,
+                  let curve = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt
+            else { return }
+            
+            UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve)) {
+                self?.listItemsTable.contentInset = .zero
+                self?.listItemsTable.scrollIndicatorInsets = .zero
+            }
+        }
     }
     
     private func showPopUpView(for id: UUID, quantity: Float, unit: Units) {
