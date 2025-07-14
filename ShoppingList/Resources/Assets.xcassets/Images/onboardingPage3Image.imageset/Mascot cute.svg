@@ -1,0 +1,14 @@
+<svg width="221" height="299" viewBox="0 0 221 299" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M198.111 0C210.752 0 221 10.2478 221 22.8887V276.111C221 288.752 210.752 299 198.111 299H22.8887C10.2478 299 0 288.752 0 276.111V22.8887C0 10.2478 10.2478 0 22.8887 0H198.111ZM75.5 23C67.4919 23 61 29.4919 61 37.5C61 45.5081 67.4919 52 75.5 52H145.5C153.508 52 160 45.5081 160 37.5C160 29.4919 153.508 23 145.5 23H75.5Z" fill="#A5BBFF"/>
+<line x1="166.586" y1="120.728" x2="180.728" y2="106.586" stroke="black" stroke-width="4"/>
+<line x1="158.187" y1="116.281" x2="166.64" y2="98.1546" stroke="black" stroke-width="4"/>
+<line x1="147.068" y1="113.801" x2="152.245" y2="94.4822" stroke="black" stroke-width="4"/>
+<circle cx="170" cy="165" r="25" fill="#698AF0"/>
+<circle cx="149" cy="135" r="21.1853" fill="black" stroke="white" stroke-width="7.62943"/>
+<line y1="-2" x2="20" y2="-2" transform="matrix(-0.707107 -0.707107 -0.707107 0.707107 53 122.143)" stroke="black" stroke-width="4"/>
+<line y1="-2" x2="20" y2="-2" transform="matrix(-0.422618 -0.906308 -0.906308 0.422618 61 117.126)" stroke="black" stroke-width="4"/>
+<line y1="-2" x2="20" y2="-2" transform="matrix(-0.258819 -0.965926 -0.965926 0.258819 72 114.318)" stroke="black" stroke-width="4"/>
+<circle cx="25" cy="25" r="25" transform="matrix(-1 0 0 1 76 140)" fill="#698AF0"/>
+<circle cx="25" cy="25" r="21.1853" transform="matrix(-1 0 0 1 97 110)" fill="black" stroke="white" stroke-width="7.62943"/>
+<path d="M130 167C130 175.96 121.27 181 110.5 181C99.7304 181 91 174.732 91 167" stroke="black" stroke-width="4"/>
+</svg>

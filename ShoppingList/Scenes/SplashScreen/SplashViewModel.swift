@@ -11,6 +11,11 @@ final class SplashViewModel {
     }
     
     func animationCompleted() {
-        coordinator.showTabBarVC()
+        if UserDefaults.standard.bool(forKey: "skipOnboarding") == true {
+            UserDefaults.standard.set(true, forKey: "skipOnboarding")
+            coordinator.showOnboarding()            
+        } else {
+            coordinator.showTabBarVC()
+        }
     }
 }

@@ -42,6 +42,7 @@ final class PopUpViewModel: PopUpViewModelProtocol {
     }
     
     func doneButtonPressed() {
+        delegate?.unitSelected(itemID: itemID, unit: self.unit)
         popUpBinding.value = .closePopUp
     }
     

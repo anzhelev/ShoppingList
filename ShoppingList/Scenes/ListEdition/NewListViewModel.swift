@@ -397,7 +397,6 @@ final class NewListViewModel: NewListViewModelProtocol {
 extension NewListViewModel: NewListCellDelegate {
     
     func updateNewListTitle(with title: String?) {
-        
         state = .itemModified(row: 0, newValue: .name(title))
     }
     
@@ -410,6 +409,7 @@ extension NewListViewModel: NewListCellDelegate {
     }
     
     func editQuantityButtonPressed(id: UUID) {
+        completeButtonState = false
         state = .startEditing(row: getItemRowBy(id: id), field: .quantity)
     }
     

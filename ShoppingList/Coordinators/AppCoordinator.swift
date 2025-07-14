@@ -8,6 +8,9 @@ protocol Coordinator {
     func start()
     func applyCurrentTheme()
     func getLanguages() -> [Language]
+    func showOnboarding()
+    func showWelcomeScreen()
+    func switchToNewListCreationView()
     func showTabBarVC()
     func switchToShoppingList(with listInfo: ListInfo)
     func switchToListEditionView(editList: UUID?)
@@ -64,11 +67,28 @@ final class AppCoordinator: Coordinator {
         languageManager.languages
     }    
     
+    func showOnboarding() {
+        let onboardingViewController = OnboardingAssembler().build(coordinator: self)
+        window.rootViewController = onboardingViewController
+        window.makeKeyAndVisible()
+    }
+    
+    func showWelcomeScreen() {
+        let welcomeScreen = WelcomeScreenAssembler().build(coordinator: self)
+        window.rootViewController = welcomeScreen
+        window.makeKeyAndVisible()
+    }
+    
     func showTabBarVC() {
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
         let tabBarController = TabBarController(coordinator: self)
         navigationController.pushViewController(tabBarController, animated: false)
+    }
+    
+    func switchToNewListCreationView() {
+        showTabBarVC()
+        switchToListEditionView(editList: nil)
     }
     
     func switchToShoppingList(with listInfo: ListInfo) {

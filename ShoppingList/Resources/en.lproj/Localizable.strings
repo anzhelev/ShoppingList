@@ -34,6 +34,16 @@
 "themes.automatic" = "Automatic";
 "themes.dark" = "Dark";
 
+"onboarding.page1.header" = "Удобно и просто";
+"onboarding.page1.description" = "Создавай любые списки чтобы\nне забыть все все, что ты хочешь\nкупить";
+"onboarding.page2.header" = "Ты точно не забудешь";
+"onboarding.page2.description" = "Напомним в любое время о твоих\nпланах на магзины";
+"onboarding.page3.header" = "Все понятно";
+"onboarding.page3.description" = "Удобный интерфейс для ежедневных\nпокупок, давай попробуем!";
+
+"welcomeScreen.header" = "Нажми на кнопку\nи запиши все свои\nхотелки";
+"welcomeScreen.description" = "Создать новый список";
+
 "settings.languageSettings.title" = "Language";
 "settings.themeSettings.title" = "Theme";
 "settings.alert.title" = "Attention!";
