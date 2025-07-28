@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "Image.svg",
+      "filename" : "Mascot Group.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
@@ -12,7 +12,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Image 1.svg",
+      "filename" : "Mascot Group 1.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },

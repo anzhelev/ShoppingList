@@ -14,36 +14,60 @@ class MainScreenViewController: UIViewController {
         return label
     }()
     
-    private let stubLabel = {
-        let label = UILabel()
-        label.text = .mainScreenStub
-        label.textColor = .textColorPrimary
-        label.font = .mainScreenStub
-        label.textAlignment = .center
-        label.numberOfLines = 3
-        label.isHidden = true
-        return label
-    }()
+//    private let stubLabel = {
+//        let label = UILabel()
+//        label.text = .mainScreenStub
+//        label.textColor = .textColorPrimary
+//        label.font = .mainScreenStub
+//        label.textAlignment = .center
+//        label.numberOfLines = 3
+//        label.isHidden = true
+//        return label
+//    }()
     
-    private let arrowImageView = {
-        let imageView = UIImageView(image: UIImage(named: "blueArrow"))
-        imageView.isHidden = true
-        return imageView
-    }()
+//    private let arrowImageView = {
+//        let imageView = UIImageView(image: UIImage(named: "blueArrow"))
+//        imageView.isHidden = true
+//        return imageView
+//    }()
+    
+    private var clearArchiveButtonHeightConstraint: NSLayoutConstraint = .init()
     
     private let backgroundImageView = {
         let imageView = UIImageView(image: UIImage(named: "listBgrImage"))
-        imageView.alpha = 0.5
-        imageView.isHidden = true
+//        imageView.alpha = 0.5
+//        imageView.isHidden = true
         return imageView
     }()
     
+//    private lazy var addNewListButton = {
+//        UIButton.systemButton(
+//            with: UIImage(named: "buttonPlus")?.withTintColor(.buttonBgrPrimary, renderingMode: .alwaysOriginal) ?? UIImage(),
+//            target: self,
+//            action: #selector(addNewListButtonPressed)
+//        )
+//    }()
+    
     private lazy var addNewListButton = {
-        UIButton.systemButton(
-            with: UIImage(named: "buttonPlus")?.withTintColor(.buttonBgrPrimary, renderingMode: .alwaysOriginal) ?? UIImage(),
-            target: self,
-            action: #selector(addNewListButtonPressed)
-        )
+        let button = UIButton()
+        button.setTitle(.buttonCreateNewList, for: .normal)
+        button.setTitleColor(.buttonTextPrimary, for: .normal)
+        button.titleLabel?.font = .listScreenTitle
+        button.backgroundColor = .buttonBgrTertiary
+        button.layer.cornerRadius = 10
+        button.addTarget(self, action: #selector(addNewListButtonPressed), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var clearArchiveButton = {
+        let button = UIButton()
+        button.setTitle(.buttonClearAhchive, for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .listScreenTitle
+        button.backgroundColor = .buttonBgrSecondary
+        button.layer.cornerRadius = 10
+        button.addTarget(self, action: #selector(clearArchiveButtonPressed), for: .touchUpInside)
+        return button
     }()
     
     private lazy var shoppingListsTable = {
@@ -71,7 +95,6 @@ class MainScreenViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         bindViewModel()
         setUI()
     }
@@ -80,12 +103,16 @@ class MainScreenViewController: UIViewController {
         super.viewWillAppear(true)
         navigationController?.setNavigationBarHidden(true, animated: true)
         viewModel.viewWillAppear()
-        updateStub()
+        updateClearArchiveButtonState()
     }
     
     // MARK: - Actions
     @objc private func addNewListButtonPressed() {
         viewModel.addNewListButtonPressed()
+    }
+    
+    @objc private func clearArchiveButtonPressed() {
+        viewModel.clearArchiveButtonPressed()
     }
     
     // MARK: - Private Methods
@@ -99,9 +126,9 @@ class MainScreenViewController: UIViewController {
             case .updateItem(let indexPath):
                 self?.reloadItem(index: indexPath)
                 
-            case .removeItem(let indexPath):
-                self?.removeItem(index: indexPath)
-                self?.updateStub()
+            case .removeItem(let indexes):
+                self?.removeItem(indexes: indexes)
+//                self?.updateStub()
                 
             default:
                 return
@@ -119,50 +146,66 @@ class MainScreenViewController: UIViewController {
         shoppingListsTable.endUpdates()
     }
     
-    private func removeItem(index: IndexPath) {
+    private func removeItem(indexes: [IndexPath]) {
         shoppingListsTable.beginUpdates()
-        shoppingListsTable.deleteRows(at: [index], with: .top)
-        if index.row > 0 {
-            shoppingListsTable.reloadRows(at: [.init(row: index.row - 1, section: 0)], with: .none)
+        shoppingListsTable.deleteRows(at: indexes, with: .top)
+        if indexes.first?.row ?? 0 > 0 {
+            shoppingListsTable.reloadRows(at: [.init(row: (indexes.first?.row ?? 1) - 1, section: 0)], with: .none)
         }
         shoppingListsTable.endUpdates()
+        updateClearArchiveButtonState()
     }
     
-    private func updateStub() {
-        let stubStatus = viewModel.getStubState()
-        stubLabel.isHidden = !stubStatus
-        arrowImageView.isHidden = !stubStatus
-        backgroundImageView.isHidden = stubStatus
-        shoppingListsTable.isHidden = stubStatus
+    private func updateClearArchiveButtonState() {
+        let oldConstant: CGFloat = clearArchiveButtonHeightConstraint.constant
+        clearArchiveButton.isHidden = !viewModel.getClearArchiveButtonState()
+        let newConstant: CGFloat = clearArchiveButton.isHidden ? 0 : 48
+        if oldConstant != newConstant {
+            clearArchiveButtonHeightConstraint.constant = newConstant
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+        }
     }
     
     private func setUI() {
         self.view.backgroundColor = .screenBgrPrimary
         titleLabel.text = viewModel.getScreenTitle()
         
-        [titleLabel, stubLabel, arrowImageView, backgroundImageView, addNewListButton, shoppingListsTable].forEach {
+        [titleLabel, backgroundImageView, addNewListButton, clearArchiveButton, shoppingListsTable].forEach { //arrowImageView stubLabel
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
+        clearArchiveButton.isHidden = !viewModel.getClearArchiveButtonState()
+        clearArchiveButtonHeightConstraint = clearArchiveButton.heightAnchor.constraint(equalToConstant: clearArchiveButton.isHidden ? 0 : 48)
+        clearArchiveButtonHeightConstraint.isActive = true
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 48),
             titleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             
-            stubLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            stubLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            stubLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            
-            addNewListButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+//            stubLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+//            stubLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+//            stubLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+//            
+            addNewListButton.bottomAnchor.constraint(equalTo: clearArchiveButton.topAnchor, constant: -12),
             addNewListButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            addNewListButton.heightAnchor.constraint(equalToConstant: 50),
-            addNewListButton.widthAnchor.constraint(equalTo: addNewListButton.heightAnchor),
+            addNewListButton.heightAnchor.constraint(equalToConstant: 48),
+            addNewListButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            addNewListButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             
-            arrowImageView.topAnchor.constraint(equalTo: stubLabel.bottomAnchor, constant: 13),
-            arrowImageView.bottomAnchor.constraint(equalTo: addNewListButton.topAnchor, constant: 10),
-            arrowImageView.leadingAnchor.constraint(equalTo: addNewListButton.trailingAnchor, constant: -15),
-            arrowImageView.widthAnchor.constraint(equalTo: arrowImageView.heightAnchor, multiplier: 127/267.5),
+            clearArchiveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            clearArchiveButton.centerXAnchor.constraint(equalTo: addNewListButton.centerXAnchor),
+//            clearArchiveButton.heightAnchor.constraint(equalToConstant: clearArchiveButton.isHidden ? 0 : 48),
+            clearArchiveButton.leadingAnchor.constraint(equalTo: addNewListButton.leadingAnchor),
+            clearArchiveButton.trailingAnchor.constraint(equalTo: addNewListButton.trailingAnchor),
+//            addNewListButton.widthAnchor.constraint(equalTo: addNewListButton.heightAnchor),
+            
+//            arrowImageView.topAnchor.constraint(equalTo: stubLabel.bottomAnchor, constant: 13),
+//            arrowImageView.bottomAnchor.constraint(equalTo: addNewListButton.topAnchor, constant: 10),
+//            arrowImageView.leadingAnchor.constraint(equalTo: addNewListButton.trailingAnchor, constant: -15),
+//            arrowImageView.widthAnchor.constraint(equalTo: arrowImageView.heightAnchor, multiplier: 127/267.5),
             
             backgroundImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             backgroundImageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 62),

@@ -226,14 +226,14 @@ class ShoppingListViewController: UIViewController {
         }
         
         let option3 = UIAction(title: .dropdownDuplicate, image: UIImage(systemName: "plus.square.on.square")) { _ in
-            
+            self.viewModel.duplicateButtonPressed()
         }
         
         let option4 = UIAction(title: .dropdownRemind, image: UIImage(systemName: "bell")) { _ in
             
         }
         
-        let menu = UIMenu(children: [option1, option2, option3, option4])
+        let menu = UIMenu(children: [option2, option3, option4]) //option1
         
         
         // Настраиваем кнопку

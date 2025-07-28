@@ -12,7 +12,7 @@ final class WelcomeScreenViewModel: WelcomeScreenViewModelProtocol {
     // MARK: - Public Properties
     let image: String = "launchScreenImage"
     let header: String = .welcomeScreenHeader
-    let description: String = .welcomeScreenDescription
+    let description: String = .buttonCreateNewList
     
     // MARK: - Private Properties
     private var coordinator: Coordinator

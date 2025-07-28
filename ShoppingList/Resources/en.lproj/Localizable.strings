@@ -19,6 +19,8 @@
 "buttons.restoreList" = "Restore list";
 "buttons.removeCheckedItems" = "Done with shopping";
 "buttons.switchToMainScreen" = "To main screen";
+"buttons.createNewList" = "Создать новый список";
+"buttons.clearArchive" = "Очистить архив";
 
 "dropdown.share" = "Share with...";
 "dropdown.sorting" = "Sorting";
@@ -42,7 +44,6 @@
 "onboarding.page3.description" = "Удобный интерфейс для ежедневных\nпокупок, давай попробуем!";
 
 "welcomeScreen.header" = "Нажми на кнопку\nи запиши все свои\nхотелки";
-"welcomeScreen.description" = "Создать новый список";
 
 "settings.languageSettings.title" = "Language";
 "settings.themeSettings.title" = "Theme";

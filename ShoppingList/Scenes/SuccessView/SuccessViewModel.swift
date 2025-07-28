@@ -2,7 +2,7 @@ import UIKit
 
 class SuccessViewModel {
     weak var delegate: SuccessViewDelegate?
-    let successImage: UIImage? = UIImage(named: "successScreenImage")
+    let successImage: UIImage? = UIImage(named: "launchScreenImage")
     let congratsLabel: String = .successViewCongratulations
     let additionalLabel: String = .successViewAdditional
     let confirmButtonTitle: String = .buttonSwitchToMainScreen

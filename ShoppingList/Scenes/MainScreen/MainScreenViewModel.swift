@@ -4,8 +4,9 @@ protocol MainScreenViewModelProtocol {
     var mainScreenBinding: Observable<MainScreenBinding> { get set }
     func viewWillAppear()
     func getScreenTitle() -> String
-    func getSwipeHintText() -> String
+    func getClearArchiveButtonState() -> Bool
     func addNewListButtonPressed()
+    func clearArchiveButtonPressed()
     func getTableRowCount() -> Int
     func listSelected(row: Int)
     func getCellParams(for row: Int) -> MainScreenTableCellParams
@@ -43,15 +44,17 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     // MARK: - Public Methods
     func viewWillAppear() {
         loadLists()
-        updateStubState()
+//        updateStubState()
     }
     
     func getScreenTitle() -> String {
         completeMode ? .mainScreenCompletedTitle : .mainScreenActiveTitle
     }
     
-    func getSwipeHintText() -> String {
-        completeMode ? .mainScreenCompletedSwipeHint : .mainScreenActiveSwipeHint
+    func getClearArchiveButtonState() -> Bool {
+        completeMode && storageService.getListsWithStatus(
+                isCompleted: true
+            ).count > 0
     }
     
     func getTableRowCount() -> Int {
@@ -86,6 +89,19 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
         coordinator.switchToListEditionView(editList: nil)
     }
     
+    func clearArchiveButtonPressed() {
+        var indexPathsToRemove: [IndexPath] = []
+        
+        for listNumber in 0 ..< shoppingLists.count {
+            storageService.deleteList(with: shoppingLists[listNumber].listId)
+            indexPathsToRemove.append(.init(row: listNumber, section: 0))
+        }
+        shoppingLists.removeAll()
+        
+        mainScreenBinding.value = .removeItem(indexPathsToRemove)
+//        updateStubState()
+    }
+    
     func editButtonPressed(in row: Int) {
         coordinator.switchToListEditionView(editList: shoppingLists[row].listId)        
     }
@@ -99,8 +115,8 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     func deleteListButtonPressed(in row: Int) {
         storageService.deleteList(with: shoppingLists[row].listId)
         shoppingLists.remove(at: row)
-        mainScreenBinding.value = .removeItem(.init(row: row, section: 0))
-        updateStubState()
+        mainScreenBinding.value = .removeItem([.init(row: row, section: 0)])
+//        updateStubState()
     }
     
     // MARK: - Private Methods
@@ -120,17 +136,17 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
     private func restoreList(in row: Int) {
         storageService.restoreList(with: shoppingLists[row].listId)
         shoppingLists.remove(at: row)
-        mainScreenBinding.value = .removeItem(.init(row: row, section: 0))
+        mainScreenBinding.value = .removeItem([.init(row: row, section: 0)])
     }
     
-    private func updateStubState() {
-        stubState = completeMode
-        ? shoppingLists.count + storageService
-            .getListsWithStatus(
-                isCompleted: false
-            ).count == 0
-        : shoppingLists.isEmpty
-    }
+//    private func updateStubState() {
+//        stubState = completeMode
+//        ? shoppingLists.count + storageService
+//            .getListsWithStatus(
+//                isCompleted: false
+//            ).count == 0
+//        : shoppingLists.isEmpty
+//    }
     
     private func sortList() {
         shoppingLists.sort(by: {$0.pinned && !$1.pinned})

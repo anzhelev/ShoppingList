@@ -9,6 +9,7 @@ protocol ShoppingListViewModelProtocol {
     func getBottomButtonName() -> String
     func rowMoved(from: Int, to: Int)
     func sortButtonPressed()
+    func duplicateButtonPressed()
     func doneButtonPressed()
     func getListTitle() -> String
     func getTableRowCount() -> Int
@@ -96,6 +97,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     
     // MARK: - Actions
     func sortButtonPressed() {
+        guard uncheckedItemsCount > 0 else { return }
         var uncheckedItems = [ShopListCellParams]()
         var checkedItems = [ShopListCellParams]()
         var indexesToUpdate: [IndexPath] = []
@@ -128,6 +130,10 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         }
         
         shoppingListBinding.value = .updateItem(indexesToUpdate, true)
+    }
+    
+    func duplicateButtonPressed() {
+        duplicateList()
     }
     
     func checkAllSwitchIs(on: Bool) {
@@ -254,6 +260,32 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     
     private func validateList() -> Bool {
         shoppingList.first(where: { $0.title == nil || $0.title?.isEmpty == true || $0.error != nil}) == nil
+    }
+    
+    private func duplicateList() {
+        var newListItems = [ListItem]()
+        if shoppingList.count > 1 {
+            for item in shoppingList[0...shoppingList.count - 2] {
+                newListItems.append(.init(name: item.title ?? "",
+                                          quantity: Float(item.quantity),
+                                          unit: item.unit.rawValue,
+                                          checked: item.checked
+                                         )
+                )
+            }
+        }
+        
+        let list = ShopList(
+            info: .init(listId: UUID(),
+                        title: "\(currentListInfo.title)#",
+                        date: Date(),
+                        completed: false,
+                        pinned: false
+                       ),
+            items: newListItems
+        )
+        storageService.saveNewList(list: list)
+
     }
     
     private func saveListToStorage(duplicatePinned: Bool) {

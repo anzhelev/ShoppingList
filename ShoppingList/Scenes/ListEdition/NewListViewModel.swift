@@ -26,7 +26,10 @@ final class NewListViewModel: NewListViewModelProtocol {
     private var existingListNames = Set<String>()
     private var listItems: [NewListCellParams] = []
     private var editedList: ShopList?
-    private var autoSave = true
+    private lazy var autoSave: Bool = {
+        validateName(row: 0)
+        return listItems[0].error == nil
+    }()
     private var userIsTyping: Bool = false
     private var tableIsUpdating: Bool = false
     private var completeButtonState: Bool = true
@@ -54,7 +57,7 @@ final class NewListViewModel: NewListViewModelProtocol {
         case addNewItem
         case completeButtonPressed
         case viewWillDisappear
-        case wipeInputs
+        //        case wipeInputs
     }
     
     private enum Values {
@@ -229,7 +232,7 @@ final class NewListViewModel: NewListViewModelProtocol {
             
             if listIsValid {
                 DispatchQueue.main.async {
-                    self.autoSave = false
+                    //                    self.autoSave = false
                     self.editList == nil
                     ? self.storageService.saveNewList(list: self.buildNewList())
                     : self.storageService.updateList(list: self.buildNewList())
@@ -239,16 +242,18 @@ final class NewListViewModel: NewListViewModelProtocol {
             
         case .viewWillDisappear:
             if autoSave {
-                saveUserInputs()
+                self.editList == nil
+                ? self.storageService.saveNewList(list: self.buildNewList())
+                : self.storageService.updateList(list: self.buildNewList())
             }
             
-        case .wipeInputs:
-            listItems = [
-                .init(id: UUID(), title: nil),
-                .init(id: UUID(), title: .buttonAddProduct)
-            ]
-            tableIsUpdating = true
-            newListBinding.value = [.reloadTable]
+            //        case .wipeInputs:
+            //            listItems = [
+            //                .init(id: UUID(), title: nil),
+            //                .init(id: UUID(), title: .buttonAddProduct)
+            //            ]
+            //            tableIsUpdating = true
+            //            newListBinding.value = [.reloadTable]
             
         default:
             break
@@ -277,12 +282,14 @@ final class NewListViewModel: NewListViewModelProtocol {
         var newListItems = [ListItem]()
         if listItems.count > 2 {
             for item in listItems[1...listItems.count - 2] {
-                newListItems.append(.init(name: item.title ?? .newListItemPlaceholder,
-                                          quantity: Float(item.quantity ?? 1),
-                                          unit: item.unit?.rawValue ?? Units.piece.rawValue,
-                                          checked: item.checked ?? false
-                                         )
-                )
+                if item.error == nil {
+                    newListItems.append(.init(name: item.title ?? .newListItemPlaceholder,
+                                              quantity: Float(item.quantity ?? 1),
+                                              unit: item.unit?.rawValue ?? Units.piece.rawValue,
+                                              checked: item.checked ?? false
+                                             )
+                    )
+                }
             }
         }
         return .init(info: .init(listId: editList ?? UUID(),
@@ -299,61 +306,61 @@ final class NewListViewModel: NewListViewModelProtocol {
         listItems.firstIndex(where: { $0.id == id }) ?? 0
     }
     
-    private func saveUserInputs() {
-        guard editList == nil,
-              listItems[0].title != nil || listItems.count > 2  else {
-            UserDefaults.standard.set(false, forKey: "newListInputsSaved")
-            return
-        }
-        UserDefaults.standard.set(true, forKey: "newListInputsSaved")
-        UserDefaults.standard.set(listItems[0].title, forKey: "newListTitle")
-        let itemsCount = listItems.count - 2
-        UserDefaults.standard.set(itemsCount, forKey: "newListItemsCount")
-        
-        if itemsCount > 0 {
-            for i in 1...itemsCount {
-                UserDefaults.standard.set(listItems[i].title, forKey: "newListItem\(i).title")
-                UserDefaults.standard.set(listItems[i].quantity, forKey: "newListItem\(i).quantity")
-                UserDefaults.standard.set(listItems[i].unit?.rawValue, forKey: "newListItem\(i).unit")
-            }
-        }
-    }
+    //    private func saveUserInputs() {
+    //        guard editList == nil,
+    //              listItems[0].title != nil || listItems.count > 2  else {
+    //            UserDefaults.standard.set(false, forKey: "newListInputsSaved")
+    //            return
+    //        }
+    //        UserDefaults.standard.set(true, forKey: "newListInputsSaved")
+    //        UserDefaults.standard.set(listItems[0].title, forKey: "newListTitle")
+    //        let itemsCount = listItems.count - 2
+    //        UserDefaults.standard.set(itemsCount, forKey: "newListItemsCount")
+    //
+    //        if itemsCount > 0 {
+    //            for i in 1...itemsCount {
+    //                UserDefaults.standard.set(listItems[i].title, forKey: "newListItem\(i).title")
+    //                UserDefaults.standard.set(listItems[i].quantity, forKey: "newListItem\(i).quantity")
+    //                UserDefaults.standard.set(listItems[i].unit?.rawValue, forKey: "newListItem\(i).unit")
+    //            }
+    //        }
+    //    }
     
     private func restoreUserInputs() {
-        guard UserDefaults.standard.bool(forKey: "newListInputsSaved") == true else {
-            listItems = [
-                .init(id: UUID()),//, error: .newListEmptyName),
-                .init(id: UUID(), title: .buttonAddProduct)
-            ]
-            return
-        }
-        
-        listItems = [.init(id: UUID(), title: UserDefaults.standard.string(forKey: "newListTitle"))]
-        
-        let itemsCount = UserDefaults.standard.integer(forKey: "newListItemsCount")
-        
-        if itemsCount > 0 {
-            for i in 1...itemsCount {
-                listItems.append(
-                    .init(id: UUID(),
-                          title: UserDefaults.standard.string(forKey: "newListItem\(i).title"),
-                          quantity: UserDefaults.standard.float(forKey: "newListItem\(i).quantity"),
-                          unit: Units(rawValue: UserDefaults.standard.string(forKey: "newListItem\(i).unit")
-                                      ?? Units.piece.rawValue) ?? .piece,
-                          checked: false
-                         )
-                )
-            }
-        }
-        listItems.append(.init(id: UUID(), title: .buttonAddProduct))
-        clearSavedUserInputs()
+        //            guard UserDefaults.standard.bool(forKey: "newListInputsSaved") == true else {
+        listItems = [
+            .init(id: UUID()),//, error: .newListEmptyName),
+            .init(id: UUID(), title: .buttonAddProduct)
+        ]
+        return
     }
+    //
+    //        listItems = [.init(id: UUID(), title: UserDefaults.standard.string(forKey: "newListTitle"))]
+    //
+    //        let itemsCount = UserDefaults.standard.integer(forKey: "newListItemsCount")
+    //
+    //        if itemsCount > 0 {
+    //            for i in 1...itemsCount {
+    //                listItems.append(
+    //                    .init(id: UUID(),
+    //                          title: UserDefaults.standard.string(forKey: "newListItem\(i).title"),
+    //                          quantity: UserDefaults.standard.float(forKey: "newListItem\(i).quantity"),
+    //                          unit: Units(rawValue: UserDefaults.standard.string(forKey: "newListItem\(i).unit")
+    //                                      ?? Units.piece.rawValue) ?? .piece,
+    //                          checked: false
+    //                         )
+    //                )
+    //            }
+    //        }
+    //        listItems.append(.init(id: UUID(), title: .buttonAddProduct))
+    //        clearSavedUserInputs()
+    //    }
     
-    private func clearSavedUserInputs() {
-        if let bundleID = Bundle.main.bundleIdentifier {
-            UserDefaults.standard.removePersistentDomain(forName: bundleID)
-        }
-    }
+    //    private func clearSavedUserInputs() {
+    //        if let bundleID = Bundle.main.bundleIdentifier {
+    //            UserDefaults.standard.removePersistentDomain(forName: bundleID)
+    //        }
+    //    }
     
     @discardableResult
     private func updateCompleteButtonState() -> Bool { // возвращает true если статус изменился

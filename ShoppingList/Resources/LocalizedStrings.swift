@@ -17,6 +17,8 @@ extension String {
     static let buttonRestoreList = NSLocalizedString("buttons.restoreList", comment: "")
     static let buttonRemoveCheckedItems = NSLocalizedString("buttons.removeCheckedItems", comment: "")
     static let buttonSwitchToMainScreen = NSLocalizedString("buttons.switchToMainScreen", comment: "")
+    static let buttonCreateNewList = NSLocalizedString("buttons.createNewList", comment: "")
+    static let buttonClearAhchive = NSLocalizedString("buttons.clearArchive", comment: "")
     
     static let dropdownShare = NSLocalizedString("dropdown.share", comment: "")
     static let dropdownSorting: String = NSLocalizedString("dropdown.sorting", comment: "")
@@ -40,7 +42,7 @@ extension String {
     static let onboardingPage3Description = NSLocalizedString("onboarding.page3.description", comment: "")
     
     static let welcomeScreenHeader = NSLocalizedString("welcomeScreen.header", comment: "")
-    static let welcomeScreenDescription = NSLocalizedString("welcomeScreen.description", comment: "")
+    
     
     static let tabBarTabsMainView = NSLocalizedString("tabBar.mainView", comment: "")
     static let tabBarTabsArchiveView = NSLocalizedString("tabBar.archiveView", comment: "")
