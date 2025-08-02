@@ -3,6 +3,10 @@ import Foundation
 extension String {
     static let dateFormat = NSLocalizedString("formatter.dateFormat", comment: "")
     
+    static let appName = NSLocalizedString("app.name", comment: "")
+    
+    static let notificationText = NSLocalizedString("notification.text", comment: "")
+    
     static let buttonPin = NSLocalizedString("buttons.pin", comment: "")
     static let buttonUnpin = NSLocalizedString("buttons.unpin", comment: "")
     static let buttonEdit = NSLocalizedString("buttons.edit", comment: "")

@@ -1,8 +1,12 @@
 import Foundation
+import EventKit
+import UserNotifications
 
 protocol ShoppingListViewModelProtocol {
     var shoppingListBinding: Observable<ShoppingListBinding> { get set }
+    var notificationText: String { get }
     
+    func viewDidLoad()
     func viewWillAppear()
     func listIsCompleted() -> Bool
     func checkAllSwitchIs(on: Bool)
@@ -18,6 +22,8 @@ protocol ShoppingListViewModelProtocol {
     func isDropAllowed(for row: Int) -> Bool
     func tableFinishedUpdating()
     func deleteItemButtonPressed(in row: Int)
+    func addNoticeButtonPressed()
+    func addEventAndNotification(date: Date)
 }
 
 final class ShoppingListViewModel: ShoppingListViewModelProtocol {
@@ -25,8 +31,13 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     var shoppingListBinding: Observable<ShoppingListBinding> = Observable(nil)
     
     // MARK: - Private Properties
+    lazy var notificationText: String = {
+        "\(String.notificationText) '\(currentListInfo.title)'"
+    }()
+    
     private let coordinator: Coordinator
     private let storageService: StorageServiceProtocol
+    private let eventStore = EKEventStore()
     private var currentListInfo: ListInfo
     private var shoppingList: [ShopListCellParams] = []
     private var uncheckedItemsCount: Int = 0
@@ -42,6 +53,11 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     }
     
     // MARK: - Public Methods
+    func viewDidLoad() {
+        requestCalendarAccess()
+        requestNotificationAuthorization()
+    }
+    
     func viewWillAppear() {
         loadList()
         updateBottomButtonState()
@@ -134,6 +150,10 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     
     func duplicateButtonPressed() {
         duplicateList()
+    }
+    
+    func addNoticeButtonPressed() {
+        shoppingListBinding.value = .addReminder
     }
     
     func checkAllSwitchIs(on: Bool) {
@@ -314,6 +334,68 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
         duplicatePinned
         ? storageService.saveNewList(list: list)
         : storageService.updateList(list: list)
+    }
+    
+    func addEventAndNotification(date: Date) {
+        // 1. Создаем событие в календаре
+        let event = EKEvent(eventStore: eventStore)
+        event.title = .appName
+        event.notes = notificationText
+        event.startDate = date
+        event.endDate = date.addingTimeInterval(3600)
+        event.calendar = eventStore.defaultCalendarForNewEvents
+        
+        do {
+            try eventStore.save(event, span: .thisEvent)
+            print("Событие сохранено в календаре")
+        } catch {
+            print("Ошибка сохранения события: \(error.localizedDescription)")
+        }
+        
+        // 2. Создаем локальное уведомление
+        let content = UNMutableNotificationContent()
+        content.title = .appName
+        content.body = notificationText
+        content.sound = .default
+        
+        let triggerDate = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
+        
+        let request = UNNotificationRequest(
+            identifier: "event_\(event.eventIdentifier ?? UUID().uuidString)",
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Ошибка уведомления: \(error.localizedDescription)")
+            } else {
+                print("Уведомление создано")
+            }
+        }
+    }
+    
+    // Запрос доступа к календарю
+    func requestCalendarAccess() {
+        eventStore.requestAccess(to: .event) { granted, error in
+            if granted {
+                print("Доступ к календарю разрешен")
+            } else if let error = error {
+                print("Ошибка доступа к календарю: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    // Запрос разрешения на уведомления
+    func requestNotificationAuthorization() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if granted {
+                print("Уведомления разрешены")
+            } else if let error = error {
+                print("Ошибка уведомлений: \(error.localizedDescription)")
+            }
+        }
     }
 }
 

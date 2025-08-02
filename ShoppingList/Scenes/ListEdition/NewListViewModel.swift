@@ -2,6 +2,7 @@ import Foundation
 
 protocol NewListViewModelProtocol {
     var newListBinding: Observable<[NewListBinding]> { get set }
+    
     func viewWillAppear()
     func viewWillDisappear()
     func completeButtonPressed()
@@ -28,12 +29,12 @@ final class NewListViewModel: NewListViewModelProtocol {
     private var editedList: ShopList?
     private lazy var autoSave: Bool = {
         validateName(row: 0)
-        return listItems[0].error == nil
+        return listItems[0].error == nil && !completeButtonWasPressed
     }()
     private var userIsTyping: Bool = false
     private var tableIsUpdating: Bool = false
     private var completeButtonState: Bool = true
-    
+    private var completeButtonWasPressed: Bool = false
     private var listIsValid: Bool {
         validateList()
     }
@@ -57,7 +58,6 @@ final class NewListViewModel: NewListViewModelProtocol {
         case addNewItem
         case completeButtonPressed
         case viewWillDisappear
-        //        case wipeInputs
     }
     
     private enum Values {
@@ -81,6 +81,7 @@ final class NewListViewModel: NewListViewModelProtocol {
     // MARK: - Public Methods
     func viewWillAppear() {
         self.state = .loadList
+        completeButtonWasPressed = false
     }
     
     func viewWillDisappear() {
@@ -232,7 +233,7 @@ final class NewListViewModel: NewListViewModelProtocol {
             
             if listIsValid {
                 DispatchQueue.main.async {
-                    //                    self.autoSave = false
+                    self.completeButtonWasPressed = true
                     self.editList == nil
                     ? self.storageService.saveNewList(list: self.buildNewList())
                     : self.storageService.updateList(list: self.buildNewList())
@@ -246,14 +247,6 @@ final class NewListViewModel: NewListViewModelProtocol {
                 ? self.storageService.saveNewList(list: self.buildNewList())
                 : self.storageService.updateList(list: self.buildNewList())
             }
-            
-            //        case .wipeInputs:
-            //            listItems = [
-            //                .init(id: UUID(), title: nil),
-            //                .init(id: UUID(), title: .buttonAddProduct)
-            //            ]
-            //            tableIsUpdating = true
-            //            newListBinding.value = [.reloadTable]
             
         default:
             break
@@ -306,26 +299,6 @@ final class NewListViewModel: NewListViewModelProtocol {
         listItems.firstIndex(where: { $0.id == id }) ?? 0
     }
     
-    //    private func saveUserInputs() {
-    //        guard editList == nil,
-    //              listItems[0].title != nil || listItems.count > 2  else {
-    //            UserDefaults.standard.set(false, forKey: "newListInputsSaved")
-    //            return
-    //        }
-    //        UserDefaults.standard.set(true, forKey: "newListInputsSaved")
-    //        UserDefaults.standard.set(listItems[0].title, forKey: "newListTitle")
-    //        let itemsCount = listItems.count - 2
-    //        UserDefaults.standard.set(itemsCount, forKey: "newListItemsCount")
-    //
-    //        if itemsCount > 0 {
-    //            for i in 1...itemsCount {
-    //                UserDefaults.standard.set(listItems[i].title, forKey: "newListItem\(i).title")
-    //                UserDefaults.standard.set(listItems[i].quantity, forKey: "newListItem\(i).quantity")
-    //                UserDefaults.standard.set(listItems[i].unit?.rawValue, forKey: "newListItem\(i).unit")
-    //            }
-    //        }
-    //    }
-    
     private func restoreUserInputs() {
         //            guard UserDefaults.standard.bool(forKey: "newListInputsSaved") == true else {
         listItems = [
@@ -334,33 +307,6 @@ final class NewListViewModel: NewListViewModelProtocol {
         ]
         return
     }
-    //
-    //        listItems = [.init(id: UUID(), title: UserDefaults.standard.string(forKey: "newListTitle"))]
-    //
-    //        let itemsCount = UserDefaults.standard.integer(forKey: "newListItemsCount")
-    //
-    //        if itemsCount > 0 {
-    //            for i in 1...itemsCount {
-    //                listItems.append(
-    //                    .init(id: UUID(),
-    //                          title: UserDefaults.standard.string(forKey: "newListItem\(i).title"),
-    //                          quantity: UserDefaults.standard.float(forKey: "newListItem\(i).quantity"),
-    //                          unit: Units(rawValue: UserDefaults.standard.string(forKey: "newListItem\(i).unit")
-    //                                      ?? Units.piece.rawValue) ?? .piece,
-    //                          checked: false
-    //                         )
-    //                )
-    //            }
-    //        }
-    //        listItems.append(.init(id: UUID(), title: .buttonAddProduct))
-    //        clearSavedUserInputs()
-    //    }
-    
-    //    private func clearSavedUserInputs() {
-    //        if let bundleID = Bundle.main.bundleIdentifier {
-    //            UserDefaults.standard.removePersistentDomain(forName: bundleID)
-    //        }
-    //    }
     
     @discardableResult
     private func updateCompleteButtonState() -> Bool { // возвращает true если статус изменился
@@ -397,7 +343,6 @@ final class NewListViewModel: NewListViewModelProtocol {
     private func validateList() -> Bool {
         listItems.first(where: { $0.title == nil || $0.title?.isEmpty == true || $0.error != nil}) == nil
     }
-    
 }
 
 // MARK: - NewListCellDelegate

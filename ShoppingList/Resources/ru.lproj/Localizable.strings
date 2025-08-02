@@ -1,3 +1,7 @@
+"app.name" = "Список покупок";
+
+"notification.text" = "Покупки по списку";
+
 "units.kg" = "кг";
 "units.liter" = "л";
 "units.pack" = "уп";
