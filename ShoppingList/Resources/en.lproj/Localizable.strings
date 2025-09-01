@@ -1,6 +1,6 @@
 "app.name" = "Shopping list";
 
-"notification.text" = "Покупки по списку";
+"notification.text" = "List Shopping";
 
 "units.kg" = "kg";
 "units.liter" = "l";
@@ -17,6 +17,7 @@
 "buttons.back" = "Back";
 "buttons.cancel" = "Cancel";
 "buttons.done" = "Done";
+"buttons.apply" = "Apply";
 "buttons.ok" = "Ok";
 "buttons.addProduct" = "Add product";
 "buttons.saveList" = "Save list";
@@ -40,14 +41,14 @@
 "themes.automatic" = "Automatic";
 "themes.dark" = "Dark";
 
-"onboarding.page1.header" = "Удобно и просто";
-"onboarding.page1.description" = "Создавай любые списки чтобы\nне забыть все все, что ты хочешь\nкупить";
-"onboarding.page2.header" = "Ты точно не забудешь";
-"onboarding.page2.description" = "Напомним в любое время о твоих\nпланах на магзины";
-"onboarding.page3.header" = "Все понятно";
-"onboarding.page3.description" = "Удобный интерфейс для ежедневных\nпокупок, давай попробуем!";
+"onboarding.page1.header" = "Easy and Convenient";
+"onboarding.page1.description" = "Create any kind of list\nto never forget everything\nyou want to buy.";
+"onboarding.page2.header" = "You Won't Forget a Thing";
+"onboarding.page2.description" = "We'll remind you anytime\nabout your shopping plans.";
+"onboarding.page3.header" = "Simple & Intuitive";
+"onboarding.page3.description" = "A convenient interface\nfor your daily shopping.\nLet's give it a try!";
 
-"welcomeScreen.header" = "Нажми на кнопку\nи запиши все свои\nхотелки";
+"welcomeScreen.header" = "Tap the button and write down\nall your wishlist items!";
 
 "settings.languageSettings.title" = "Language";
 "settings.themeSettings.title" = "Theme";
@@ -76,3 +77,5 @@
 
 "successView.congratulations" = "Congratulations!";
 "successView.additional" = "You're done shopping.\nCome back again with\nnew lists.";
+
+"datePickerView.title" = "Set date and time:";

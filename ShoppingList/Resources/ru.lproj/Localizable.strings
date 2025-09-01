@@ -17,6 +17,7 @@
 "buttons.back" = "Назад";
 "buttons.cancel" = "Oтмена";
 "buttons.done" = "Готово";
+"buttons.apply" = "Применить";
 "buttons.ok" = "ОК";
 "buttons.addProduct" = "Добавить продукт";
 "buttons.saveList" = "Сохранить список";
@@ -43,7 +44,7 @@
 "onboarding.page1.header" = "Удобно и просто";
 "onboarding.page1.description" = "Создавай любые списки чтобы\nне забыть все все, что ты хочешь\nкупить";
 "onboarding.page2.header" = "Ты точно не забудешь";
-"onboarding.page2.description" = "Напомним в любое время о твоих\nпланах на магзины";
+"onboarding.page2.description" = "Напомним в любое время о твоих\nпланах на магазины";
 "onboarding.page3.header" = "Все понятно";
 "onboarding.page3.description" = "Удобный интерфейс для ежедневных\nпокупок, давай попробуем!";
 
@@ -76,3 +77,5 @@
 
 "successView.congratulations" = "Поздравляем!";
 "successView.additional" = "Вы завершили покупки.\nВозвращайтесь снова с новыми\nсписками.";
+
+"datePickerView.title" = "Установите дату и время:";

@@ -2,7 +2,6 @@ import UIKit
 protocol Coordinator {
     var storageService: StorageService { get }
     var currentTheme: Int { get set }
-//    var languageManager: LanguageManager { get }
     var currentLanguage: Int { get set }
     
     func start()
@@ -15,6 +14,7 @@ protocol Coordinator {
     func switchToShoppingList(with listInfo: ListInfo)
     func switchToListEditionView(editList: UUID?)
     func showSuccessView(delegate: SuccessViewDelegate)
+    func showDatePickerView(delegate: DatePickerViewDelegate)
     func dismissPopupVC()
     func popToMainView()
     func switchToMainView()
@@ -111,6 +111,13 @@ final class AppCoordinator: Coordinator {
             delegate: delegate
         )
         navigationController.present(successVC, animated: true, completion: nil)
+    }
+    
+    func showDatePickerView(delegate: DatePickerViewDelegate) {
+        let datePickerVC = DatePickerViewAssembler().build(
+            delegate: delegate
+        )
+        navigationController.present(datePickerVC, animated: true, completion: nil)
     }
     
     func dismissPopupVC() {

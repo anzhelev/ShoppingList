@@ -56,19 +56,6 @@ class ShoppingListViewController: UIViewController {
         return button
     }()
     
-    private lazy var datePicker = {
-        let datePicker = UIDatePicker()
-        datePicker.datePickerMode = .dateAndTime
-        datePicker.minimumDate = Date()
-        datePicker.maximumDate = Calendar.current.date(byAdding: .day, value: 365, to: Date())
-        datePicker.roundsToMinuteInterval = true
-        datePicker.minuteInterval = 5
-        datePicker.preferredDatePickerStyle = .wheels
-//        datePicker.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height)
-        return datePicker
-    }()
-
-    
     // MARK: - Initializers
     init(viewModel: ShoppingListViewModelProtocol) {
         self.viewModel = viewModel
@@ -115,9 +102,6 @@ class ShoppingListViewController: UIViewController {
                 
             case .showPopUp(let id, let quantity, let unit):
                 self?.showPopUpView(for: id, quantity: quantity, unit: unit)
-                
-            case .addReminder:
-                self?.addReminder()
                 
             case .updateItem(let indexPath, let option):
                 self?.listItemsTable.isUserInteractionEnabled = !option
@@ -270,30 +254,6 @@ class ShoppingListViewController: UIViewController {
         }
         
         present(popUpView, animated: true)
-    }
-    
-    private func addReminder() {
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        alert.view.addSubview(datePicker)
-        alert.view.heightAnchor.constraint(equalToConstant: 400).isActive = true
-        alert.view.backgroundColor = .white
-        alert.view.layer.cornerRadius = 16
-        alert.view.clipsToBounds = true
-        
-        datePicker.translatesAutoresizingMaskIntoConstraints = false
-        datePicker.leadingAnchor.constraint(equalTo: alert.view.leadingAnchor).isActive = true
-        datePicker.trailingAnchor.constraint(equalTo: alert.view.trailingAnchor).isActive = true
-        datePicker.topAnchor.constraint(equalTo: alert.view.topAnchor).isActive = true
-        datePicker.bottomAnchor.constraint(equalTo: alert.view.bottomAnchor, constant: -90).isActive = true
-
-        let okAction = UIAlertAction(title: .buttonDone, style: .default) { _ in
-            self.viewModel.addEventAndNotification(date: self.datePicker.date)
-        }
-        let cancelAction = UIAlertAction(title: .buttonCancel, style: .destructive)
-        
-        alert.addAction(okAction)
-        alert.addAction(cancelAction)
-        present(alert, animated: true)
     }
 }
 

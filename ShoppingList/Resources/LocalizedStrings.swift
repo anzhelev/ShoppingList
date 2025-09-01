@@ -15,6 +15,7 @@ extension String {
     static let buttonBack = NSLocalizedString("buttons.back", comment: "")
     static let buttonCancel = NSLocalizedString("buttons.cancel", comment: "")
     static let buttonDone = NSLocalizedString("buttons.done", comment: "")
+    static let buttonApply: String = NSLocalizedString("buttons.apply", comment: "")
     static let buttonOk: String = NSLocalizedString("buttons.ok", comment: "")
     static let buttonAddProduct = NSLocalizedString("buttons.addProduct", comment: "")
     static let buttonSaveList = NSLocalizedString("buttons.saveList", comment: "")
@@ -69,6 +70,8 @@ extension String {
     static let shoppingListVCcheckAll = NSLocalizedString("shoppingListViewController.checkAll", comment: "")
     static let successViewCongratulations = NSLocalizedString("successView.congratulations", comment: "")
     static let successViewAdditional = NSLocalizedString("successView.additional", comment: "")
+    
+    static let datePickerViewTitle = NSLocalizedString("datePickerView.title", comment: "")
     
     static let settingsLanguageSectionTitle = NSLocalizedString("settings.languageSettings.title", comment: "")
     static let settingsThemeSectionTitle = NSLocalizedString("settings.themeSettings.title", comment: "")
