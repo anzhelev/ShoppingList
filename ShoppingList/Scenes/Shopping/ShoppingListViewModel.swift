@@ -349,7 +349,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
                        ),
             items: newListItems
         )
-        storageService.saveNewList(list: list)        
+        storageService.saveNewList(list: list)
     }
     
     private func saveListToStorage(duplicatePinned: Bool) {

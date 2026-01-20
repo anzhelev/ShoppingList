@@ -19,7 +19,7 @@ class ThemeManager {
     
     func applyCurrentTheme(for window: UIWindow) {
         window.overrideUserInterfaceStyle =
-        currentTheme == 1 ? .light
+        currentTheme == 0 ? .light
         : currentTheme == 2 ? .dark
         : .unspecified
     }

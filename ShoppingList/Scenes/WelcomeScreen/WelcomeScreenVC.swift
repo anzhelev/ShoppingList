@@ -52,7 +52,7 @@ final class WelcomeScreenVC: UIViewController {
         label.text = text
         label.textAlignment = .center
         label.font = .mainScreenTitle
-        label.textColor = .black
+        label.textColor = .textColorPrimary
         label.numberOfLines = 3
         return label
     }

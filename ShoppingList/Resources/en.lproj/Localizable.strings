@@ -24,8 +24,8 @@
 "buttons.restoreList" = "Restore list";
 "buttons.removeCheckedItems" = "Done with shopping";
 "buttons.switchToMainScreen" = "To main screen";
-"buttons.createNewList" = "Создать новый список";
-"buttons.clearArchive" = "Очистить архив";
+"buttons.createNewList" = "Create new list";
+"buttons.clearArchive" = "Clear archive";
 
 "dropdown.share" = "Share with...";
 "dropdown.sorting" = "Sorting";

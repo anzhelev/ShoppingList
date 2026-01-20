@@ -10,7 +10,7 @@ final class NewListCellItem: UITableViewCell {
     private var cellID = UUID()
     private var quantity: Float = 1
     private var unit: Units = .piece
-    private let maxNameleLenght = 15
+    private let maxNameleLenght = 27
     
     private lazy var itemNameField = {
         let textField = UITextField()

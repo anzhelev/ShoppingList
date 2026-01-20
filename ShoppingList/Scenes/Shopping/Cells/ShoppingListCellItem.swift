@@ -10,7 +10,7 @@ final class ShoppingListCellItem: UITableViewCell {
     private var cellID = UUID()
     private var quantity: Float = 1
     private var unit: Units = .piece
-    private let maxNameleLenght = 25
+    private let maxNameleLenght = 27
     
     private let checkBoxImageView = UIImageView()
     

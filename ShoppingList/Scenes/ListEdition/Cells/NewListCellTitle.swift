@@ -16,7 +16,7 @@ final class NewListCellTitle: UITableViewCell {
         textField.clearButtonMode = .always
         textField.tintColor = .textColorPrimary
         textField.textColor = .textColorPrimary
-        textField.font = .itemName
+        textField.font = .listScreenTitle
         textField.placeholder = .newListTitlePlaceholder
         textField.clearButtonMode = .whileEditing
         return textField

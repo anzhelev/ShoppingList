@@ -26,8 +26,8 @@ class OnboardingViewController: UIPageViewController {
         let pageControl = UIPageControl()
         pageControl.numberOfPages = pages.count
         pageControl.currentPage = 0
-        pageControl.currentPageIndicatorTintColor = .black
-        pageControl.pageIndicatorTintColor = .black.withAlphaComponent(0.3)
+        pageControl.currentPageIndicatorTintColor = .textColorPrimary
+        pageControl.pageIndicatorTintColor = .textColorPrimary.withAlphaComponent(0.3)
         pageControl.backgroundStyle = .prominent
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         return pageControl
@@ -83,7 +83,7 @@ class OnboardingViewController: UIPageViewController {
         label.text = text
         label.textAlignment = .center
         label.font = .mainScreenTitle
-        label.textColor = .black
+        label.textColor = .textColorPrimary
         label.numberOfLines = 2
         return label
     }
@@ -93,7 +93,7 @@ class OnboardingViewController: UIPageViewController {
         label.text = text
         label.textAlignment = .center
         label.font = .itemName
-        label.textColor = .black
+        label.textColor = .textColorPrimary
         label.numberOfLines = 3
         return label
     }
