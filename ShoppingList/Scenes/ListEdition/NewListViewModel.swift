@@ -300,9 +300,8 @@ final class NewListViewModel: NewListViewModelProtocol {
     }
     
     private func restoreUserInputs() {
-        //            guard UserDefaults.standard.bool(forKey: "newListInputsSaved") == true else {
         listItems = [
-            .init(id: UUID()),//, error: .newListEmptyName),
+            .init(id: UUID()),
             .init(id: UUID(), title: .buttonAddProduct)
         ]
         return
