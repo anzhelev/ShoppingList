@@ -91,12 +91,12 @@
 				};
 			};
 			buildConfigurationList = D46AA5962CF889B700B81D86 /* Build configuration list for PBXProject "ShoppingList" */;
-			developmentRegion = ru;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				Base,
 				ru,
 				en,
+				Base,
 			);
 			mainGroup = D46AA5922CF889B700B81D86;
 			minimizedProjectReferenceProxies = 1;
@@ -141,6 +141,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShoppingList/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Приложение использует календарь для создания напоминаний";
+				INFOPLIST_KEY_NSRemindersUsageDescription = "Приложение хочет получать доступ к напоминаниям";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
@@ -174,6 +176,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ShoppingList/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Приложение использует календарь для создания напоминаний";
+				INFOPLIST_KEY_NSRemindersUsageDescription = "Приложение хочет получать доступ к напоминаниям";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
