@@ -91,7 +91,7 @@
 				};
 			};
 			buildConfigurationList = D46AA5962CF889B700B81D86 /* Build configuration list for PBXProject "ShoppingList" */;
-			developmentRegion = en;
+			developmentRegion = ru;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				ru,

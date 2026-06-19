@@ -1,81 +1,81 @@
-"app.name" = "Всё взял!";
+"app.name" = "Got It All!";
 
-"notification.text" = "Покупки по списку";
+"notification.text" = "List Shopping";
 
-"units.kg" = "кг";
-"units.liter" = "л";
-"units.pack" = "уп";
-"units.piece" = "шт";
+"units.kg" = "kg";
+"units.liter" = "l";
+"units.pack" = "pk";
+"units.piece" = "pc";
 
-"formatter.dateFormat" = "dd.MM.yyyy";
+"formatter.dateFormat" = "MM.dd.yyyy";
 
-"buttons.pin" = "Закрепить";
-"buttons.unpin" = "Открепить";
-"buttons.edit" = "Редактировать";
-"buttons.restore" = "Восстановить";
-"buttons.delete" = "Удалить";
-"buttons.back" = "Назад";
-"buttons.cancel" = "Oтмена";
-"buttons.done" = "Готово";
-"buttons.apply" = "Применить";
-"buttons.ok" = "ОК";
-"buttons.addProduct" = "Добавить продукт";
-"buttons.saveList" = "Сохранить список";
-"buttons.restoreList" = "Восстановить список";
-"buttons.removeCheckedItems" = "Завершить покупки";
-"buttons.switchToMainScreen" = "На главную";
-"buttons.createNewList" = "Создать новый список";
-"buttons.clearArchive" = "Очистить архив";
+"buttons.pin" = "Pin";
+"buttons.unpin" = "Unpin";
+"buttons.edit" = "Edit";
+"buttons.restore" = "Restore";
+"buttons.delete" = "Delete";
+"buttons.back" = "Back";
+"buttons.cancel" = "Cancel";
+"buttons.done" = "Done";
+"buttons.apply" = "Apply";
+"buttons.ok" = "Ok";
+"buttons.addProduct" = "Add product";
+"buttons.saveList" = "Save list";
+"buttons.restoreList" = "Restore list";
+"buttons.removeCheckedItems" = "Done with shopping";
+"buttons.switchToMainScreen" = "To main screen";
+"buttons.createNewList" = "Create new list";
+"buttons.clearArchive" = "Clear archive";
 
-"dropdown.share" = "Поделиться с ...";
-"dropdown.sorting" = "Сортировка";
-"dropdown.duplicate" = "Дублировать";
-"dropdown.remind" = "Напомнить";
-"dropdown.reset" = "Очистить поля ввода";
+"dropdown.share" = "Share with...";
+"dropdown.sorting" = "Sorting";
+"dropdown.duplicate" = "Duplicate";
+"dropdown.remind" = "Remind";
+"dropdown.reset" = "Reset input fields";
 
-"languages.system" = "Язык системы";
+"languages.system" = "System";
 "languages.english" = "English";
 "languages.russian" = "Русский";
 
-"themes.light" = "Светлая";
-"themes.automatic" = "Авто";
-"themes.dark" = "Темная";
+"themes.light" = "Light";
+"themes.automatic" = "Automatic";
+"themes.dark" = "Dark";
 
-"onboarding.page1.header" = "Удобно и просто";
-"onboarding.page1.description" = "Создавай любые списки чтобы\nне забыть все все, что ты хочешь\nкупить";
-"onboarding.page2.header" = "Ты точно не забудешь";
-"onboarding.page2.description" = "Напомним в любое время о твоих\nпланах на магазины";
-"onboarding.page3.header" = "Все понятно";
-"onboarding.page3.description" = "Удобный интерфейс для ежедневных\nпокупок, давай попробуем!";
+"onboarding.page1.header" = "Easy and Convenient";
+"onboarding.page1.description" = "Create any kind of list\nto never forget everything\nyou want to buy.";
+"onboarding.page2.header" = "You Won't Forget a Thing";
+"onboarding.page2.description" = "We'll remind you anytime\nabout your shopping plans.";
+"onboarding.page3.header" = "Simple & Intuitive";
+"onboarding.page3.description" = "A convenient interface\nfor your daily shopping.\nLet's give it a try!";
 
-"welcomeScreen.header" = "Нажми на кнопку\nи запиши все свои\nхотелки";
+"welcomeScreen.header" = "Tap the button and write down\nall your wishlist items!";
 
-"settings.languageSettings.title" = "Язык";
-"settings.themeSettings.title" = "Тема";
-"settings.alert.title" = "Внимание!";
-"settings.alert.message" = "Для применения настройки языка \nперезапустите приложение";
+"settings.languageSettings.title" = "Language";
+"settings.themeSettings.title" = "Theme";
+"settings.alert.title" = "Attention!";
+"settings.alert.message" = "Please restart the app for\nthe language changes to take effect";
 
-"tabBar.mainView" = "Списки покупок";
-"tabBar.archiveView" = "Архив";
-"tabBar.settingsView" = "Настройки";
+"tabBar.mainView" = "Shopping lists";
+"tabBar.archiveView" = "Archive";
+"tabBar.settingsView" = "Settings";
 
-"mainScreenViewController.active.title" = "Списки покупок";
-"mainScreenViewController.active.swipeHint" = "Проведите, чтобы открыть\nзавершенные списки";
-"mainScreenViewController.completed.title" = "Завершенные списки";
-"mainScreenViewController.completed.swipeHint" = "Проведите, чтобы открыть все списки";
-"mainScreenViewController.stub" = "У вас еще нет списков покупок.\nСамое время создать первый!";
+"mainScreenViewController.active.title" = "Shopping lists";
+"mainScreenViewController.active.swipeHint" = "Swipe to open\ncompleted lists";
+"mainScreenViewController.completed.title" = "Completed lists";
+"mainScreenViewController.completed.swipeHint" = "Swipe to open all lists";
+"mainScreenViewController.stub" = "There are no shopping lists yet.\nIt's the perfect time to create\nyour first one!";
 
-"newListViewController.title" = "Новый список";
-"newListViewController.titlePlaceholder" = "Введите название списка";
-"newListViewController.itemPlaceholder" = "Продукт";
-"newListViewController.nameAlreadyUsed" = "Такой список уже есть";
-"newListViewController.wrongName" = "Такое название недопустимо";
-"newListViewController.emptyName" = "Введите название";
-"newListViewController.addProductHint" = "Не забудьте указать количество";
+"newListViewController.title" = "New list";
+"newListViewController.titlePlaceholder" = "Enter list name";
+"newListViewController.itemPlaceholder" = "Product";
+"newListViewController.nameAlreadyUsed" = "This list already exists";
+"newListViewController.wrongName" = "This name is not allowed";
+"newListViewController.emptyName" = "Enter a name";
+"newListViewController.addProductHint" = "Don't forget to specify the quantity";
 
-"shoppingListViewController.checkAll" = "Отметить все продукты";
+"shoppingListViewController.checkAll" = "Mark all products";
 
-"successView.congratulations" = "Поздравляем!";
-"successView.additional" = "Вы завершили покупки.\nВозвращайтесь снова с новыми\nсписками.";
+"successView.congratulations" = "Congratulations!";
+"successView.additional" = "You're done shopping.\nCome back again with\nnew lists.";
 
-"datePickerView.title" = "Установите дату и время:";
+"datePickerView.title" = "Set date and time:";
