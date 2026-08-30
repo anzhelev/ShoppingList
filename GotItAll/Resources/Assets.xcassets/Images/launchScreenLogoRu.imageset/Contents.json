@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "Всё взял!_any 1.svg",
+      "filename" : "Всё взял!_any.svg",
       "idiom" : "universal"
     },
     {
@@ -11,7 +11,7 @@
           "value" : "light"
         }
       ],
-      "filename" : "Всё взял!_any.svg",
+      "filename" : "Всё взял!_any 1.svg",
       "idiom" : "universal"
     },
     {
@@ -21,7 +21,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Всё взял!_dark 1.svg",
+      "filename" : "Всё взял!_dark.svg",
       "idiom" : "universal"
     }
   ],
