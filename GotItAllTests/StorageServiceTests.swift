@@ -1,6 +1,6 @@
 import CoreData
 import XCTest
-@testable import ShoppingList
+@testable import GotItAll
 
 final class StorageServiceTests: XCTestCase {
 

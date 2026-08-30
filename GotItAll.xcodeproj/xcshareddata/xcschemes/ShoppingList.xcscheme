@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D46AA59A2CF889B700B81D86"
-               BuildableName = "ShoppingList.app"
-               BlueprintName = "ShoppingList"
-               ReferencedContainer = "container:ShoppingList.xcodeproj">
+               BuildableName = "GotItAll.app"
+               BlueprintName = "GotItAll"
+               ReferencedContainer = "container:GotItAll.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -30,9 +30,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D4A000032E00000100000001"
-               BuildableName = "ShoppingListTests.xctest"
-               BlueprintName = "ShoppingListTests"
-               ReferencedContainer = "container:ShoppingList.xcodeproj">
+               BuildableName = "GotItAllTests.xctest"
+               BlueprintName = "GotItAllTests"
+               ReferencedContainer = "container:GotItAll.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -50,9 +50,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D4A000032E00000100000001"
-               BuildableName = "ShoppingListTests.xctest"
-               BlueprintName = "ShoppingListTests"
-               ReferencedContainer = "container:ShoppingList.xcodeproj">
+               BuildableName = "GotItAllTests.xctest"
+               BlueprintName = "GotItAllTests"
+               ReferencedContainer = "container:GotItAll.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D46AA59A2CF889B700B81D86"
-            BuildableName = "ShoppingList.app"
-            BlueprintName = "ShoppingList"
-            ReferencedContainer = "container:ShoppingList.xcodeproj">
+            BuildableName = "GotItAll.app"
+            BlueprintName = "GotItAll"
+            ReferencedContainer = "container:GotItAll.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -100,9 +100,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D46AA59A2CF889B700B81D86"
-            BuildableName = "ShoppingList.app"
-            BlueprintName = "ShoppingList"
-            ReferencedContainer = "container:ShoppingList.xcodeproj">
+            BuildableName = "GotItAll.app"
+            BlueprintName = "GotItAll"
+            ReferencedContainer = "container:GotItAll.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

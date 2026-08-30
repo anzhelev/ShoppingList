@@ -1,6 +1,6 @@
 import UIKit
 import XCTest
-@testable import ShoppingList
+@testable import GotItAll
 
 final class ThemeManagerTests: XCTestCase {
 

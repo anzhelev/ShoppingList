@@ -17,32 +17,32 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D4A000012E00000100000001 /* ShoppingListTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = ShoppingListTests.xctest; path = "/Users/andreyzhelev/Downloads/ShoppingListFixed/build/Debug-iphoneos/ShoppingList.app/PlugIns/ShoppingListTests.xctest"; sourceTree = "<absolute>"; };
-		D4BBACB72D638E7C00A59869 /* ShoppingList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShoppingList.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GotItAllTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4BBACB72D638E7C00A59869 /* GotItAll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GotItAll.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D4E9E86C2D452FB6006448E8 /* Exceptions for "ShoppingList" folder in "ShoppingList" target */ = {
+		D4E9E86C2D452FB6006448E8 /* Exceptions for "GotItAll" folder in "GotItAll" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = D46AA59A2CF889B700B81D86 /* ShoppingList */;
+			target = D46AA59A2CF889B700B81D86 /* GotItAll */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		D46AA59D2CF889B700B81D86 /* ShoppingList */ = {
+		D46AA59D2CF889B700B81D86 /* GotItAll */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D4E9E86C2D452FB6006448E8 /* Exceptions for "ShoppingList" folder in "ShoppingList" target */,
+				D4E9E86C2D452FB6006448E8 /* Exceptions for "GotItAll" folder in "GotItAll" target */,
 			);
-			path = ShoppingList;
+			path = GotItAll;
 			sourceTree = "<group>";
 		};
-		D4A000022E00000100000001 /* ShoppingListTests */ = {
+		D4A000022E00000100000001 /* GotItAllTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ShoppingListTests;
+			path = GotItAllTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -68,18 +68,19 @@
 		D46AA5922CF889B700B81D86 = {
 			isa = PBXGroup;
 			children = (
-				D46AA59D2CF889B700B81D86 /* ShoppingList */,
-				D4A000022E00000100000001 /* ShoppingListTests */,
-				D4BBACB72D638E7C00A59869 /* ShoppingList.app */,
+				D46AA59D2CF889B700B81D86 /* GotItAll */,
+				D4A000022E00000100000001 /* GotItAllTests */,
+				D4BBACB72D638E7C00A59869 /* GotItAll.app */,
+				D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D46AA59A2CF889B700B81D86 /* ShoppingList */ = {
+		D46AA59A2CF889B700B81D86 /* GotItAll */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D46AA5B12CF889B900B81D86 /* Build configuration list for PBXNativeTarget "ShoppingList" */;
+			buildConfigurationList = D46AA5B12CF889B900B81D86 /* Build configuration list for PBXNativeTarget "GotItAll" */;
 			buildPhases = (
 				D46AA5972CF889B700B81D86 /* Sources */,
 				D46AA5982CF889B700B81D86 /* Frameworks */,
@@ -90,18 +91,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				D46AA59D2CF889B700B81D86 /* ShoppingList */,
+				D46AA59D2CF889B700B81D86 /* GotItAll */,
 			);
-			name = ShoppingList;
+			name = GotItAll;
 			packageProductDependencies = (
 			);
 			productName = ShoppingList;
-			productReference = D4BBACB72D638E7C00A59869 /* ShoppingList.app */;
+			productReference = D4BBACB72D638E7C00A59869 /* GotItAll.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D4A000032E00000100000001 /* ShoppingListTests */ = {
+		D4A000032E00000100000001 /* GotItAllTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D4A000072E00000100000001 /* Build configuration list for PBXNativeTarget "ShoppingListTests" */;
+			buildConfigurationList = D4A000072E00000100000001 /* Build configuration list for PBXNativeTarget "GotItAllTests" */;
 			buildPhases = (
 				D4A000042E00000100000001 /* Sources */,
 				D4A000052E00000100000001 /* Frameworks */,
@@ -113,13 +114,13 @@
 				D4A0000B2E00000100000001 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				D4A000022E00000100000001 /* ShoppingListTests */,
+				D4A000022E00000100000001 /* GotItAllTests */,
 			);
-			name = ShoppingListTests;
+			name = GotItAllTests;
 			packageProductDependencies = (
 			);
 			productName = ShoppingListTests;
-			productReference = D4A000012E00000100000001 /* ShoppingListTests.xctest */;
+			productReference = D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -141,7 +142,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D46AA5962CF889B700B81D86 /* Build configuration list for PBXProject "ShoppingList" */;
+			buildConfigurationList = D46AA5962CF889B700B81D86 /* Build configuration list for PBXProject "GotItAll" */;
 			developmentRegion = ru;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -156,8 +157,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D46AA59A2CF889B700B81D86 /* ShoppingList */,
-				D4A000032E00000100000001 /* ShoppingListTests */,
+				D46AA59A2CF889B700B81D86 /* GotItAll */,
+				D4A000032E00000100000001 /* GotItAllTests */,
 			);
 		};
 /* End PBXProject section */
@@ -199,7 +200,7 @@
 /* Begin PBXTargetDependency section */
 		D4A0000B2E00000100000001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D46AA59A2CF889B700B81D86 /* ShoppingList */;
+			target = D46AA59A2CF889B700B81D86 /* GotItAll */;
 			targetProxy = D4A0000A2E00000100000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -213,7 +214,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ShoppingList/Info.plist;
+				INFOPLIST_FILE = GotItAll/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Got It All";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -227,7 +228,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.ShoppingList;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.GotItAll;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -247,7 +248,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ShoppingList/Info.plist;
+				INFOPLIST_FILE = GotItAll/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Got It All";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -261,7 +262,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.ShoppingList;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.GotItAll;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -405,13 +406,17 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.ShoppingListTests;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.GotItAllTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ShoppingList.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ShoppingList";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GotItAll.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GotItAll";
 			};
 			name = Debug;
 		};
@@ -422,20 +427,24 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.ShoppingListTests;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.GotItAllTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ShoppingList.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ShoppingList";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GotItAll.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GotItAll";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D46AA5962CF889B700B81D86 /* Build configuration list for PBXProject "ShoppingList" */ = {
+		D46AA5962CF889B700B81D86 /* Build configuration list for PBXProject "GotItAll" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D46AA5B42CF889B900B81D86 /* Debug */,
@@ -444,7 +453,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D46AA5B12CF889B900B81D86 /* Build configuration list for PBXNativeTarget "ShoppingList" */ = {
+		D46AA5B12CF889B900B81D86 /* Build configuration list for PBXNativeTarget "GotItAll" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D46AA5B22CF889B900B81D86 /* Debug */,
@@ -453,7 +462,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D4A000072E00000100000001 /* Build configuration list for PBXNativeTarget "ShoppingListTests" */ = {
+		D4A000072E00000100000001 /* Build configuration list for PBXNativeTarget "GotItAllTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D4A000082E00000100000001 /* Debug */,
