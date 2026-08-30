@@ -1,10 +1,10 @@
 import UIKit
 
-final class OnboardingAssembler {    
+final class OnboardingAssembler {
+
+    // MARK: - Public Methods
     public func build(coordinator: Coordinator) -> UIPageViewController {
         let viewModel = OnboardingViewModel(coordinator: coordinator)
-        let viewController = OnboardingViewController()
-        viewController.viewModel = viewModel
-        return viewController
+        return OnboardingViewController(viewModel: viewModel)
     }
 }

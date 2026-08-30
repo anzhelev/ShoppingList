@@ -1,4 +1,6 @@
 struct LanguageCellParams {
+
+    // MARK: - Public Properties
     let name: String
     let corners: RoundedCorners
     let separator: Bool
@@ -6,8 +8,10 @@ struct LanguageCellParams {
 }
 
 enum RoundedCorners: String {
-    case top
-    case bottom
+
+    // MARK: - Constants
     case all
+    case bottom
     case none
+    case top
 }

@@ -1,54 +1,18 @@
 {
   "images" : [
     {
-      "filename" : "Всё взял!_any.svg",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "filename" : "Всё взял!_dark.svg",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "idiom" : "universal",
-      "scale" : "3x"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "idiom" : "universal",
-      "scale" : "3x"
-    },
-    {
       "filename" : "Всё взял!_any 1.svg",
-      "idiom" : "universal",
-      "locale" : "ru",
-      "scale" : "1x"
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "light"
+        }
+      ],
+      "filename" : "Всё взял!_any.svg",
+      "idiom" : "universal"
     },
     {
       "appearances" : [
@@ -58,47 +22,23 @@
         }
       ],
       "filename" : "Всё взял!_dark 1.svg",
-      "idiom" : "universal",
-      "locale" : "ru",
-      "scale" : "1x"
-    },
-    {
-      "idiom" : "universal",
-      "locale" : "ru",
-      "scale" : "2x"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "idiom" : "universal",
-      "locale" : "ru",
-      "scale" : "2x"
-    },
-    {
-      "idiom" : "universal",
-      "locale" : "ru",
-      "scale" : "3x"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "idiom" : "universal",
-      "locale" : "ru",
-      "scale" : "3x"
+      "idiom" : "universal"
     },
     {
       "filename" : "Got It All!_any.svg",
       "idiom" : "universal",
-      "locale" : "en",
-      "scale" : "1x"
+      "locale" : "en"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "light"
+        }
+      ],
+      "filename" : "Got It All!_any 1.svg",
+      "idiom" : "universal",
+      "locale" : "en"
     },
     {
       "appearances" : [
@@ -109,13 +49,23 @@
       ],
       "filename" : "Got It All!_dark.svg",
       "idiom" : "universal",
-      "locale" : "en",
-      "scale" : "1x"
+      "locale" : "en"
     },
     {
+      "filename" : "Всё взял!_any 2.svg",
       "idiom" : "universal",
-      "locale" : "en",
-      "scale" : "2x"
+      "locale" : "ru"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "light"
+        }
+      ],
+      "filename" : "Всё взял!_any 3.svg",
+      "idiom" : "universal",
+      "locale" : "ru"
     },
     {
       "appearances" : [
@@ -124,25 +74,9 @@
           "value" : "dark"
         }
       ],
+      "filename" : "Всё взял!_dark 2.svg",
       "idiom" : "universal",
-      "locale" : "en",
-      "scale" : "2x"
-    },
-    {
-      "idiom" : "universal",
-      "locale" : "en",
-      "scale" : "3x"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "idiom" : "universal",
-      "locale" : "en",
-      "scale" : "3x"
+      "locale" : "ru"
     }
   ],
   "info" : {

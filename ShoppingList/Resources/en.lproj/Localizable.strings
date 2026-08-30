@@ -1,6 +1,6 @@
-"app.name" = "Got It All!";
+"app.name" = "Got It All";
 
-"notification.text" = "List Shopping";
+"notification.text" = "Shopping list “%@”";
 
 "units.kg" = "kg";
 "units.liter" = "l";
@@ -18,7 +18,9 @@
 "buttons.cancel" = "Cancel";
 "buttons.done" = "Done";
 "buttons.apply" = "Apply";
-"buttons.ok" = "Ok";
+"buttons.ok" = "OK";
+"buttons.clear" = "Clear";
+"buttons.settings" = "Settings";
 "buttons.addProduct" = "Add product";
 "buttons.saveList" = "Save list";
 "buttons.restoreList" = "Restore list";
@@ -27,7 +29,7 @@
 "buttons.createNewList" = "Create new list";
 "buttons.clearArchive" = "Clear archive";
 
-"dropdown.share" = "Share with...";
+"dropdown.share" = "Share…";
 "dropdown.sorting" = "Sorting";
 "dropdown.duplicate" = "Duplicate";
 "dropdown.remind" = "Remind";
@@ -42,11 +44,13 @@
 "themes.dark" = "Dark";
 
 "onboarding.page1.header" = "Easy and Convenient";
-"onboarding.page1.description" = "Create any kind of list\nto never forget everything\nyou want to buy.";
+"onboarding.page1.description" = "Create shopping lists so you never forget what you want to buy.";
 "onboarding.page2.header" = "You Won't Forget a Thing";
-"onboarding.page2.description" = "We'll remind you anytime\nabout your shopping plans.";
+"onboarding.page2.description" = "Set a time, and we'll remind you about your shopping plans.";
 "onboarding.page3.header" = "Simple & Intuitive";
-"onboarding.page3.description" = "A convenient interface\nfor your daily shopping.\nLet's give it a try!";
+"onboarding.page3.description" = "A simple interface for everyday shopping. Let's give it a try!";
+"onboarding.continue" = "Continue";
+"onboarding.start" = "Get started";
 
 "welcomeScreen.header" = "Tap the button and write down\nall your wishlist items!";
 
@@ -79,3 +83,12 @@
 "successView.additional" = "You're done shopping.\nCome back again with\nnew lists.";
 
 "datePickerView.title" = "Set date and time:";
+
+"errors.title" = "Something went wrong";
+"notifications.invalidDate" = "Select a future date and time.";
+"notifications.permissionDenied" = "Notifications are disabled. Enable them for this app in Settings.";
+"notifications.scheduledMessage" = "The reminder has been scheduled.";
+"notifications.scheduledTitle" = "Reminder ready";
+"storage.listAlreadyExists" = "A list with this identifier already exists.";
+"storage.listNotFound" = "The list could not be found. It may have already been deleted.";
+"shoppingList.duplicatedMessage" = "A copy of the list has been created.";

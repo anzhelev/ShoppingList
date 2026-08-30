@@ -1,19 +1,38 @@
 import UIKit
 
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-    
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+    // MARK: - Public Properties
     var window: UIWindow?
-    
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+
+    // MARK: - Private Properties
+    private var appCoordinator: AppCoordinator?
+
+    // MARK: - Lifecycle
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        guard let windowScene = scene as? UIWindowScene else {
+            return
+        }
         let window = UIWindow(windowScene: windowScene)
 
         self.window = window
-        let coordinator = AppCoordinator(window: window)
-        coordinator.start()
+        appCoordinator = AppCoordinator(window: window)
+        appCoordinator?.start()
     }
-    
+
     func sceneDidEnterBackground(_ scene: UIScene) {
-        (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+        do {
+            try (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+        } catch {
+            debugPrint("@@@ Core Data save failed: \(error.localizedDescription)")
+        }
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        appCoordinator?.applyCurrentTheme()
     }
 }

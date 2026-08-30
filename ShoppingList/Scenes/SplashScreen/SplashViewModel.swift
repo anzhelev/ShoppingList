@@ -1,20 +1,26 @@
 import UIKit
 
 final class SplashViewModel {
-    
-    // MARK: - Public Properties
-    private var coordinator: Coordinator
-    var switchToMainView: Observable<Bool> = Observable(nil)
-    
+
+    // MARK: - Private Properties
+    private let coordinator: Coordinator
+
+    // MARK: - Initializers
     init(coordinator: Coordinator) {
         self.coordinator = coordinator
     }
-    
+
+    // MARK: - Public Methods
     func animationCompleted() {
-        if UserDefaults.standard.bool(forKey: "skipOnboarding") == false {
-            UserDefaults.standard.set(true, forKey: "skipOnboarding")
+        let defaults = UserDefaults.standard
+        let didCompleteOnboarding = defaults.bool(forKey: "didCompleteOnboarding")
+            || defaults.bool(forKey: "skipOnboarding")
+
+        if didCompleteOnboarding == false {
             coordinator.showOnboarding()
         } else {
+            defaults.set(true, forKey: "didCompleteOnboarding")
+            defaults.removeObject(forKey: "skipOnboarding")
             coordinator.showTabBarVC()
         }
     }

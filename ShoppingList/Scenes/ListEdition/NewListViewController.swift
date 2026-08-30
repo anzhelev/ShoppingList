@@ -1,10 +1,13 @@
 import UIKit
 
-class NewListViewController: UIViewController, KeyboardHandler {
-    
+final class NewListViewController: UIViewController, KeyboardHandler {
+
+    // MARK: - Public Properties
+    var keyboardObserverTokens: [NSObjectProtocol] = []
+    var keyboardWillHideAction: ((Notification) -> Void)?
+    var keyboardWillShowAction: ((Notification) -> Void)?
+
     // MARK: - Private Properties
-    private let viewModel: NewListViewModelProtocol
-    
     private lazy var listItemsTable = {
         let table = UITableView()
         table.register(NewListCellTitle.self, forCellReuseIdentifier: NewListCellTitle.reuseIdentifier)
@@ -19,7 +22,7 @@ class NewListViewController: UIViewController, KeyboardHandler {
         table.allowsSelection = false
         return table
     }()
-    
+
     private lazy var completeButton = {
         let button = UIButton()
         button.setTitle(.buttonSaveList, for: .normal)
@@ -30,20 +33,20 @@ class NewListViewController: UIViewController, KeyboardHandler {
         button.addTarget(self, action: #selector(completeButtonPressed), for: .touchUpInside)
         return button
     }()
-    
-    var keyboardWillShowAction: ((Notification) -> Void)?
-    var keyboardWillHideAction: ((Notification) -> Void)?
-    
+
+    private var pendingScrollIndexPath: IndexPath?
+    private let viewModel: NewListViewModelProtocol
+
     // MARK: - Initializers
     init(viewModel: NewListViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,54 +56,53 @@ class NewListViewController: UIViewController, KeyboardHandler {
         bindViewModel()
         setUI()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(true)
+        super.viewWillAppear(animated)
         viewModel.viewWillAppear()
         updateCompleteButton()
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(true)
-        viewModel.viewWillDisappear()
+        super.viewWillDisappear(animated)
+        if isMovingFromParent {
+            viewModel.viewWillDisappear()
+        }
     }
-    
+
     deinit {
         removeKeyboardHandling()
     }
-    
-    // MARK: - Actions
-    @objc private func completeButtonPressed() {
-        viewModel.completeButtonPressed()
-    }
-    
+
     // MARK: - Private Methods
     private func bindViewModel() {
-        viewModel.newListBinding.bind {[weak self] tasks in
-            guard let tasks else { return }
+        viewModel.newListBinding.bind { [weak self] tasks in
+            guard let tasks else {
+                return
+            }
             for task in tasks {
                 switch task {
                 case .interactionEnabled(let state):
                     self?.listItemsTable.isUserInteractionEnabled = state
-                    
+
                 case .updateCompleteButtonState:
                     self?.updateCompleteButton()
-                    
+
                 case .showPopUp(let id, let quantity, let unit):
                     self?.showPopUpView(for: id, quantity: quantity, unit: unit)
-                    
+
                 case .updateItems(let indexes, let option):
                     self?.listItemsTable.isUserInteractionEnabled = !option
                     self?.reloadItems(indexes: indexes, animated: option)
-                    
+
                 case .insertItem(let indexPath):
                     self?.listItemsTable.isUserInteractionEnabled = false
                     self?.insertItem(index: indexPath)
-                    
+
                 case .removeItem(let indexPath):
                     self?.listItemsTable.isUserInteractionEnabled = false
                     self?.removeItem(index: indexPath)
-                    
+
                 case .reloadTable:
                     self?.listItemsTable.reloadData()
                     self?.viewModel.tableFinishedUpdating()
@@ -108,57 +110,59 @@ class NewListViewController: UIViewController, KeyboardHandler {
             }
         }
     }
-    
+
     private func reloadItems(indexes: [IndexPath], animated: Bool) {
         listItemsTable.performBatchUpdates {
             listItemsTable.reloadRows(at: indexes, with: animated ? .automatic : .none)
-        } completion: {_ in
+        } completion: { _ in
             self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
-    
+
     private func insertItem(index: IndexPath) {
+        pendingScrollIndexPath = index
         listItemsTable.performBatchUpdates {
             listItemsTable.insertRows(at: [index], with: .bottom)
-        } completion: {_ in
+        } completion: { _ in
             self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
+            self.scrollToPendingItem(animated: true)
         }
     }
-    
+
     private func removeItem(index: IndexPath) {
         listItemsTable.performBatchUpdates {
             listItemsTable.deleteRows(at: [index], with: .top)
-        } completion: {_ in
+        } completion: { _ in
             self.listItemsTable.isUserInteractionEnabled = true
             self.viewModel.tableFinishedUpdating()
         }
     }
-    
+
     private func setUI() {
         self.view.backgroundColor = .screenBgrPrimary
         navBarConfig()
         navigationController?.setNavigationBarHidden(false, animated: true)
-        
+
         [completeButton, listItemsTable].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
-        
+
         NSLayoutConstraint.activate([
             listItemsTable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
             listItemsTable.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             listItemsTable.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             listItemsTable.bottomAnchor.constraint(equalTo: completeButton.topAnchor, constant: -24),
-            
+
             completeButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
             completeButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             completeButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             completeButton.heightAnchor.constraint(equalToConstant: 48),
         ])
     }
-    
+
     private func navBarConfig() {
         let titleView = UILabel()
         titleView.text = viewModel.getListTitle()
@@ -166,48 +170,66 @@ class NewListViewController: UIViewController, KeyboardHandler {
         titleView.font = .listScreenTitle
         navigationItem.titleView = titleView
     }
-    
+
     private func updateCompleteButton() {
         let enableState = viewModel.getCompleteButtonState()
         completeButton.isEnabled = enableState
         completeButton.backgroundColor = enableState ? .buttonBgrTertiary : .buttonBgrDisabled
-        
+
         enableState
         ? completeButton.setTitleColor(.buttonTextPrimary, for: .normal)
         : completeButton.setTitleColor(.buttonTextSecondary, for: .normal)
     }
-    
+
     private func setupKeyboardActions() {
-        
+
         keyboardWillShowAction = { [weak self] notification in
             guard let userInfo = notification.userInfo,
                   let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
                   let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval,
-                  let curve = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt
-            else { return }
-            
-            let keyboardHeight = keyboardFrame.height
-            let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight, right: 0)
-            
-            UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve)) {
+            let curve = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {
+                return
+            }
+
+            let keyboardFrameInView = self?.view.convert(keyboardFrame, from: nil) ?? .zero
+            let overlap = self?.view.bounds.intersection(keyboardFrameInView).height ?? 0
+            let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: overlap, right: 0)
+
+            let animationOptions = UIView.AnimationOptions(rawValue: curve << 16)
+            UIView.animate(withDuration: duration, delay: 0, options: animationOptions) {
                 self?.listItemsTable.contentInset = contentInsets
-                self?.listItemsTable.scrollIndicatorInsets = contentInsets
+                self?.listItemsTable.verticalScrollIndicatorInsets = contentInsets
+                self?.scrollToPendingItem(animated: false)
+            } completion: { [weak self] _ in
+                self?.pendingScrollIndexPath = nil
             }
         }
-        
+
         keyboardWillHideAction = { [weak self] notification in
             guard let userInfo = notification.userInfo,
                   let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval,
-                  let curve = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt
-            else { return }
-            
-            UIView.animate(withDuration: duration, delay: 0, options: UIView.AnimationOptions(rawValue: curve)) {
+            let curve = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? UInt else {
+                return
+            }
+
+            let animationOptions = UIView.AnimationOptions(rawValue: curve << 16)
+            UIView.animate(withDuration: duration, delay: 0, options: animationOptions) {
                 self?.listItemsTable.contentInset = .zero
-                self?.listItemsTable.scrollIndicatorInsets = .zero
+                self?.listItemsTable.verticalScrollIndicatorInsets = .zero
             }
         }
     }
-    
+
+    private func scrollToPendingItem(animated: Bool) {
+        guard let indexPath = pendingScrollIndexPath,
+              indexPath.row < viewModel.getTableRowCount() else {
+            return
+        }
+
+        listItemsTable.layoutIfNeeded()
+        listItemsTable.scrollToRow(at: indexPath, at: .middle, animated: animated)
+    }
+
     private func showPopUpView(for id: UUID, quantity: Float, unit: Units) {
         let popUpView = PopUpAssembler().build(itemID: id, delegate: self.viewModel as? PopUpVCDelegate, quantity: quantity, unit: unit)
         if let sheet = popUpView.sheetPresentationController {
@@ -216,27 +238,33 @@ class NewListViewController: UIViewController, KeyboardHandler {
             sheet.preferredCornerRadius = 24
             sheet.prefersGrabberVisible = true
         }
-        
+
         present(popUpView, animated: true)
+    }
+
+    // MARK: - Actions
+    @objc private func completeButtonPressed() {
+        view.endEditing(true)
+        viewModel.completeButtonPressed()
     }
 }
 
 // MARK: - UITableViewDataSource
 extension NewListViewController: UITableViewDataSource {
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         viewModel.getTableRowCount()
     }
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         viewModel.getRowHeight(for: indexPath.row)
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellParams = viewModel.getCellParams(for: indexPath.row)
-        
+
         switch cellParams.0 {
-            
+
         case .title:
             guard let cell = tableView.dequeueReusableCell(
                 withIdentifier: NewListCellTitle.reuseIdentifier,
@@ -247,7 +275,7 @@ extension NewListViewController: UITableViewDataSource {
             cell.delegate = viewModel as? NewListCellDelegate
             cell.configure(with: cellParams.1)
             return cell
-            
+
         case .item:
             guard let cell = tableView.dequeueReusableCell(
                 withIdentifier: NewListCellItem.reuseIdentifier,
@@ -258,7 +286,7 @@ extension NewListViewController: UITableViewDataSource {
             cell.delegate = viewModel as? NewListCellDelegate
             cell.configure(with: cellParams.1)
             return cell
-            
+
         case .button:
             guard let cell = tableView.dequeueReusableCell(
                 withIdentifier: NewListCellButton.reuseIdentifier,
@@ -274,22 +302,22 @@ extension NewListViewController: UITableViewDataSource {
 
 // MARK: - UITableViewDelegate
 extension NewListViewController: UITableViewDelegate {
-    
+
     func tableView(_ tableView: UITableView,
                    trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        
+
         guard indexPath.row != 0,
               indexPath.row != viewModel.getTableRowCount() - 1 else {
             return nil
         }
-        
+
         let primaryAction = UIContextualAction(style: .destructive,
                                                title: .buttonDelete) { [weak self] (action, view, completionHandler) in
             self?.viewModel.deleteItemButtonPressed(in: indexPath.row)
             completionHandler(true)
         }
         primaryAction.backgroundColor = .buttonBgrSecondary
-        
+
         return UISwipeActionsConfiguration(actions: [primaryAction])
     }
 }

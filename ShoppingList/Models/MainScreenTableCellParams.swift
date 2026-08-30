@@ -1,4 +1,6 @@
 struct MainScreenTableCellParams {
+
+    // MARK: - Public Properties
     let title: String
     let date: String
     let separator: Bool

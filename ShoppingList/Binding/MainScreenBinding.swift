@@ -1,7 +1,8 @@
 import UIKit
 
 enum MainScreenBinding {
+
+    // MARK: - Constants
     case reloadTable
-    case updateItem(IndexPath)
-    case removeItem([IndexPath])
+    case removeItems([IndexPath])
 }

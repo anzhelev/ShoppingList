@@ -1,40 +1,63 @@
 import Foundation
 
 struct Language {
-    let name: String
+
+    // MARK: - Public Properties
     let code: String
+    let name: String
 }
 
-class LanguageManager {
+final class LanguageManager {
+
+    // MARK: - Public Properties
     static let languageManager = LanguageManager()
-    
-    var currentLanguage: Int {
-        get {
-            getSavedLanguage()
-        }
-        set {
-            saveLanguage(newValue)
-        }
-    }
-    
+
     let languages: [Language] = [
-        Language(name: .languageSystem, code: "system"),
-        Language(name: .languageRussian, code: "ru"),
-        Language(name: .languageEnglish, code: "en")
+        Language(code: "system", name: .languageSystem),
+        Language(code: "ru", name: .languageRussian),
+        Language(code: "en", name: .languageEnglish)
     ]
-    
-    private let userDefaults = UserDefaults.standard
-    private let key = "AppleLanguages"
-    
-    private init() { }
-    
-    private func getSavedLanguage() -> Int {
-        let storedLanguageCode = userDefaults.string(forKey: key) ?? Locale.preferredLanguages.first ?? "system"
-        return languages.firstIndex(where: { $0.code == storedLanguageCode}) ?? 0
+
+    var currentLanguage: Int {
+        get { languages.firstIndex { $0.code == savedLanguageCode } ?? 0 }
+        set { saveLanguage(at: newValue) }
     }
-    
-    private func saveLanguage(_ language: Int) {
-        userDefaults.set([languages[language].code], forKey: key)
-        userDefaults.synchronize()
+
+    // MARK: - Private Properties
+    private let appleLanguagesKey = "AppleLanguages"
+    private let selectedLanguageKey = "selectedLanguageCode"
+    private let userDefaults = UserDefaults.standard
+
+    private var savedLanguageCode: String {
+        userDefaults.string(forKey: selectedLanguageKey) ?? "system"
+    }
+
+    // MARK: - Initializers
+    private init() {
+        guard userDefaults.string(forKey: selectedLanguageKey) == nil else {
+            return
+        }
+
+        let legacyLanguage = userDefaults.stringArray(forKey: appleLanguagesKey)?.first
+        let selectedCode = legacyLanguage.flatMap { code in
+            languages.contains { $0.code == code } ? code : nil
+        } ?? "system"
+        userDefaults.set(selectedCode, forKey: selectedLanguageKey)
+    }
+
+    // MARK: - Private Methods
+    private func saveLanguage(at index: Int) {
+        guard languages.indices.contains(index) else {
+            return
+        }
+
+        let code = languages[index].code
+        userDefaults.set(code, forKey: selectedLanguageKey)
+
+        if code == "system" {
+            userDefaults.removeObject(forKey: appleLanguagesKey)
+        } else {
+            userDefaults.set([code], forKey: appleLanguagesKey)
+        }
     }
 }

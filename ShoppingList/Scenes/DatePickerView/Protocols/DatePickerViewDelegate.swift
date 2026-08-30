@@ -1,7 +1,6 @@
 import Foundation
 
 protocol DatePickerViewDelegate: AnyObject {
-    func datePickerConfirmButtonPressed(date: Date)
     func datePickerCancelButtonPressed()
+    func datePickerConfirmButtonPressed(date: Date)
 }
-

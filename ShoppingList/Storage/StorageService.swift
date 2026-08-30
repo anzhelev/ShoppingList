@@ -1,111 +1,96 @@
 import CoreData
+import Foundation
+
+enum StorageServiceError: LocalizedError {
+
+    // MARK: - Constants
+    case listAlreadyExists
+    case listNotFound
+
+    // MARK: - Public Properties
+    var errorDescription: String? {
+        switch self {
+        case .listAlreadyExists:
+            return .storageListAlreadyExists
+        case .listNotFound:
+            return .storageListNotFound
+        }
+    }
+}
 
 protocol StorageServiceProtocol {
-    func getExistingListNames() -> Set<String>
-    func getListsWithStatus(isCompleted: Bool) -> [ListInfo]
-    func deleteList(with id: UUID)
-    func getList(by id: UUID) -> ShopList?
-    func saveNewList(list: ShopList)
-    func updateListInfo(listInfo: ListInfo)
-    func updateList(list: ShopList)
-    func restoreList(with id: UUID)
-    func getItems(by listId: UUID) -> [ListItem]?
+    func deleteList(with id: UUID) throws
+    func deleteLists(with ids: [UUID]) throws
+    func getExistingListNames(excluding listID: UUID?) throws -> Set<String>
+    func getItems(by listId: UUID) throws -> [ListItem]
+    func getList(by id: UUID) throws -> ShopList?
+    func getListsWithStatus(isCompleted: Bool) throws -> [ListInfo]
+    func restoreList(with id: UUID) throws
+    func saveNewList(list: ShopList) throws
+    func updateList(list: ShopList) throws
+    func updateListInfo(listInfo: ListInfo) throws
 }
 
 final class StorageService: StorageServiceProtocol {
-    // MARK: - Public Properties
-    var context: NSManagedObjectContext = AppDelegate.context
-    
+
     // MARK: - Private Properties
-    private lazy var coreDataService: CoreDataService = CoreDataService(delegate: self)
-    
+    private let coreDataService: CoreDataService
+
+    // MARK: - Initializers
+    init(context: NSManagedObjectContext = AppDelegate.context) {
+        coreDataService = CoreDataService(context: context)
+    }
+
     // MARK: - Public Methods
-    func saveContext() {
-        if let appDelegate = AppDelegate.appDelegate {
-            appDelegate.saveContext()
-        }
+    func deleteList(with id: UUID) throws {
+        try coreDataService.deleteListFromStore(with: id)
     }
-    
-    func getExistingListNames() -> Set<String> {
-        Set(getListsWithStatus(isCompleted: false).map{ $0.title.lowercased() })
+
+    func deleteLists(with ids: [UUID]) throws {
+        try coreDataService.deleteListsFromStore(with: ids)
     }
-    
-    func getListsWithStatus(isCompleted: Bool) -> [ListInfo] {
-        coreDataService.fetchListsWith(status: isCompleted)
-    }
-    
-    func deleteList(with id: UUID) {
-        coreDataService.deleteItemsFromList(list: id)
-        coreDataService.deleteListFromStore(with: id)
-    }
-    
-    func getList(by id: UUID) -> ShopList? {
-        guard let list = coreDataService.fetchListCoreData(with: id) else {
-            return nil
-        }
-        let listItems = coreDataService.fetchItemsForList(with: id)
-        
-        return .init(info: .init(listId: list.listId ?? UUID(),
-                                 title: list.title ?? "",
-                                 date: list.date ?? Date(),
-                                 completed: list.completed,
-                                 pinned: list.pinned
-                                ),
-                     items: listItems.map {item in
-                .init(name: item.name ?? "",
-                      quantity: item.quantity,
-                      unit: item.unit ?? "",
-                      checked: item.checked
-                )
-        })
-    }
-    
-    func saveNewList(list: ShopList) {
-        coreDataService.addNewListToStore(list: list.info)
-        for item in list.items {
-            coreDataService.addItemTolist(list: list.info.listId, item: item)
-        }
-    }
-    
-    func updateListInfo(listInfo: ListInfo) {
-        coreDataService.updateListInfoInStore(listInfo: listInfo)
-    }
-    
-    func updateList(list: ShopList) {
-        deleteList(with: list.info.listId)
-        saveNewList(list: list)
-    }
-    
-    func restoreList(with id: UUID) {
-        guard let oldList = getList(by: id) else {
-            return
-        }
-        deleteList(with: id)
-        saveNewList(list: .init(info: .init(listId: oldList.info.listId,
-                                            title: oldList.info.title,
-                                            date: oldList.info.date,
-                                            completed: false,
-                                            pinned: false
-                                           ),
-                                items: oldList.items.map {
-            .init(name: $0.name,
-                  quantity: $0.quantity,
-                  unit: $0.unit,
-                  checked: false
-            )
-        }
-        )
+
+    func getExistingListNames(excluding listID: UUID? = nil) throws -> Set<String> {
+        let lists = try getListsWithStatus(isCompleted: false)
+        return Set(
+            lists
+                .filter { $0.listId != listID }
+                .map { normalizeName($0.title) }
         )
     }
-    
-    func getItems(by listId: UUID) -> [ListItem]? {
-        let storedItems = coreDataService.fetchItemsForList(with: listId)
-        return storedItems.map {item in
-                .init(name: item.name ?? "",
-                      quantity: item.quantity,
-                      unit: item.unit ?? "",
-                      checked: item.checked
-                )
-        }
+
+    func getItems(by listId: UUID) throws -> [ListItem] {
+        try coreDataService.fetchItemsForList(with: listId)
+    }
+
+    func getList(by id: UUID) throws -> ShopList? {
+        try coreDataService.fetchList(with: id)
+    }
+
+    func getListsWithStatus(isCompleted: Bool) throws -> [ListInfo] {
+        try coreDataService.fetchListsWith(status: isCompleted)
+    }
+
+    func restoreList(with id: UUID) throws {
+        try coreDataService.restoreList(with: id)
+    }
+
+    func saveNewList(list: ShopList) throws {
+        try coreDataService.addNewListToStore(list: list)
+    }
+
+    func updateList(list: ShopList) throws {
+        try coreDataService.updateListInStore(list: list)
+    }
+
+    func updateListInfo(listInfo: ListInfo) throws {
+        try coreDataService.updateListInfoInStore(listInfo: listInfo)
+    }
+
+    // MARK: - Private Methods
+    private func normalizeName(_ name: String) -> String {
+        name
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
     }
 }

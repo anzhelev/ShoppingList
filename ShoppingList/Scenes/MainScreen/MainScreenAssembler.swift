@@ -2,7 +2,9 @@ import UIKit
 
 final class MainScreenAssembler {
 
-    public func build(coordinator: Coordinator,
+    // MARK: - Public Methods
+    public func build(
+        coordinator: Coordinator,
         completeMode: Bool
     ) -> UIViewController {
         let viewModel = MainScreenViewModel(

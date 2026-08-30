@@ -1,51 +1,82 @@
-import UIKit
 import CoreData
+import UIKit
+import UserNotifications
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
-    
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        return true
-    }
-    
-    // MARK: UISceneSession Lifecycle
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
-    
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        
-    }
-    
-    // MARK: - Core Data stack
-    lazy var persistentContainer: NSPersistentContainer = {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    // MARK: - Public Properties
+    private(set) var persistentStoreError: Error?
+
+    // MARK: - Private Properties
+    private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "ShoppingList")
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+        container.persistentStoreDescriptions.forEach {
+            $0.shouldInferMappingModelAutomatically = true
+            $0.shouldMigrateStoreAutomatically = true
+        }
+        container.loadPersistentStores { [weak self] _, error in
+            guard let error else {
+                return
             }
-        })
+
+            self?.persistentStoreError = error
+            debugPrint("@@@ Persistent store loading failed: \(error.localizedDescription)")
+        }
+        container.viewContext.automaticallyMergesChangesFromParent = true
         return container
     }()
-    
-    // MARK: - Core Data Saving support
-    func saveContext () {
+
+    // MARK: - Public Methods
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    }
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+
+    func saveContext() throws {
         let context = persistentContainer.viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-            }
+        guard context.hasChanges else {
+            return
         }
+
+        try context.save()
     }
 }
 
+// MARK: - UNUserNotificationCenterDelegate
+extension AppDelegate: UNUserNotificationCenterDelegate {
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        [.banner, .sound]
+    }
+}
+
+// MARK: - Shared Core Data Context
 extension AppDelegate {
-    static var appDelegate = UIApplication.shared.delegate as? AppDelegate
-    
+
+    static var appDelegate: AppDelegate? {
+        UIApplication.shared.delegate as? AppDelegate
+    }
+
     static var context: NSManagedObjectContext {
-        return (UIApplication.shared.delegate as! Self).persistentContainer.viewContext
+        guard let appDelegate else {
+            preconditionFailure("UIApplication delegate is unavailable")
+        }
+
+        return appDelegate.persistentContainer.viewContext
     }
 }

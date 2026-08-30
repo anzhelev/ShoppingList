@@ -1,26 +1,26 @@
 import UIKit
 
 final class ShoppingListCellItem: UITableViewCell {
-    
+
     // MARK: - Public Properties
     static let reuseIdentifier = "shoppingListCellItem"
     weak var delegate: ShoppingListCellDelegate?
-    
+
     // MARK: - Private Properties
     private var cellID = UUID()
     private var quantity: Float = 1
     private var unit: Units = .piece
-    private let maxNameleLenght = 27
-    
+    private let maximumNameLength = 27
+
     private let checkBoxImageView = UIImageView()
-    
+
     private lazy var checkBoxButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(checkBoxTapped), for: .touchUpInside)
         button.addSubview(checkBoxImageView)
         return button
     }()
-    
+
     private lazy var itemNameField = {
         let textField = UITextField()
         textField.delegate = self
@@ -33,7 +33,7 @@ final class ShoppingListCellItem: UITableViewCell {
         textField.addTarget(self, action: #selector(itemUpdated), for: .editingDidEnd)
         return textField
     }()
-    
+
     private let quantityLabel = {
         let label = UILabel()
         label.textColor = .textColorTertiary
@@ -41,17 +41,17 @@ final class ShoppingListCellItem: UITableViewCell {
         label.textAlignment = .right
         return label
     }()
-    
+
     private let arrowImageView = UIImageView(image: UIImage(named: "arrowRight")?.withTintColor(.listItemRightArrow))
-    
+
     private lazy var quantityButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(editQuantity), for: .touchUpInside)
         return button
     }()
-    
+
     private var separatorView = UIView()
-    
+
     private let errorLabel = {
         let label = UILabel()
         label.textColor = .textColorTertiary
@@ -61,111 +61,113 @@ final class ShoppingListCellItem: UITableViewCell {
         label.text = nil
         return label
     }()
-    
+
     // MARK: - Initializers
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         setUIElements()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Public Methods
     func configure(with params: ShopListCellParams) {
         self.cellID = params.id
         self.quantity = params.quantity
         self.unit = params.unit
-        
+
         checkBoxImageView.image = params.checked
         ? UIImage(named: "checkboxChecked")?.withTintColor(.unitSelectionBlockBgr, renderingMode: .alwaysOriginal)
         : UIImage(named: "checkboxEmpty")?.withTintColor(.textColorPrimary, renderingMode: .alwaysOriginal)
-        
+
         let attributeString = NSMutableAttributedString(string: params.title ?? "")
         attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle,
                                      value: params.checked ? 1: 0,
                                      range: NSRange(location: 0, length: attributeString.length)
         )
         itemNameField.attributedText = attributeString
-        
+
         itemNameField.textColor = params.checked ? .textColorSecondary : .textColorPrimary
-        let quantityAsString = quantity.rounded(.towardZero) == quantity
-        ? String(Int(quantity))
-        : String(format: "%.1f", quantity)
-        
-        quantityLabel.text = quantityAsString + " \(NSLocalizedString(unit.rawValue, comment: ""))"
+        quantityLabel.text = QuantityFormatter.string(from: quantity)
+            + " \(NSLocalizedString(unit.rawValue, comment: ""))"
         separatorView.backgroundColor = params.error == nil ? .tableSeparator : .buttonBgrSecondary
         errorLabel.text = params.error
         errorLabel.isHidden = params.error == nil
+        arrowImageView.isHidden = !params.isEditable
+        checkBoxButton.isEnabled = params.isEditable
+        itemNameField.isEnabled = params.isEditable
+        quantityButton.isEnabled = params.isEditable
+
+        if params.startEditing && params.isEditable {
+            DispatchQueue.main.async { [weak self] in
+                self?.itemNameField.becomeFirstResponder()
+            }
+        }
     }
-    
-    // MARK: - IBAction
-    @objc func itemUpdated() {
-        self.delegate?.updateShoppingListItem(cellID: cellID, with: itemNameField.text ?? .newListItemPlaceholder)
-    }
-    
-    @objc func editQuantity() {
-        self.delegate?.editQuantityButtonPressed(cellID: cellID)
-    }
-    
-    @objc func checkBoxTapped() {
-        self.delegate?.checkBoxTapped(cellID: cellID)
-    }
-    
+
     // MARK: - Private Methods
-    
     private func setUIElements() {
         self.backgroundColor = .screenBgrPrimary
-        
+
         let quantityButtonStack = setQuantityButtonStack(subviews: [quantityLabel, arrowImageView])
         let itemStack = setItemHorizontalStack(subviews: [itemNameField, quantityButton])
-        
+
         quantityButton.addSubview(quantityButtonStack)
-        
-        [checkBoxImageView, checkBoxButton, itemStack, quantityButtonStack, quantityLabel, arrowImageView, separatorView, errorLabel].forEach {
+
+        let configurableViews = [
+            checkBoxImageView,
+            checkBoxButton,
+            itemStack,
+            quantityButtonStack,
+            quantityLabel,
+            arrowImageView,
+            separatorView,
+            errorLabel
+        ]
+        configurableViews.forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
-        
+
         [checkBoxButton, itemStack, separatorView, errorLabel].forEach {
             contentView.addSubview($0)
         }
-        
+
         NSLayoutConstraint.activate([
             checkBoxButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             checkBoxButton.widthAnchor.constraint(equalToConstant: 44),
             checkBoxButton.heightAnchor.constraint(equalTo: checkBoxButton.widthAnchor),
             checkBoxButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            
+
             checkBoxImageView.centerXAnchor.constraint(equalTo: checkBoxButton.centerXAnchor),
             checkBoxImageView.centerYAnchor.constraint(equalTo: checkBoxButton.centerYAnchor),
-            
+
             itemStack.centerYAnchor.constraint(equalTo: checkBoxButton.centerYAnchor),
             itemStack.leadingAnchor.constraint(equalTo: checkBoxButton.trailingAnchor, constant: 16),
-            itemStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor,constant: -8),
-            
+            itemStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
+
             quantityButton.heightAnchor.constraint(equalTo: checkBoxButton.heightAnchor),
             quantityButtonStack.centerYAnchor.constraint(equalTo: quantityButton.centerYAnchor),
             quantityButtonStack.leadingAnchor.constraint(equalTo: quantityButton.leadingAnchor),
             quantityButtonStack.trailingAnchor.constraint(equalTo: quantityButton.trailingAnchor),
             quantityButtonStack.widthAnchor.constraint(greaterThanOrEqualToConstant: 80),
-            
-            
+
             arrowImageView.heightAnchor.constraint(equalToConstant: 15),
             arrowImageView.widthAnchor.constraint(equalToConstant: 8),
-            
+
             separatorView.bottomAnchor.constraint(equalTo: itemStack.bottomAnchor),
             separatorView.leadingAnchor.constraint(equalTo: itemStack.leadingAnchor),
             separatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             separatorView.heightAnchor.constraint(equalToConstant: 0.5),
-            
+
             errorLabel.leadingAnchor.constraint(equalTo: itemStack.leadingAnchor),
             errorLabel.topAnchor.constraint(equalTo: itemStack.bottomAnchor),
             errorLabel.heightAnchor.constraint(equalToConstant: 29)
         ])
     }
-    
+
     private func setQuantityButtonStack(subviews: [UIView]) -> UIStackView {
         let stackView = UIStackView(arrangedSubviews: subviews)
         stackView.sizeToFit()
@@ -176,7 +178,7 @@ final class ShoppingListCellItem: UITableViewCell {
         stackView.spacing = 6
         return stackView
     }
-    
+
     private func setItemHorizontalStack(subviews: [UIView]) -> UIStackView {
         let stackView = UIStackView(arrangedSubviews: subviews)
         stackView.axis = .horizontal
@@ -185,22 +187,36 @@ final class ShoppingListCellItem: UITableViewCell {
         stackView.spacing = 6
         return stackView
     }
+
+    // MARK: - Actions
+    @objc func checkBoxTapped() {
+        delegate?.checkBoxTapped(cellID: cellID)
+    }
+
+    @objc func editQuantity() {
+        delegate?.editQuantityButtonPressed(cellID: cellID)
+    }
+
+    @objc func itemUpdated() {
+        delegate?.updateShoppingListItem(cellID: cellID, with: itemNameField.text ?? .newListItemPlaceholder)
+    }
 }
 
 // MARK: - UITextFieldDelegate
 extension ShoppingListCellItem: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        self.endEditing(true)
-        return false
-    }
-    
+
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let text = textField.text else { return true }
         let newLength = text.count + string.count - range.length
-        return newLength <= maxNameleLenght
+        return newLength <= maximumNameLength
     }
-    
+
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.delegate?.textFieldDidBeginEditing()
+        delegate?.textFieldDidBeginEditing(cellID: cellID)
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        endEditing(true)
+        return false
     }
 }

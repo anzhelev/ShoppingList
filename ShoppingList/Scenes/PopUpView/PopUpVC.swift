@@ -1,14 +1,14 @@
 import UIKit
 
 final class PopUpVC: UIViewController {
-    
+
     // MARK: - Private Properties
-    private let viewModel: PopUpViewModelProtocol?
-    
+    private let viewModel: PopUpViewModelProtocol
+
     private let maxIntegerPlaces = 3
     private let maxDecimalPlaces = 1
-    private let decimalSeparator = "."
-    
+    private let decimalSeparator = Locale.current.decimalSeparator ?? "."
+
     private lazy var unitSelector = {
         let selector = UISegmentedControl(
             items: [NSLocalizedString(Units.kg.rawValue, comment: ""),
@@ -38,16 +38,15 @@ final class PopUpVC: UIViewController {
         selector.addTarget(self, action: #selector(unitSelected), for: .valueChanged)
         return selector
     }()
-    
+
     private lazy var minusButton = {
         UIButton.systemButton(
             with: UIImage(named: "buttonMinus")?.withTintColor(.textColorPrimary, renderingMode: .alwaysOriginal) ?? UIImage(),
             target: self,
             action: #selector(self.minusButtonPressed)
         )
-        
     }()
-    
+
     private lazy var plusButton = {
         UIButton.systemButton(
             with: UIImage(named: "buttonPlus")?.withTintColor(.textColorPrimary, renderingMode: .alwaysOriginal) ?? UIImage(),
@@ -55,7 +54,7 @@ final class PopUpVC: UIViewController {
             action: #selector(self.plusButtonPressed)
         )
     }()
-    
+
     private lazy var quantityTextField: UITextField = {
         let textField = UITextField()
         textField.delegate = self
@@ -68,11 +67,11 @@ final class PopUpVC: UIViewController {
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.listItemRightArrow.cgColor
         textField.backgroundColor = .screenBgrPrimary
-        textField.keyboardType = .numberPad
+        textField.keyboardType = .decimalPad
         textField.inputAccessoryView = createKeyboardToolbar()
         return textField
     }()
-    
+
     private lazy var doneButton: UIButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(doneButtonPressed), for: .touchUpInside)
@@ -83,140 +82,106 @@ final class PopUpVC: UIViewController {
         button.layer.cornerRadius = 10
         return button
     }()
-    
+
     // MARK: - Initializers
     init(viewModel: PopUpViewModelProtocol) {
         self.viewModel = viewModel
-        
+
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         bindViewModel()
         setUIElements()
     }
-    
-    // MARK: - Actions
-    @objc private func unitSelected() {
-        viewModel?.unitSelected(unit: unitSelector.selectedSegmentIndex)
-    }
-    
-    @objc private func doneButtonPressed() {
-        viewModel?.doneButtonPressed()
-    }
-    
-    @objc private func minusButtonPressed() {
-        viewModel?.minusButtonPressed(for: quantityTextField.text)
-    }
-    
-    @objc private func plusButtonPressed() {
-        viewModel?.plusButtonPressed(for: quantityTextField.text)
-    }
-    
-    @objc private func insertDecimalSeparator() {
-        guard let currentText = quantityTextField.text else { return }
-        
-        if !currentText.contains(decimalSeparator) {
-            quantityTextField.insertText(decimalSeparator)
-        }
-    }
-    
-    @objc private func clearText() {
-        quantityTextField.text = ""
-    }
-    
-    @objc private func endEditing() {
-        quantityTextField.resignFirstResponder()
-        viewModel?.quantityUpdated(with: quantityTextField.text)
-    }
-    
+
     // MARK: - Private Methods
     private func bindViewModel() {
-        viewModel?.popUpBinding.bind { [weak self] value in
+        viewModel.popUpBinding.bind { [weak self] value in
             switch value {
-                
+
             case .closePopUp:
                 self?.dismiss(animated: true)
-                
+
             case .popUpQuantity(let quantity):
                 self?.quantityTextField.text = quantity
-                
+
             case .popUpUnit(let unit):
                 self?.setUnitSelectorValue(unit: unit)
-                
+
             default:
                 return
             }
         }
     }
-    
+
     private func createKeyboardToolbar() -> UIToolbar {
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
-        
+
         let clearButton = UIBarButtonItem(
-            title: "Очистить",
+            title: .buttonClear,
             style: .plain,
             target: self,
             action: #selector(clearText))
-       
+
         let separatorButton = UIBarButtonItem(
             title: decimalSeparator,
             style: .plain,
             target: self,
             action: #selector(insertDecimalSeparator)
         )
-        
+
         separatorButton.tintColor = .textColorPrimary
-        
+
         let flexibleSpace = UIBarButtonItem(
             barButtonSystemItem: .flexibleSpace,
             target: nil,
             action: nil
         )
-        
+
         let doneButton = UIBarButtonItem(
-            title: "Готово",
+            title: .buttonDone,
             style: .done,
             target: self,
             action: #selector(endEditing)
         )
-        
+
         toolbar.items = [clearButton, flexibleSpace, separatorButton, flexibleSpace, doneButton]
-        
+
         return toolbar
     }
 
     private func setUIElements() {
         view.backgroundColor = .screenBgrPrimary
-        
-        quantityTextField.text = viewModel?.getQuantity() ?? "1"
-        setUnitSelectorValue(unit: viewModel?.getUnitIndex() ?? 3)
-        
+
+        quantityTextField.text = viewModel.getQuantity()
+        setUnitSelectorValue(unit: viewModel.getUnitIndex())
+
         [unitSelector, minusButton, plusButton, quantityTextField, doneButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
-        
+
         [unitSelector, minusButton, doneButton].forEach {
             $0.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16).isActive = true
         }
-        
+
         [unitSelector, quantityTextField, doneButton].forEach {
             $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         }
-        
+
         [minusButton, plusButton].forEach {
             $0.widthAnchor.constraint(equalToConstant: 50).isActive = true
             $0.heightAnchor.constraint(equalTo: $0.widthAnchor).isActive = true
         }
-        
+
         NSLayoutConstraint.activate([
             unitSelector.topAnchor.constraint(equalTo: view.topAnchor, constant: 24),
             unitSelector.heightAnchor.constraint(equalToConstant: 32),
@@ -230,9 +195,43 @@ final class PopUpVC: UIViewController {
             doneButton.heightAnchor.constraint(equalToConstant: 48)
         ])
     }
-    
+
     private func setUnitSelectorValue(unit: Int) {
         unitSelector.selectedSegmentIndex = unit
+    }
+
+    // MARK: - Actions
+    @objc private func unitSelected() {
+        viewModel.unitSelected(unit: unitSelector.selectedSegmentIndex)
+    }
+
+    @objc private func doneButtonPressed() {
+        viewModel.doneButtonPressed(for: quantityTextField.text)
+    }
+
+    @objc private func minusButtonPressed() {
+        viewModel.minusButtonPressed(for: quantityTextField.text)
+    }
+
+    @objc private func plusButtonPressed() {
+        viewModel.plusButtonPressed(for: quantityTextField.text)
+    }
+
+    @objc private func insertDecimalSeparator() {
+        guard let currentText = quantityTextField.text else { return }
+
+        if !currentText.contains(decimalSeparator) {
+            quantityTextField.insertText(decimalSeparator)
+        }
+    }
+
+    @objc private func clearText() {
+        quantityTextField.text = ""
+    }
+
+    @objc private func endEditing() {
+        quantityTextField.resignFirstResponder()
+        viewModel.quantityUpdated(with: quantityTextField.text)
     }
 }
 
@@ -240,9 +239,9 @@ final class PopUpVC: UIViewController {
 extension PopUpVC: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let currentText = textField.text else { return true }
-        
+
         let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
-        
+
         if let separatorRange = newText.range(of: decimalSeparator) {
             let decimalPart = newText[separatorRange.upperBound...]
             let integerPart = newText[..<separatorRange.lowerBound]
@@ -251,7 +250,7 @@ extension PopUpVC: UITextFieldDelegate {
             return newText.count <= maxIntegerPlaces
         }
     }
-    
+
     func textFieldDidEndEditing(_ textField: UITextField) {
         endEditing()
     }

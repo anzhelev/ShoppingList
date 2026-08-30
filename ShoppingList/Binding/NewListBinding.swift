@@ -1,11 +1,13 @@
 import UIKit
 
 enum NewListBinding {
-    case interactionEnabled(Bool)
-    case updateCompleteButtonState
-    case showPopUp(UUID, Float, Units)
-    case updateItems([IndexPath], Bool)
+
+    // MARK: - Constants
     case insertItem(IndexPath)
-    case removeItem(IndexPath)
+    case interactionEnabled(Bool)
     case reloadTable
+    case removeItem(IndexPath)
+    case showPopUp(UUID, Float, Units)
+    case updateCompleteButtonState
+    case updateItems([IndexPath], Bool)
 }

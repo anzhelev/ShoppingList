@@ -1,6 +1,6 @@
-"app.name" = "Всё взял!";
+"app.name" = "Got It All";
 
-"notification.text" = "Покупки по списку";
+"notification.text" = "Покупки по списку «%@»";
 
 "units.kg" = "кг";
 "units.liter" = "л";
@@ -15,10 +15,12 @@
 "buttons.restore" = "Восстановить";
 "buttons.delete" = "Удалить";
 "buttons.back" = "Назад";
-"buttons.cancel" = "Oтмена";
+"buttons.cancel" = "Отмена";
 "buttons.done" = "Готово";
 "buttons.apply" = "Применить";
 "buttons.ok" = "ОК";
+"buttons.clear" = "Очистить";
+"buttons.settings" = "Настройки";
 "buttons.addProduct" = "Добавить продукт";
 "buttons.saveList" = "Сохранить список";
 "buttons.restoreList" = "Восстановить список";
@@ -27,7 +29,7 @@
 "buttons.createNewList" = "Создать новый список";
 "buttons.clearArchive" = "Очистить архив";
 
-"dropdown.share" = "Поделиться с ...";
+"dropdown.share" = "Поделиться…";
 "dropdown.sorting" = "Сортировка";
 "dropdown.duplicate" = "Дублировать";
 "dropdown.remind" = "Напомнить";
@@ -39,21 +41,23 @@
 
 "themes.light" = "Светлая";
 "themes.automatic" = "Авто";
-"themes.dark" = "Темная";
+"themes.dark" = "Тёмная";
 
 "onboarding.page1.header" = "Удобно и просто";
-"onboarding.page1.description" = "Создавай любые списки чтобы\nне забыть все все, что ты хочешь\nкупить";
+"onboarding.page1.description" = "Создавай списки покупок, чтобы не забыть ничего важного.";
 "onboarding.page2.header" = "Ты точно не забудешь";
-"onboarding.page2.description" = "Напомним в любое время о твоих\nпланах на магазины";
-"onboarding.page3.header" = "Все понятно";
-"onboarding.page3.description" = "Удобный интерфейс для ежедневных\nпокупок, давай попробуем!";
+"onboarding.page2.description" = "Выбери время — и мы напомним о запланированных покупках.";
+"onboarding.page3.header" = "Всё понятно";
+"onboarding.page3.description" = "Простой интерфейс для ежедневных покупок. Давай попробуем!";
+"onboarding.continue" = "Продолжить";
+"onboarding.start" = "Начать";
 
 "welcomeScreen.header" = "Нажми на кнопку\nи запиши все свои\nхотелки";
 
 "settings.languageSettings.title" = "Язык";
 "settings.themeSettings.title" = "Тема";
 "settings.alert.title" = "Внимание!";
-"settings.alert.message" = "Для применения настройки языка \nперезапустите приложение";
+"settings.alert.message" = "Чтобы изменить язык, перезапустите приложение.";
 
 "tabBar.mainView" = "Списки покупок";
 "tabBar.archiveView" = "Архив";
@@ -61,7 +65,7 @@
 
 "mainScreenViewController.active.title" = "Списки покупок";
 "mainScreenViewController.active.swipeHint" = "Проведите, чтобы открыть\nзавершенные списки";
-"mainScreenViewController.completed.title" = "Завершенные списки";
+"mainScreenViewController.completed.title" = "Завершённые списки";
 "mainScreenViewController.completed.swipeHint" = "Проведите, чтобы открыть все списки";
 "mainScreenViewController.stub" = "У вас еще нет списков покупок.\nСамое время создать первый!";
 
@@ -79,3 +83,12 @@
 "successView.additional" = "Вы завершили покупки.\nВозвращайтесь снова с новыми\nсписками.";
 
 "datePickerView.title" = "Установите дату и время:";
+
+"errors.title" = "Что-то пошло не так";
+"notifications.invalidDate" = "Выберите будущие дату и время.";
+"notifications.permissionDenied" = "Уведомления отключены. Разрешите их для приложения в Настройках.";
+"notifications.scheduledMessage" = "Напоминание запланировано.";
+"notifications.scheduledTitle" = "Напоминание готово";
+"storage.listAlreadyExists" = "Список с таким идентификатором уже существует.";
+"storage.listNotFound" = "Список не найден. Возможно, он уже был удалён.";
+"shoppingList.duplicatedMessage" = "Копия списка создана.";

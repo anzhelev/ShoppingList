@@ -1,6 +1,8 @@
 import Foundation
 
 struct NewListCellParams {
+
+    // MARK: - Public Properties
     var id: UUID
     var title: String?
     var quantity: Float?
@@ -11,7 +13,9 @@ struct NewListCellParams {
 }
 
 enum NewListCellType {
-    case title
-    case item
+
+    // MARK: - Constants
     case button
+    case item
+    case title
 }

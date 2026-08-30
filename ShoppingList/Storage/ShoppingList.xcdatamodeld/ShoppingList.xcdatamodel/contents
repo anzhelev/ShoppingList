@@ -4,6 +4,7 @@
         <attribute name="checked" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="quantity" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="sortIndex" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="unit" attributeType="String"/>
         <relationship name="shoppingList" maxCount="1" deletionRule="Nullify" destinationEntity="ShoppingListCoreData" inverseName="listItems" inverseEntity="ShoppingListCoreData"/>
     </entity>
@@ -12,7 +13,8 @@
         <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="listId" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="pinned" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="reminderDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="title" attributeType="String" defaultValueString=""/>
-        <relationship name="listItems" toMany="YES" deletionRule="Nullify" destinationEntity="ListItemCoreData" inverseName="shoppingList" inverseEntity="ListItemCoreData"/>
+        <relationship name="listItems" toMany="YES" deletionRule="Cascade" destinationEntity="ListItemCoreData" inverseName="shoppingList" inverseEntity="ListItemCoreData"/>
     </entity>
 </model>

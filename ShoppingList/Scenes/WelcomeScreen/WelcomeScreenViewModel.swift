@@ -8,20 +8,20 @@ protocol WelcomeScreenViewModelProtocol {
 }
 
 final class WelcomeScreenViewModel: WelcomeScreenViewModelProtocol {
-    
+
     // MARK: - Public Properties
     let image: String = "launchScreenImage"
     let header: String = .welcomeScreenHeader
     let description: String = .buttonCreateNewList
-    
+
     // MARK: - Private Properties
     private var coordinator: Coordinator
-    
+
     // MARK: - Initializers
     init(coordinator: Coordinator) {
         self.coordinator = coordinator
     }
-    
+
     // MARK: - Public Methods
     func buttonPressed() {
         coordinator.switchToNewListCreationView()

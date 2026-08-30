@@ -1,7 +1,8 @@
 import UIKit
 
 final class NewListAssembler {
-    
+
+    // MARK: - Public Methods
     public func build(coordinator: Coordinator, editList: UUID?) -> UIViewController {
         let viewModel = NewListViewModel(
             coordinator: coordinator,

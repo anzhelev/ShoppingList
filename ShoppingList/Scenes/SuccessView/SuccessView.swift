@@ -1,37 +1,22 @@
 import UIKit
 
-class SuccessView: UIView {
-    
+final class SuccessView: UIView {
+
+    // MARK: - Private Properties
     private let viewModel: SuccessViewModel
-    
+
+    // MARK: - Initializers
     init(viewModel: SuccessViewModel) {
         self.viewModel = viewModel
         super.init(frame: .zero)
         setupView()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    @objc private func confirmButtonTapped() {
-        viewModel.confirmAction()
-    }
-    
-    @objc private func cancelButtonTapped() {
-        viewModel.cancelAction()
-    }
-    
-    private func createLabel(text: String, font: UIFont, numberOfLines: Int) -> UILabel {
-        let label = UILabel()
-        label.text = text
-        label.font = font
-        label.textColor = .textColorPrimary
-        label.textAlignment = .center
-        label.numberOfLines = numberOfLines
-        return label
-    }
-    
+
+    // MARK: - Private Methods
     private func createButton(title: String, cancelMode: Bool, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
@@ -42,7 +27,17 @@ class SuccessView: UIView {
         button.addTarget(self, action: action, for: .touchUpInside)
         return button
     }
-    
+
+    private func createLabel(text: String, font: UIFont, numberOfLines: Int) -> UILabel {
+        let label = UILabel()
+        label.text = text
+        label.font = font
+        label.textColor = .textColorPrimary
+        label.textAlignment = .center
+        label.numberOfLines = numberOfLines
+        return label
+    }
+
     private func createStackView(arrangedSubviews: [UIView], spacing: CGFloat = 0) -> UIStackView {
         let stackView = UIStackView(arrangedSubviews: arrangedSubviews)
         stackView.axis = .vertical
@@ -50,14 +45,14 @@ class SuccessView: UIView {
         stackView.spacing = spacing
         return stackView
     }
-    
+
     private func setupView() {
         backgroundColor = .successViewBgr
         layer.cornerRadius = 24
         translatesAutoresizingMaskIntoConstraints = false
-        
+
         let logoImageView = UIImageView(image: viewModel.successImage)
-        
+
         let labelStack = createStackView(
             arrangedSubviews: [
                 createLabel(text: viewModel.congratsLabel, font: .mainScreenStub, numberOfLines: 1),
@@ -65,26 +60,26 @@ class SuccessView: UIView {
             ],
             spacing: 6
         )
-        
+
         let confirmButton = createButton(
             title: viewModel.confirmButtonTitle,
             cancelMode: false,
             action: #selector(confirmButtonTapped)
         )
-        
+
         let cancelButton = createButton(
             title: viewModel.cancelButtonTitle,
             cancelMode: true,
             action: #selector(cancelButtonTapped)
         )
-        
+
         let buttonStack = createStackView(arrangedSubviews: [confirmButton, cancelButton], spacing: 8)
-        
+
         let mainStackView = createStackView(arrangedSubviews: [logoImageView, labelStack, buttonStack], spacing: 10)
         mainStackView.alignment = .center
         mainStackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(mainStackView)
-        
+
         NSLayoutConstraint.activate([
             mainStackView.topAnchor.constraint(equalTo: topAnchor, constant: 20),
             mainStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20),
@@ -94,5 +89,14 @@ class SuccessView: UIView {
             confirmButton.heightAnchor.constraint(equalToConstant: 40),
             cancelButton.heightAnchor.constraint(equalTo: confirmButton.heightAnchor)
         ])
+    }
+
+    // MARK: - Actions
+    @objc private func cancelButtonTapped() {
+        viewModel.cancelAction()
+    }
+
+    @objc private func confirmButtonTapped() {
+        viewModel.confirmAction()
     }
 }

@@ -1,543 +1,571 @@
 import Foundation
-import EventKit
-import UserNotifications
 
-protocol ShoppingListViewModelProtocol {
+protocol ShoppingListViewModelProtocol: AnyObject {
     var shoppingListBinding: Observable<ShoppingListBinding> { get set }
-    var notificationText: String { get }
-    
-    func viewDidLoad()
-    func viewWillAppear()
-    func listIsCompleted() -> Bool
+
+    func addNoticeButtonPressed()
     func checkAllSwitchIs(on: Bool)
+    func deleteItemButtonPressed(in row: Int)
+    func doneButtonPressed()
+    func duplicateButtonPressed()
     func getBottomButtonName() -> String
+    func getBottomButtonState() -> Bool
+    func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams)
+    func getCheckAllSwitchAvailability() -> Bool
+    func getCheckAllSwitchState() -> Bool
+    func getListTitle() -> String
+    func getRowHeight(for row: Int) -> CGFloat
+    func getTableRowCount() -> Int
+    func isDropAllowed(for row: Int) -> Bool
+    func listIsCompleted() -> Bool
     func rowMoved(from: Int, to: Int)
     func sortButtonPressed()
-    func duplicateButtonPressed()
-    func doneButtonPressed()
-    func getListTitle() -> String
-    func getTableRowCount() -> Int
-    func getRowHeight(for row: Int) -> CGFloat
-    func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams)
-    func isDropAllowed(for row: Int) -> Bool
     func tableFinishedUpdating()
-    func deleteItemButtonPressed(in row: Int)
-    func addNoticeButtonPressed()
-    func addEventAndNotification(date: Date)
+    func viewWillAppear()
 }
 
 final class ShoppingListViewModel: ShoppingListViewModelProtocol {
+
     // MARK: - Public Properties
     var shoppingListBinding: Observable<ShoppingListBinding> = Observable(nil)
-    
+
     // MARK: - Private Properties
-    lazy var notificationText: String = {
-        "\(String.notificationText) '\(currentListInfo.title)'"
-    }()
-    
     private let coordinator: Coordinator
+    private let notificationService: NotificationServiceProtocol
     private let storageService: StorageServiceProtocol
-    private let eventStore = EKEventStore()
     private var currentListInfo: ListInfo
     private var shoppingList: [ShopListCellParams] = []
-    private var uncheckedItemsCount: Int = 0
-    private var sortOrderAscending : Bool?
-    private var userIsTyping: Bool = false
-    private var bottomButtonIsEnabled: Bool = false
-    
-    //MARK: - Initializers
+    private var sortOrderAscending = true
+    private var uncheckedItemsCount = 0
+    private var userIsTyping = false
+
+    private var productCount: Int {
+        currentListInfo.completed ? shoppingList.count : max(0, shoppingList.count - 1)
+    }
+
+    // MARK: - Initializers
     init(coordinator: Coordinator, listInfo: ListInfo) {
-        self.currentListInfo = listInfo
         self.coordinator = coordinator
-        self.storageService = coordinator.storageService
+        self.currentListInfo = listInfo
+        notificationService = coordinator.notificationService
+        storageService = coordinator.storageService
     }
-    
+
     // MARK: - Public Methods
-    func viewDidLoad() {
-        requestCalendarAccess()
-        requestNotificationAuthorization()
-    }
-    
-    func viewWillAppear() {
-        loadList()
-        updateBottomButtonState()
-    }
-    
-    func getListTitle() -> String {
-        currentListInfo.title
-    }
-    
-    func listIsCompleted() -> Bool {
-        currentListInfo.completed
-    }
-    
-    func getBottomButtonName() -> String {
-        currentListInfo.completed ? .buttonRestoreList : .buttonRemoveCheckedItems
-    }
-    
-    func getTableRowCount() -> Int {
-        shoppingList.count
-    }
-    
-    func getRowHeight(for row: Int) -> CGFloat {
-        switch row {
-            
-        case shoppingList.count - 1:
-            currentListInfo.completed || shoppingList[row].error == nil ? 52 : 81
-            
-        default:
-            shoppingList[row].error == nil ? 52 : 81
-        }
-    }
-    
-    func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams) {
-        return (row == shoppingList.count - 1 && !currentListInfo.completed ? .button : .item,
-                .init(id: shoppingList[row].id,
-                      checked: shoppingList[row].checked,
-                      title: shoppingList[row].title,
-                      quantity: shoppingList[row].quantity,
-                      unit: shoppingList[row].unit,
-                      error: shoppingList[row].error
-                     )
-        )
-    }
-    
-    func isDropAllowed(for row: Int) -> Bool {
-        row < uncheckedItemsCount && !currentListInfo.completed
-    }
-    
-    func tableFinishedUpdating() {
-        saveListToStorage(duplicatePinned: false)
-        userIsTyping = false
-    }
-    
-    func addEventAndNotification(date: Date) {
-        
-        guard date > Date() else {
-            return
-        }
-        
-        coordinator.dismissPopupVC()
-        
-        let event = EKEvent(eventStore: eventStore)
-        event.title = .appName
-        event.notes = notificationText
-        event.startDate = date
-        event.endDate = date.addingTimeInterval(3600)
-        event.calendar = eventStore.defaultCalendarForNewEvents
-        
-        do {
-            try eventStore.save(event, span: .thisEvent)
-            print("Событие сохранено в календаре")
-        } catch {
-            print("Ошибка сохранения события: \(error.localizedDescription)")
-        }
-        
-        let content = UNMutableNotificationContent()
-        content.title = .appName
-        content.body = notificationText
-        content.sound = .default
-        
-        let triggerDate = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date)
-        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
-        
-        let request = UNNotificationRequest(
-            identifier: "event_\(event.eventIdentifier ?? UUID().uuidString)",
-            content: content,
-            trigger: trigger
-        )
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Ошибка уведомления: \(error.localizedDescription)")
-            } else {
-                print("Уведомление создано")
-            }
-        }
-    }
-    
-    // MARK: - Actions
-    func sortButtonPressed() {
-        guard uncheckedItemsCount > 0 else { return }
-        var uncheckedItems = [ShopListCellParams]()
-        var checkedItems = [ShopListCellParams]()
-        var indexesToUpdate: [IndexPath] = []
-        
-        for (index, item) in shoppingList[0...shoppingList.count - 2].enumerated() {
-            item.checked
-            ? checkedItems.append(item)
-            : uncheckedItems.append(item)
-            
-            indexesToUpdate.append(.init(row: index, section: 0))
-        }
-        
-        if sortOrderAscending == true {
-            shoppingList = uncheckedItems.sorted{$0.title ?? "" > $1.title ?? ""}
-            sortOrderAscending?.toggle()
-        } else {
-            shoppingList = uncheckedItems.sorted{$0.title ?? "" < $1.title ?? ""}
-            sortOrderAscending = true
-        }
-        
-        shoppingList += checkedItems
-        
-        if !currentListInfo.completed {
-            shoppingList.append(.init(id: UUID(),
-                                      checked: true,
-                                      title: .buttonAddProduct,
-                                      quantity: 1,
-                                      unit: .piece)
-            )
-        }
-        
-        shoppingListBinding.value = .updateItem(indexesToUpdate, true)
-    }
-    
-    func duplicateButtonPressed() {
-        duplicateList()
-    }
-    
     func addNoticeButtonPressed() {
         coordinator.showDatePickerView(delegate: self)
     }
-    
+
     func checkAllSwitchIs(on: Bool) {
-        let lastRow = shoppingList.count - 2
-        guard lastRow >= 0 else {
+        guard getCheckAllSwitchAvailability() else {
             return
         }
-        var indexesToUpdate: [IndexPath] = []
-        for index in 0...shoppingList.count - 2 {
-            
-            switch on {
-                
-            case true:
-                if !shoppingList[index].checked {
-                    shoppingList[index].checked = true
-                    indexesToUpdate.append(.init(row: index, section: 0))
-                    uncheckedItemsCount -= 1
-                }
-                
-            case false:
-                if shoppingList[index].checked {
-                    shoppingList[index].checked = false
-                    indexesToUpdate.append(.init(row: index, section: 0))
-                    uncheckedItemsCount += 1
-                }
+
+        let indexes = (0..<productCount).compactMap { index -> IndexPath? in
+            guard shoppingList[index].checked != on else {
+                return nil
             }
+
+            shoppingList[index].checked = on
+            return IndexPath(row: index, section: 0)
         }
-        
-        if indexesToUpdate.isEmpty {
+
+        guard !indexes.isEmpty else {
             return
         }
-        shoppingListBinding.value = .updateItem(indexesToUpdate, true)
+
+        uncheckedItemsCount = on ? 0 : productCount
+        publishControlsState()
+        shoppingListBinding.value = .updateItems(indexes, true)
     }
-    
-    func rowMoved(from sourceIndex: Int, to destinationIndex: Int) {
-        moveItemInArray(from: sourceIndex, to: destinationIndex)
-        tableFinishedUpdating()
-    }
-    
-    func doneButtonPressed() {
-        switch currentListInfo.completed {
-            
-        case true: // если смотрим завершенный список (проверить, есть ли активный закреп с таким названием)
-            storageService.restoreList(with: currentListInfo.listId)
-            coordinator.popToMainView()
-            
-        case false: // если завершаем актив. список
-            coordinator.showSuccessView(delegate: self)
-        }
-    }
-    
+
     func deleteItemButtonPressed(in row: Int) {
+        guard !currentListInfo.completed, row >= 0, row < productCount else {
+            return
+        }
+
         if !shoppingList[row].checked {
             uncheckedItemsCount -= 1
         }
         shoppingList.remove(at: row)
-        shoppingListBinding.value = .removeItem(.init(row: row, section: 0))
+        publishControlsState()
+        shoppingListBinding.value = .removeItem(IndexPath(row: row, section: 0))
     }
-    
-    // MARK: - Private Methods
-    private func loadList() {
-        guard let loadedItems = storageService.getItems(by: currentListInfo.listId) else {
+
+    func doneButtonPressed() {
+        guard getBottomButtonState() else {
             return
         }
-        loadedItems.enumerated().forEach {index, item in
-            shoppingList.append(.init(id: UUID(),
-                                      checked: item.checked,
-                                      title: item.name,
-                                      quantity: Float(item.quantity),
-                                      unit: Units(rawValue: item.unit) ?? .piece
-                                     )
+
+        if currentListInfo.completed {
+            restoreList()
+        } else {
+            coordinator.showSuccessView(delegate: self)
+        }
+    }
+
+    func duplicateButtonPressed() {
+        do {
+            let existingNames = try storageService.getExistingListNames(excluding: nil)
+            let title = makeUniqueDuplicateTitle(existingNames: existingNames)
+            let duplicate = ShopList(
+                info: ListInfo(
+                    listId: UUID(),
+                    title: title,
+                    date: Date(),
+                    completed: false,
+                    pinned: false
+                ),
+                items: makeListItems()
             )
-            if !item.checked {
-                uncheckedItemsCount += 1
+            try storageService.saveNewList(list: duplicate)
+            coordinator.showAlert(title: .appName, message: .listDuplicatedMessage)
+        } catch {
+            show(error)
+        }
+    }
+
+    func getBottomButtonName() -> String {
+        currentListInfo.completed ? .buttonRestoreList : .buttonRemoveCheckedItems
+    }
+
+    func getBottomButtonState() -> Bool {
+        currentListInfo.completed || (productCount > 0 && uncheckedItemsCount == 0)
+    }
+
+    func getCellParams(for row: Int) -> (ShopListCellType, ShopListCellParams) {
+        let isButton = !currentListInfo.completed && row == shoppingList.count - 1
+        let item = shoppingList[row]
+        return (
+            isButton ? .button : .item,
+            ShopListCellParams(
+                id: item.id,
+                checked: item.checked,
+                title: item.title,
+                quantity: item.quantity,
+                unit: item.unit,
+                error: item.error,
+                isEditable: !currentListInfo.completed,
+                startEditing: item.startEditing
+            )
+        )
+    }
+
+    func getCheckAllSwitchAvailability() -> Bool {
+        !currentListInfo.completed
+            && !userIsTyping
+            && productCount > 0
+            && shoppingList.prefix(productCount).allSatisfy { $0.error == nil }
+    }
+
+    func getCheckAllSwitchState() -> Bool {
+        productCount > 0 && uncheckedItemsCount == 0
+    }
+
+    func getListTitle() -> String {
+        currentListInfo.title
+    }
+
+    func getRowHeight(for row: Int) -> CGFloat {
+        shoppingList[row].error == nil ? 52 : 81
+    }
+
+    func getTableRowCount() -> Int {
+        shoppingList.count
+    }
+
+    func isDropAllowed(for row: Int) -> Bool {
+        !currentListInfo.completed && row >= 0 && row < uncheckedItemsCount
+    }
+
+    func listIsCompleted() -> Bool {
+        currentListInfo.completed
+    }
+
+    func rowMoved(from sourceIndex: Int, to destinationIndex: Int) {
+        guard isDropAllowed(for: sourceIndex), isDropAllowed(for: destinationIndex) else {
+            return
+        }
+
+        moveItemInArray(from: sourceIndex, to: destinationIndex)
+        saveListToStorage()
+    }
+
+    func sortButtonPressed() {
+        guard !currentListInfo.completed, productCount > 1 else {
+            return
+        }
+
+        let products = Array(shoppingList.prefix(productCount))
+        let unchecked = products.filter { !$0.checked }.sorted(by: compareItems)
+        let checked = products.filter(\.checked).sorted(by: compareItems)
+        let button = shoppingList.last
+        shoppingList = unchecked + checked
+        if let button {
+            shoppingList.append(button)
+        }
+        sortOrderAscending.toggle()
+        saveListToStorage()
+        shoppingListBinding.value = .reloadTable
+    }
+
+    func tableFinishedUpdating() {
+        saveListToStorage()
+        publishControlsState()
+    }
+
+    func viewWillAppear() {
+        loadList()
+    }
+
+    // MARK: - Private Methods
+    private func compareItems(_ first: ShopListCellParams, _ second: ShopListCellParams) -> Bool {
+        let comparison = (first.title ?? "").localizedCaseInsensitiveCompare(second.title ?? "")
+        return sortOrderAscending ? comparison == .orderedAscending : comparison == .orderedDescending
+    }
+
+    private func getItemRow(by id: UUID) -> Int? {
+        shoppingList.firstIndex { item in
+            item.id == id && (currentListInfo.completed || item.id != shoppingList.last?.id)
+        }
+    }
+
+    private func loadList() {
+        do {
+            userIsTyping = false
+            let items = try storageService.getItems(by: currentListInfo.listId)
+            let mappedItems = items.map {
+                ShopListCellParams(
+                    id: UUID(),
+                    checked: $0.checked,
+                    title: $0.name,
+                    quantity: $0.quantity,
+                    unit: Units(rawValue: $0.unit) ?? .piece,
+                    error: nil,
+                    isEditable: !currentListInfo.completed,
+                    startEditing: false
+                )
             }
-        }
-        if !currentListInfo.completed{
-            shoppingList.append(.init(id: UUID(),
-                                      checked: true,
-                                      title: .buttonAddProduct,
-                                      quantity: 1,
-                                      unit: .piece)
-            )
+            let unchecked = mappedItems.filter { !$0.checked }
+            let checked = mappedItems.filter(\.checked)
+            shoppingList = unchecked + checked
+            uncheckedItemsCount = unchecked.count
+
+            if !currentListInfo.completed {
+                shoppingList.append(
+                    ShopListCellParams(
+                        id: UUID(),
+                        checked: true,
+                        title: .buttonAddProduct,
+                        quantity: 1,
+                        unit: .piece,
+                        error: nil,
+                        isEditable: false,
+                        startEditing: false
+                    )
+                )
+            }
+
+            shoppingListBinding.value = .reloadTable
+            publishControlsState()
+        } catch {
+            show(error)
         }
     }
-    
+
+    private func makeListItems() -> [ListItem] {
+        shoppingList.prefix(productCount).compactMap { item in
+            guard item.error == nil,
+                  let title = item.title?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !title.isEmpty else {
+                return nil
+            }
+
+            return ListItem(name: title, quantity: item.quantity, unit: item.unit.rawValue, checked: item.checked)
+        }
+    }
+
+    private func makeUniqueDuplicateTitle(existingNames: Set<String>) -> String {
+        var copyNumber = 1
+        var candidate = "\(currentListInfo.title) #\(copyNumber)"
+
+        while existingNames.contains(normalizeName(candidate)) {
+            copyNumber += 1
+            candidate = "\(currentListInfo.title) #\(copyNumber)"
+        }
+        return candidate
+    }
+
     private func moveItemInArray(from sourceIndex: Int, to destinationIndex: Int) {
-        guard sourceIndex != destinationIndex else { return }
-        let place = shoppingList[sourceIndex]
-        shoppingList.remove(at: sourceIndex)
-        shoppingList.insert(place, at: destinationIndex)
+        guard sourceIndex != destinationIndex,
+              shoppingList.indices.contains(sourceIndex),
+              shoppingList.indices.contains(destinationIndex) else {
+            return
+        }
+
+        let item = shoppingList.remove(at: sourceIndex)
+        shoppingList.insert(item, at: destinationIndex)
     }
-    
-    @discardableResult
-    private func validateName(row: Int) -> Bool { // возвращает true если статус изменился
-        guard let newTitle = shoppingList[row].title else {
+
+    private func normalizeName(_ name: String) -> String {
+        name
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+    }
+
+    private func publishControlsState() {
+        shoppingListBinding.value = .updateBottomButton(getBottomButtonState())
+        shoppingListBinding.value = .updateCheckAllAvailability(getCheckAllSwitchAvailability())
+        shoppingListBinding.value = .updateCheckAllSwitch(getCheckAllSwitchState())
+    }
+
+    private func restoreList() {
+        do {
+            notificationService.cancelNotification(for: currentListInfo.listId)
+            try storageService.restoreList(with: currentListInfo.listId)
+            coordinator.popToMainView()
+        } catch {
+            show(error)
+        }
+    }
+
+    private func saveListToStorage() {
+        do {
+            try storageService.updateList(list: ShopList(info: currentListInfo, items: makeListItems()))
+        } catch {
+            show(error)
+        }
+    }
+
+    private func show(_ error: Error) {
+        coordinator.showAlert(title: .errorTitle, message: error.localizedDescription)
+    }
+
+    private func validateName(at row: Int) -> Bool {
+        guard shoppingList.indices.contains(row) else {
             return false
         }
-        
-        let oldErrorStatus = shoppingList[row].error
-        
-        if newTitle.isEmpty {
+
+        let oldError = shoppingList[row].error
+        let title = shoppingList[row].title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        shoppingList[row].title = title
+        shoppingList[row].startEditing = false
+
+        if title.isEmpty {
             shoppingList[row].error = .newListEmptyName
-            
-        } else if newTitle.replacingOccurrences(of: " ", with: "").isEmpty {
-            shoppingList[row].error = .newListWrongName
-            
         } else {
             shoppingList[row].error = nil
         }
-        
-        return oldErrorStatus != shoppingList[row].error
-    }
-    
-    private func updateBottomButtonState() {
-        let newState = currentListInfo.completed
-        ? true
-        : shoppingList.first(where: { $0.checked == false}) == nil
-        
-        if bottomButtonIsEnabled != newState {
-            bottomButtonIsEnabled.toggle()
-        }
-    }
-    
-    private func validateList() -> Bool {
-        shoppingList.first(where: { $0.title == nil || $0.title?.isEmpty == true || $0.error != nil}) == nil
-    }
-    
-    private func duplicateList() {
-        var newListItems = [ListItem]()
-        if shoppingList.count > 1 {
-            for item in shoppingList[0...shoppingList.count - 2] {
-                newListItems.append(.init(name: item.title ?? "",
-                                          quantity: Float(item.quantity),
-                                          unit: item.unit.rawValue,
-                                          checked: item.checked
-                                         )
-                )
-            }
-        }
-        
-        let list = ShopList(
-            info: .init(listId: UUID(),
-                        title: "\(currentListInfo.title)#",
-                        date: Date(),
-                        completed: false,
-                        pinned: false
-                       ),
-            items: newListItems
-        )
-        storageService.saveNewList(list: list)
-    }
-    
-    private func saveListToStorage(duplicatePinned: Bool) {
-        var newListItems = [ListItem]()
-        if shoppingList.count > 1 {
-            for item in shoppingList[0...shoppingList.count - 2] {
-                newListItems.append(.init(name: item.title ?? "",
-                                          quantity: Float(item.quantity),
-                                          unit: item.unit.rawValue,
-                                          checked: item.checked
-                                         )
-                )
-            }
-        }
-        
-        let list = ShopList(
-            info: .init(listId: duplicatePinned ? UUID() : currentListInfo.listId,
-                        title: currentListInfo.title,
-                        date: duplicatePinned ? Date() : currentListInfo.date,
-                        completed: duplicatePinned ? true : currentListInfo.completed,
-                        pinned: duplicatePinned ? false : currentListInfo.pinned
-                       ),
-            items: newListItems
-        )
-        
-        duplicatePinned
-        ? storageService.saveNewList(list: list)
-        : storageService.updateList(list: list)
-    }
-    
-    // Запрос доступа к календарю
-    private func requestCalendarAccess() {
-        eventStore.requestAccess(to: .event) { granted, error in
-            if granted {
-                print("Доступ к календарю разрешен")
-            } else if let error = error {
-                print("Ошибка доступа к календарю: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    // Запрос разрешения на уведомления
-    private func requestNotificationAuthorization() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                print("Уведомления разрешены")
-            } else if let error = error {
-                print("Ошибка уведомлений: \(error.localizedDescription)")
-            }
-        }
+        return oldError != shoppingList[row].error
     }
 }
 
-// MARK: - ShoppingListCellItemDelegate
+// MARK: - ShoppingListCellDelegate
 extension ShoppingListViewModel: ShoppingListCellDelegate {
-    
-    func updateShoppingListItem(cellID: UUID, with title: String) {
-        let cellRow = getItemRowBy(id: cellID)
-        let oldTitle = shoppingList[cellRow].title
-        shoppingList[cellRow].title = title
-        
-        if validateName(row: cellRow) {
-            shoppingListBinding.value = .updateItem([.init(row: cellRow, section: 0)], true)
-            
-        } else {
-            if oldTitle != title {
-                saveListToStorage(duplicatePinned: false)
-            }
-            userIsTyping = false
+
+    func addNewItemButtonPressed() {
+        guard !userIsTyping, shoppingList.prefix(productCount).allSatisfy({ $0.error == nil }) else {
+            return
         }
-    }
-    
-    func getTextFieldEditState() -> Bool {
-        return userIsTyping
-    }
-    
-    func textFieldDidBeginEditing() {
+
+        let index = uncheckedItemsCount
+        shoppingList.insert(
+            ShopListCellParams(
+                id: UUID(),
+                checked: false,
+                title: nil,
+                quantity: 1,
+                unit: .piece,
+                error: .newListEmptyName,
+                isEditable: true,
+                startEditing: true
+            ),
+            at: index
+        )
+        uncheckedItemsCount += 1
         userIsTyping = true
+        publishControlsState()
+        shoppingListBinding.value = .insertItem(IndexPath(row: index, section: 0))
     }
-    
-    func editQuantityButtonPressed(cellID: UUID) {
-        if userIsTyping {
-            return
-        }
-        
-        let row = getItemRowBy(id: cellID)
-        shoppingListBinding.value = .showPopUp(cellID, shoppingList[row].quantity, shoppingList[row].unit)
-    }
-    
+
     func checkBoxTapped(cellID: UUID) {
-        if currentListInfo.completed || userIsTyping {
+        guard !currentListInfo.completed, !userIsTyping, let row = getItemRow(by: cellID) else {
             return
         }
-        let row = getItemRowBy(id: cellID)
-        
+
         let wasChecked = shoppingList[row].checked
         shoppingList[row].checked.toggle()
-        
-        if wasChecked {// cмена с отмеченного на неотмеченный
-            if row > uncheckedItemsCount {
-                moveItemInArray(from: row, to: uncheckedItemsCount)
-                shoppingListBinding.value = .moveItem(.init(row: row, section: 0),
-                                                      .init(row: uncheckedItemsCount, section: 0)
-                )
-                
+
+        if wasChecked {
+            let destination = uncheckedItemsCount
+            if row == destination {
+                shoppingListBinding.value = .updateItems([IndexPath(row: row, section: 0)], true)
             } else {
-                shoppingListBinding.value = .updateItem([.init(row: row, section: 0)], true)
+                moveItemInArray(from: row, to: destination)
+                shoppingListBinding.value = .moveItem(
+                    IndexPath(row: row, section: 0),
+                    IndexPath(row: destination, section: 0)
+                )
             }
             uncheckedItemsCount += 1
-            
-        } else {// смена с неотмеченного на отмеченный
-            if row == uncheckedItemsCount - 1 {
-                shoppingListBinding.value = .updateItem([.init(row: row, section: 0)], true)
+        } else {
+            let destination = max(0, uncheckedItemsCount - 1)
+            if row == destination {
+                shoppingListBinding.value = .updateItems([IndexPath(row: row, section: 0)], true)
             } else {
-                moveItemInArray(from: row, to: uncheckedItemsCount - 1)
-                shoppingListBinding.value = .moveItem(.init(row: row, section: 0),
-                                                      .init(row: uncheckedItemsCount-1, section: 0)
+                moveItemInArray(from: row, to: destination)
+                shoppingListBinding.value = .moveItem(
+                    IndexPath(row: row, section: 0),
+                    IndexPath(row: destination, section: 0)
                 )
             }
             uncheckedItemsCount -= 1
         }
+        publishControlsState()
     }
-    
-    func addNewItemButtonPressed() {
-        if userIsTyping || !validateList() {
+
+    func editQuantityButtonPressed(cellID: UUID) {
+        guard !currentListInfo.completed, !userIsTyping, let row = getItemRow(by: cellID) else {
             return
         }
-        shoppingList.insert(.init(id: UUID(),
-                                  checked: false,
-                                  quantity: 1,
-                                  unit: .piece,
-                                  error: .newListEmptyName
-                                 ),
-                            at: uncheckedItemsCount
-        )
-        uncheckedItemsCount += 1
-        shoppingListBinding.value = .insertItem(.init(row: uncheckedItemsCount - 1, section: 0))
+
+        let item = shoppingList[row]
+        shoppingListBinding.value = .showPopUp(cellID, item.quantity, item.unit)
     }
-    
-    private func getItemRowBy(id: UUID) -> Int {
-        shoppingList.firstIndex(where: { $0.id == id }) ?? 0
+
+    func textFieldDidBeginEditing(cellID: UUID) {
+        guard let row = getItemRow(by: cellID) else {
+            return
+        }
+
+        shoppingList[row].startEditing = false
+        userIsTyping = true
+        publishControlsState()
+    }
+
+    func updateShoppingListItem(cellID: UUID, with title: String) {
+        guard let row = getItemRow(by: cellID) else {
+            return
+        }
+
+        let oldTitle = shoppingList[row].title
+        shoppingList[row].title = title
+        userIsTyping = false
+        let validationChanged = validateName(at: row)
+        publishControlsState()
+
+        if validationChanged {
+            shoppingListBinding.value = .updateItems([IndexPath(row: row, section: 0)], true)
+        } else if oldTitle != shoppingList[row].title {
+            saveListToStorage()
+        }
     }
 }
 
 // MARK: - PopUpVCDelegate
 extension ShoppingListViewModel: PopUpVCDelegate {
-    func unitSelected(itemID: UUID, unit: Units) {
-        shoppingList[getItemRowBy(id: itemID)].unit = unit
-        shoppingListBinding.value = .updateItem([.init(row: getItemRowBy(id: itemID), section: 0)], false)
-    }
-    
+
     func quantitySelected(itemID: UUID, quantity: Float) {
-        shoppingList[getItemRowBy(id: itemID)].quantity = quantity
-        shoppingListBinding.value = .updateItem([.init(row: getItemRowBy(id: itemID), section: 0)], false)
+        guard let row = getItemRow(by: itemID) else {
+            return
+        }
+
+        shoppingList[row].quantity = quantity
+        shoppingListBinding.value = .updateItems([IndexPath(row: row, section: 0)], false)
+    }
+
+    func unitSelected(itemID: UUID, unit: Units) {
+        guard let row = getItemRow(by: itemID) else {
+            return
+        }
+
+        shoppingList[row].unit = unit
+        shoppingListBinding.value = .updateItems([IndexPath(row: row, section: 0)], false)
     }
 }
 
 // MARK: - SuccessViewDelegate
 extension ShoppingListViewModel: SuccessViewDelegate {
-    func confirmButtonPressed() {
-        if currentListInfo.pinned {
-            saveListToStorage(duplicatePinned: true)
-            if shoppingList.count > 1 {
-                for index in 0...shoppingList.count - 2 {
-                    shoppingList[index].checked = false
-                }
-            }
-            
-        } else {
-            currentListInfo.setCompleted(to: true)
-        }
-        saveListToStorage(duplicatePinned: false)
-        coordinator.dismissPopupVC()
-        coordinator.switchToMainView()
-    }
-    
+
     func cancelButtonPressed() {
         coordinator.dismissPopupVC()
+    }
+
+    func confirmButtonPressed() {
+        do {
+            notificationService.cancelNotification(for: currentListInfo.listId)
+
+            if currentListInfo.pinned {
+                let archivedInfo = ListInfo(
+                    listId: UUID(),
+                    title: currentListInfo.title,
+                    date: Date(),
+                    completed: true,
+                    pinned: false
+                )
+                try storageService.saveNewList(list: ShopList(info: archivedInfo, items: makeListItems()))
+                (0..<productCount).forEach { shoppingList[$0].checked = false }
+                currentListInfo.setReminderDate(to: nil)
+            } else {
+                currentListInfo.setCompleted(to: true)
+                currentListInfo.setReminderDate(to: nil)
+            }
+
+            try storageService.updateList(list: ShopList(info: currentListInfo, items: makeListItems()))
+            coordinator.dismissPopupVC { [weak self] in
+                self?.coordinator.switchToMainView()
+            }
+        } catch {
+            coordinator.dismissPopupVC { [weak self] in
+                self?.show(error)
+            }
+        }
     }
 }
 
 // MARK: - DatePickerViewDelegate
 extension ShoppingListViewModel: DatePickerViewDelegate {
-    func datePickerConfirmButtonPressed(date: Date) {
-        addEventAndNotification(date: date)
-    }
-    
+
     func datePickerCancelButtonPressed() {
         coordinator.dismissPopupVC()
+    }
+
+    func datePickerConfirmButtonPressed(date: Date) {
+        Task { @MainActor [weak self] in
+            guard let self else {
+                return
+            }
+
+            do {
+                try await self.notificationService.scheduleNotification(
+                    for: self.currentListInfo.listId,
+                    listTitle: self.currentListInfo.title,
+                    date: date
+                )
+                self.currentListInfo.setReminderDate(to: date)
+                do {
+                    try self.storageService.updateListInfo(listInfo: self.currentListInfo)
+                    self.coordinator.dismissPopupVC { [weak self] in
+                        self?.coordinator.showAlert(
+                            title: .notificationScheduledTitle,
+                            message: .notificationScheduledMessage
+                        )
+                    }
+                } catch {
+                    self.notificationService.cancelNotification(for: self.currentListInfo.listId)
+                    self.coordinator.dismissPopupVC { [weak self] in
+                        self?.show(error)
+                    }
+                }
+            } catch {
+                self.coordinator.dismissPopupVC { [weak self] in
+                    if error as? NotificationServiceError == .permissionDenied {
+                        self?.coordinator.showNotificationPermissionAlert()
+                    } else {
+                        self?.show(error)
+                    }
+                }
+            }
+        }
     }
 }

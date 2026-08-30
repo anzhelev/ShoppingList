@@ -1,381 +1,397 @@
 import Foundation
 
-protocol NewListViewModelProtocol {
+protocol NewListViewModelProtocol: AnyObject {
     var newListBinding: Observable<[NewListBinding]> { get set }
-    
-    func viewWillAppear()
-    func viewWillDisappear()
+
     func completeButtonPressed()
-    func getListTitle() -> String
-    func getTableRowCount() -> Int
-    func getRowHeight(for row: Int) -> CGFloat
+    func deleteItemButtonPressed(in row: Int)
     func getCellParams(for row: Int) -> (NewListCellType, NewListCellParams)
     func getCompleteButtonState() -> Bool
-    func deleteItemButtonPressed(in row: Int)
+    func getListTitle() -> String
+    func getRowHeight(for row: Int) -> CGFloat
+    func getTableRowCount() -> Int
     func tableFinishedUpdating()
+    func viewWillAppear()
+    func viewWillDisappear()
 }
 
 final class NewListViewModel: NewListViewModelProtocol {
-    
+
     // MARK: - Public Properties
     var newListBinding: Observable<[NewListBinding]> = Observable(nil)
-    
+
     // MARK: - Private Properties
     private let coordinator: Coordinator
+    private let editListID: UUID?
+    private let listID: UUID
+    private let notificationService: NotificationServiceProtocol
     private let storageService: StorageServiceProtocol
-    private let editList: UUID?
-    private var existingListNames = Set<String>()
-    private var listItems: [NewListCellParams] = []
+    private var completeButtonState = false
+    private var completeButtonWasPressed = false
     private var editedList: ShopList?
-    private lazy var autoSave: Bool = {
-        validateName(row: 0)
-        return listItems[0].error == nil && !completeButtonWasPressed
-    }()
-    private var userIsTyping: Bool = false
-    private var tableIsUpdating: Bool = false
-    private var completeButtonState: Bool = true
-    private var completeButtonWasPressed: Bool = false
-    private var listIsValid: Bool {
-        validateList()
-    }
-    
-    private var state: States? {
-        didSet {
-            processState()
+    private var existingListNames = Set<String>()
+    private var hasLoaded = false
+    private var listItems: [NewListCellParams] = []
+    private var tableIsUpdating = false
+    private var userIsTyping = false
+
+    private var productRange: Range<Int> {
+        guard listItems.count > 2 else {
+            return 1..<1
         }
+        return 1..<(listItems.count - 1)
     }
-    
-    private var addNewItemButtonIsEnabled: Bool {
-        !userIsTyping && !tableIsUpdating && listIsValid
-    }
-    
-    private enum States {
-        case loadList
-        case validateNames(itemUpdated: Int?)
-        case startEditing(row: Int, field: Fields)
-        case itemModified(row: Int, newValue: Values)
-        case deleteItem(row: Int)
-        case addNewItem
-        case completeButtonPressed
-        case viewWillDisappear
-    }
-    
-    private enum Values {
-        case name(String?)
-        case quantity(Float)
-        case unit(Units)
-    }
-    
-    private enum Fields {
-        case name
-        case quantity
-    }
-    
+
     // MARK: - Initializers
     init(coordinator: Coordinator, editList: UUID?) {
         self.coordinator = coordinator
-        self.storageService = coordinator.storageService
-        self.editList = editList
+        editListID = editList
+        listID = editList ?? UUID()
+        notificationService = coordinator.notificationService
+        storageService = coordinator.storageService
     }
-    
+
     // MARK: - Public Methods
-    func viewWillAppear() {
-        self.state = .loadList
-        completeButtonWasPressed = false
-    }
-    
-    func viewWillDisappear() {
-        state = .viewWillDisappear
-    }
-    
-    func getListTitle() -> String {
-        editList == nil ? .newListCreationTitle : .buttonEdit
-    }
-    
-    func getTableRowCount() -> Int {
-        listItems.count
-    }
-    
-    func getRowHeight(for row: Int) -> CGFloat {
-        switch row {
-            
-        case 0:
-            listItems[row].error == nil ? 60 : 87
-            
-        case listItems.count - 1:
-            76
-            
-        default:
-            listItems[row].error == nil ? 52 : 81
+    func completeButtonPressed() {
+        guard !userIsTyping else {
+            return
+        }
+
+        let changedRows = validateAllNames()
+        guard changedRows.isEmpty, validateList() else {
+            if !changedRows.isEmpty {
+                tableIsUpdating = true
+                newListBinding.value = [.updateItems(changedRows, true)]
+            }
+            updateCompleteButtonState()
+            return
+        }
+
+        do {
+            completeButtonWasPressed = true
+            try saveList()
+            coordinator.popToMainView()
+        } catch {
+            completeButtonWasPressed = false
+            show(error)
         }
     }
-    
-    func getCellParams(for row: Int) -> (NewListCellType, NewListCellParams) {
-        return (row == 0 ? .title : row == listItems.count - 1 ? .button : .item,
-                .init(id: listItems[row].id,
-                      title: listItems[row].title,
-                      quantity: listItems[row].quantity,
-                      unit: listItems[row].unit,
-                      error: listItems[row].error,
-                      startEditing: listItems[row].startEditing
-                     )
-        )
+
+    func deleteItemButtonPressed(in row: Int) {
+        guard productRange.contains(row) else {
+            return
+        }
+
+        listItems.remove(at: row)
+        tableIsUpdating = true
+        newListBinding.value = [.removeItem(IndexPath(row: row, section: 0))]
     }
-    
+
+    func getCellParams(for row: Int) -> (NewListCellType, NewListCellParams) {
+        let type: NewListCellType
+        if row == 0 {
+            type = .title
+        } else if row == listItems.count - 1 {
+            type = .button
+        } else {
+            type = .item
+        }
+        return (type, listItems[row])
+    }
+
     func getCompleteButtonState() -> Bool {
         completeButtonState
     }
-    
+
+    func getListTitle() -> String {
+        editListID == nil ? .newListCreationTitle : .buttonEdit
+    }
+
+    func getRowHeight(for row: Int) -> CGFloat {
+        if row == 0 {
+            return listItems[row].error == nil ? 60 : 87
+        }
+        if row == listItems.count - 1 {
+            return 76
+        }
+        return listItems[row].error == nil ? 52 : 81
+    }
+
+    func getTableRowCount() -> Int {
+        listItems.count
+    }
+
     func tableFinishedUpdating() {
         tableIsUpdating = false
-        if updateCompleteButtonState() {
-            newListBinding.value = [.updateCompleteButtonState]
-        }
+        updateCompleteButtonState()
     }
-    
-    // MARK: - Actions
-    func completeButtonPressed() {
-        state = .completeButtonPressed
-    }
-    
-    func deleteItemButtonPressed(in row: Int) {
-        state = .deleteItem(row: row)
-    }
-    
-    // MARK: - Private Methods
-    private func processState() {
-        switch state {
-            
-        case .loadList:
-            setListItems()
-            state = .validateNames(itemUpdated: nil)
-            
-        case .validateNames(itemUpdated: let itemUpdated):
-            var indexesToReload: [IndexPath] = []
-            var bindingTasks = [NewListBinding]()
-            
-            if let itemUpdated {
-                if validateName(row: itemUpdated) {
-                    indexesToReload.append(IndexPath(row: itemUpdated, section: 0))
-                }
-            } else {
-                for row in 0...listItems.count - 2 {
-                    if validateName(row: row) {
-                        indexesToReload.append(IndexPath(row: row, section: 0))
-                    }
-                }
-            }
-            
-            if !indexesToReload.isEmpty {
-                bindingTasks.append(.updateItems(indexesToReload, true))
-                tableIsUpdating = true
-                newListBinding.value = bindingTasks
-            } else if updateCompleteButtonState() {
-                newListBinding.value = [.updateCompleteButtonState]
-            }
-            
-        case .startEditing(row: let row, field: let field):
-            switch field {
-            case .name:
-                userIsTyping = true
-            case .quantity:
-                guard !userIsTyping else { return }
-                newListBinding.value = [.showPopUp(listItems[row].id, listItems[row].quantity ?? 1, listItems[row].unit ?? .piece)]
-            }
-            
-        case .itemModified(row: let row, newValue: let newValue):
-            switch newValue {
-            case .name(let newName):
-                listItems[row].title = newName
-                state = .validateNames(itemUpdated: row)
-            case .quantity(let newQuantity):
-                listItems[row].quantity = newQuantity
-                tableIsUpdating = true
-                newListBinding.value = [.updateItems([.init(row: row, section: 0)], false)]
-            case .unit(let newUnit):
-                listItems[row].unit = newUnit
-                tableIsUpdating = true
-                newListBinding.value = [.updateItems([.init(row: row, section: 0)], false)]
-            }
-            userIsTyping = false
-            
-        case .addNewItem:
-            guard self.addNewItemButtonIsEnabled else {
-                return
-            }
-            
-            DispatchQueue.main.async {
-                let newItemIndex = self.listItems.count - 1
-                self.listItems.insert(.init(id: UUID(),
-                                            quantity: 1,
-                                            unit: .piece,
-                                            startEditing: true
-                                           ), at: newItemIndex
-                )
-                self.tableIsUpdating = true
-                self.newListBinding.value = [
-                    .insertItem(.init(row: self.listItems.count - 2, section: 0)),
-                    .updateCompleteButtonState
-                ]
-            }
-            
-        case .deleteItem(row: let row):
-            DispatchQueue.main.async {
-                self.listItems.remove(at: row)
-                self.tableIsUpdating = true
-                self.newListBinding.value = [.removeItem(.init(row: row, section: 0))]
-            }
-            
-        case .completeButtonPressed:
-            guard !userIsTyping else { return }
-            
-            state = .validateNames(itemUpdated: nil)
-            
-            if listIsValid {
-                DispatchQueue.main.async {
-                    self.completeButtonWasPressed = true
-                    self.editList == nil
-                    ? self.storageService.saveNewList(list: self.buildNewList())
-                    : self.storageService.updateList(list: self.buildNewList())
-                    self.coordinator.popToMainView()
-                }
-            }
-            
-        case .viewWillDisappear:
-            if autoSave {
-                self.editList == nil
-                ? self.storageService.saveNewList(list: self.buildNewList())
-                : self.storageService.updateList(list: self.buildNewList())
-            }
-            
-        default:
-            break
-        }
-    }
-    
-    private func setListItems() {
-        guard let editList else {
-            restoreUserInputs()
+
+    func viewWillAppear() {
+        guard !hasLoaded else {
             return
         }
-        editedList = storageService.getList(by: editList)
-        listItems = [.init(id: UUID(), title: editedList?.info.title)]
-        for item in editedList?.items ?? [] {
-            listItems.append(.init(id: UUID(),
-                                   title: item.name,
-                                   quantity: Float(item.quantity),
-                                   unit: Units(rawValue: item.unit) ?? .piece
-                                  )
+
+        do {
+            existingListNames = try storageService.getExistingListNames(excluding: editListID)
+            try loadListItems()
+            hasLoaded = true
+            _ = validateAllNames()
+            completeButtonState = validateList()
+            newListBinding.value = [.reloadTable, .updateCompleteButtonState]
+        } catch {
+            show(error)
+        }
+    }
+
+    func viewWillDisappear() {
+        guard !completeButtonWasPressed, validateList() else {
+            return
+        }
+
+        do {
+            try saveList()
+        } catch {
+            show(error)
+        }
+    }
+
+    // MARK: - Private Methods
+    private func buildList() -> ShopList {
+        let items = productRange.compactMap { index -> ListItem? in
+            let item = listItems[index]
+            guard item.error == nil,
+                  let title = item.title?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !title.isEmpty else {
+                return nil
+            }
+
+            return ListItem(
+                name: title,
+                quantity: item.quantity ?? 1,
+                unit: item.unit?.rawValue ?? Units.piece.rawValue,
+                checked: item.checked ?? false
             )
         }
-        listItems.append(.init(id: UUID(), title: .buttonAddProduct))
+        let info = ListInfo(
+            listId: listID,
+            title: listItems[0].title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+            date: editedList?.info.date ?? Date(),
+            completed: editedList?.info.completed ?? false,
+            pinned: editedList?.info.pinned ?? false,
+            reminderDate: editedList?.info.reminderDate.flatMap { $0 > Date() ? $0 : nil }
+        )
+        return ShopList(info: info, items: items)
     }
-    
-    private func buildNewList() -> ShopList {
-        var newListItems = [ListItem]()
-        if listItems.count > 2 {
-            for item in listItems[1...listItems.count - 2] {
-                if item.error == nil {
-                    newListItems.append(.init(name: item.title ?? .newListItemPlaceholder,
-                                              quantity: Float(item.quantity ?? 1),
-                                              unit: item.unit?.rawValue ?? Units.piece.rawValue,
-                                              checked: item.checked ?? false
-                                             )
-                    )
-                }
+
+    private func getItemRow(by id: UUID) -> Int? {
+        listItems.firstIndex { $0.id == id }
+    }
+
+    private func loadListItems() throws {
+        guard let editListID else {
+            listItems = [
+                NewListCellParams(id: UUID()),
+                NewListCellParams(id: UUID(), title: .buttonAddProduct)
+            ]
+            return
+        }
+
+        guard let storedList = try storageService.getList(by: editListID) else {
+            throw StorageServiceError.listNotFound
+        }
+
+        editedList = storedList
+        listItems = [NewListCellParams(id: UUID(), title: storedList.info.title)]
+        storedList.items.forEach { item in
+            listItems.append(
+                NewListCellParams(
+                    id: UUID(),
+                    title: item.name,
+                    quantity: item.quantity,
+                    unit: Units(rawValue: item.unit) ?? .piece,
+                    checked: item.checked
+                )
+            )
+        }
+        listItems.append(NewListCellParams(id: UUID(), title: .buttonAddProduct))
+    }
+
+    private func normalizeName(_ name: String) -> String {
+        name
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+    }
+
+    private func saveList() throws {
+        let list = buildList()
+        if editListID == nil {
+            try storageService.saveNewList(list: list)
+        } else {
+            try storageService.updateList(list: list)
+        }
+
+        guard let reminderDate = list.info.reminderDate else {
+            notificationService.cancelNotification(for: list.info.listId)
+            return
+        }
+
+        Task { @MainActor [weak self, notificationService] in
+            do {
+                try await notificationService.scheduleNotification(
+                    for: list.info.listId,
+                    listTitle: list.info.title,
+                    date: reminderDate
+                )
+            } catch {
+                self?.show(error)
             }
         }
-        return .init(info: .init(listId: editList ?? UUID(),
-                                 title: listItems[0].title ?? .newListCreationTitle,
-                                 date: editedList?.info.date ?? Date(),
-                                 completed: editList == nil ? false : editedList?.info.completed ?? false,
-                                 pinned: editList == nil ? false : editedList?.info.pinned ?? false
-                                ),
-                     items: newListItems
-        )
     }
-    
-    private func getItemRowBy(id: UUID) -> Int {
-        listItems.firstIndex(where: { $0.id == id }) ?? 0
+
+    private func show(_ error: Error) {
+        coordinator.showAlert(title: .errorTitle, message: error.localizedDescription)
     }
-    
-    private func restoreUserInputs() {
-        listItems = [
-            .init(id: UUID()),
-            .init(id: UUID(), title: .buttonAddProduct)
-        ]
-        return
-    }
-    
-    @discardableResult
-    private func updateCompleteButtonState() -> Bool { // возвращает true если статус изменился
-        let oldState = completeButtonState
-        completeButtonState = validateList()
-        return oldState != completeButtonState
-    }
-    
-    @discardableResult
-    private func validateName(row: Int) -> Bool { // возвращает true если статус изменился
-        let oldErrorStatus = listItems[row].error
-        listItems[row].startEditing = false
-        
-        guard let newTitle = listItems[row].title,
-              !newTitle.isEmpty else {
-            listItems[row].error = .newListEmptyName
-            return oldErrorStatus != listItems[row].error
+
+    private func updateCompleteButtonState() {
+        let newState = validateList()
+        guard completeButtonState != newState else {
+            return
         }
-        
-        if row == 0,
-           existingListNames.contains(newTitle.lowercased()) && editedList == nil {
+
+        completeButtonState = newState
+        newListBinding.value = [.updateCompleteButtonState]
+    }
+
+    private func validateAllNames() -> [IndexPath] {
+        (0..<(listItems.count - 1)).compactMap { row in
+            validateName(at: row) ? IndexPath(row: row, section: 0) : nil
+        }
+    }
+
+    private func validateList() -> Bool {
+        guard !listItems.isEmpty else {
+            return false
+        }
+
+        return (0..<(listItems.count - 1)).allSatisfy { row in
+            let title = listItems[row].title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            return !title.isEmpty && listItems[row].error == nil
+        }
+    }
+
+    @discardableResult
+    private func validateName(at row: Int) -> Bool {
+        guard listItems.indices.contains(row), row < listItems.count - 1 else {
+            return false
+        }
+
+        let oldError = listItems[row].error
+        let title = listItems[row].title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        listItems[row].title = title
+        listItems[row].startEditing = false
+
+        if title.isEmpty {
+            listItems[row].error = .newListEmptyName
+        } else if row == 0, existingListNames.contains(normalizeName(title)) {
             listItems[row].error = .newListNameAlreadyUsed
-            
-        } else if newTitle.replacingOccurrences(of: " ", with: "").isEmpty {
-            listItems[row].error = .newListWrongName
-            
         } else {
             listItems[row].error = nil
         }
-        
-        return oldErrorStatus != listItems[row].error
-    }
-    
-    private func validateList() -> Bool {
-        listItems.first(where: { $0.title == nil || $0.title?.isEmpty == true || $0.error != nil}) == nil
+        return oldError != listItems[row].error
     }
 }
 
 // MARK: - NewListCellDelegate
 extension NewListViewModel: NewListCellDelegate {
-    
-    func updateNewListTitle(with title: String?) {
-        state = .itemModified(row: 0, newValue: .name(title))
-    }
-    
-    func updateNewListItem(id: UUID, with title: String?) {
-        state = .itemModified(row: getItemRowBy(id: id), newValue: .name(title))
-    }
-    
-    func textFieldDidBeginEditing(id: UUID) {
-        state = .startEditing(row: getItemRowBy(id: id), field: .name)
-    }
-    
-    func editQuantityButtonPressed(id: UUID) {
-        completeButtonState = false
-        state = .startEditing(row: getItemRowBy(id: id), field: .quantity)
-    }
-    
+
     func addNewItemButtonPressed() {
-        state = .addNewItem
+        guard !userIsTyping, !tableIsUpdating, validateList() else {
+            return
+        }
+
+        let index = listItems.count - 1
+        listItems.insert(
+            NewListCellParams(
+                id: UUID(),
+                quantity: 1,
+                unit: .piece,
+                error: .newListEmptyName,
+                startEditing: true
+            ),
+            at: index
+        )
+        tableIsUpdating = true
+        userIsTyping = true
+        newListBinding.value = [
+            .insertItem(IndexPath(row: index, section: 0)),
+            .updateCompleteButtonState
+        ]
+    }
+
+    func editQuantityButtonPressed(id: UUID) {
+        guard !userIsTyping, let row = getItemRow(by: id), productRange.contains(row) else {
+            return
+        }
+
+        let item = listItems[row]
+        newListBinding.value = [.showPopUp(id, item.quantity ?? 1, item.unit ?? .piece)]
+    }
+
+    func textFieldDidBeginEditing(id: UUID) {
+        guard let row = getItemRow(by: id) else {
+            return
+        }
+
+        listItems[row].startEditing = false
+        userIsTyping = true
+    }
+
+    func updateNewListItem(id: UUID, with title: String?) {
+        guard let row = getItemRow(by: id) else {
+            return
+        }
+
+        updateName(at: row, title: title)
+    }
+
+    func updateNewListTitle(with title: String?) {
+        updateName(at: 0, title: title)
+    }
+
+    // MARK: - Private Methods
+    private func updateName(at row: Int, title: String?) {
+        listItems[row].title = title
+        userIsTyping = false
+
+        if validateName(at: row) {
+            tableIsUpdating = true
+            newListBinding.value = [.updateItems([IndexPath(row: row, section: 0)], true)]
+        } else {
+            updateCompleteButtonState()
+        }
     }
 }
 
 // MARK: - PopUpVCDelegate
 extension NewListViewModel: PopUpVCDelegate {
-    func unitSelected(itemID: UUID, unit: Units) {
-        state = .itemModified(row: getItemRowBy(id: itemID), newValue: .unit(unit))
-    }
-    
+
     func quantitySelected(itemID: UUID, quantity: Float) {
-        state = .itemModified(row: getItemRowBy(id: itemID), newValue: .quantity(quantity))
+        guard let row = getItemRow(by: itemID), productRange.contains(row) else {
+            return
+        }
+
+        listItems[row].quantity = quantity
+        tableIsUpdating = true
+        newListBinding.value = [.updateItems([IndexPath(row: row, section: 0)], false)]
+    }
+
+    func unitSelected(itemID: UUID, unit: Units) {
+        guard let row = getItemRow(by: itemID), productRange.contains(row) else {
+            return
+        }
+
+        listItems[row].unit = unit
+        tableIsUpdating = true
+        newListBinding.value = [.updateItems([IndexPath(row: row, section: 0)], false)]
     }
 }
