@@ -4,7 +4,7 @@ final class SplashViewController: UIViewController {
 
     // MARK: - Private Properties
     private let animationImageView = UIImageView(image: UIImage(named: "launchScreenImage"))
-    private let logoImageView = UIImageView(image: UIImage(named: "launchScreenLogo"))
+    private let logoImageView = UIImageView(image: UIImage(named: .splashScreenLogoImage))
     private let transitionView = UIView()
     private let viewModel: SplashViewModel
 

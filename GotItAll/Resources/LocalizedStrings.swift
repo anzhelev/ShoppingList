@@ -3,92 +3,100 @@ import Foundation
 extension String {
 
     // MARK: - Public Properties
-    static let dateFormat = NSLocalizedString("formatter.dateFormat", comment: "")
+    static var dateFormat: String { localized("formatter.dateFormat") }
 
-    static let appName = NSLocalizedString("app.name", comment: "")
+    static var appName: String { localized("app.name") }
 
-    static let notificationText = NSLocalizedString("notification.text", comment: "")
+    static var notificationText: String { localized("notification.text") }
 
-    static let buttonAddProduct = NSLocalizedString("buttons.addProduct", comment: "")
-    static let buttonApply: String = NSLocalizedString("buttons.apply", comment: "")
-    static let buttonBack = NSLocalizedString("buttons.back", comment: "")
-    static let buttonCancel = NSLocalizedString("buttons.cancel", comment: "")
-    static let buttonClear = NSLocalizedString("buttons.clear", comment: "")
-    static let buttonClearArchive = NSLocalizedString("buttons.clearArchive", comment: "")
-    static let buttonCreateNewList = NSLocalizedString("buttons.createNewList", comment: "")
-    static let buttonDelete = NSLocalizedString("buttons.delete", comment: "")
-    static let buttonDone = NSLocalizedString("buttons.done", comment: "")
-    static let buttonEdit = NSLocalizedString("buttons.edit", comment: "")
-    static let buttonOk: String = NSLocalizedString("buttons.ok", comment: "")
-    static let buttonPin = NSLocalizedString("buttons.pin", comment: "")
-    static let buttonRemoveCheckedItems = NSLocalizedString("buttons.removeCheckedItems", comment: "")
-    static let buttonRestore = NSLocalizedString("buttons.restore", comment: "")
-    static let buttonRestoreList = NSLocalizedString("buttons.restoreList", comment: "")
-    static let buttonSaveList = NSLocalizedString("buttons.saveList", comment: "")
-    static let buttonSettings = NSLocalizedString("buttons.settings", comment: "")
-    static let buttonSwitchToMainScreen = NSLocalizedString("buttons.switchToMainScreen", comment: "")
-    static let buttonUnpin = NSLocalizedString("buttons.unpin", comment: "")
+    static var buttonAddProduct: String { localized("buttons.addProduct") }
+    static var buttonApply: String { localized("buttons.apply") }
+    static var buttonBack: String { localized("buttons.back") }
+    static var buttonCancel: String { localized("buttons.cancel") }
+    static var buttonClear: String { localized("buttons.clear") }
+    static var buttonClearArchive: String { localized("buttons.clearArchive") }
+    static var buttonCreateNewList: String { localized("buttons.createNewList") }
+    static var buttonDelete: String { localized("buttons.delete") }
+    static var buttonDone: String { localized("buttons.done") }
+    static var buttonEdit: String { localized("buttons.edit") }
+    static var buttonOk: String { localized("buttons.ok") }
+    static var buttonPin: String { localized("buttons.pin") }
+    static var buttonRemoveCheckedItems: String { localized("buttons.removeCheckedItems") }
+    static var buttonRestore: String { localized("buttons.restore") }
+    static var buttonRestoreList: String { localized("buttons.restoreList") }
+    static var buttonSaveList: String { localized("buttons.saveList") }
+    static var buttonSettings: String { localized("buttons.settings") }
+    static var buttonSwitchToMainScreen: String { localized("buttons.switchToMainScreen") }
+    static var buttonUnpin: String { localized("buttons.unpin") }
 
-    static let dropdownDuplicate: String = NSLocalizedString("dropdown.duplicate", comment: "")
-    static let dropdownRemind: String = NSLocalizedString("dropdown.remind", comment: "")
-    static let dropdownReset: String = NSLocalizedString("dropdown.reset", comment: "")
-    static let dropdownShare = NSLocalizedString("dropdown.share", comment: "")
-    static let dropdownSorting: String = NSLocalizedString("dropdown.sorting", comment: "")
+    static var dropdownDuplicate: String { localized("dropdown.duplicate") }
+    static var dropdownRemind: String { localized("dropdown.remind") }
+    static var dropdownReset: String { localized("dropdown.reset") }
+    static var dropdownShare: String { localized("dropdown.share") }
+    static var dropdownSorting: String { localized("dropdown.sorting") }
 
-    static let languageEnglish = NSLocalizedString("languages.english", comment: "")
-    static let languageRussian = NSLocalizedString("languages.russian", comment: "")
-    static let languageSystem = NSLocalizedString("languages.system", comment: "")
+    static var languageEnglish: String { localized("languages.english") }
+    static var languageRussian: String { localized("languages.russian") }
+    static var languageSystem: String { localized("languages.system") }
 
-    static let themeAutomatic = NSLocalizedString("themes.automatic", comment: "")
-    static let themeDark = NSLocalizedString("themes.dark", comment: "")
-    static let themeLight = NSLocalizedString("themes.light", comment: "")
+    static var themeAutomatic: String { localized("themes.automatic") }
+    static var themeDark: String { localized("themes.dark") }
+    static var themeLight: String { localized("themes.light") }
+    
+    static var splashScreenLogoImage: String { localized("splashScreen.logo.imageName") }
 
-    static let onboardingContinue = NSLocalizedString("onboarding.continue", comment: "")
-    static let onboardingPage1Description = NSLocalizedString("onboarding.page1.description", comment: "")
-    static let onboardingPage1Header = NSLocalizedString("onboarding.page1.header", comment: "")
-    static let onboardingPage2Description = NSLocalizedString("onboarding.page2.description", comment: "")
-    static let onboardingPage2Header = NSLocalizedString("onboarding.page2.header", comment: "")
-    static let onboardingPage3Description = NSLocalizedString("onboarding.page3.description", comment: "")
-    static let onboardingPage3Header = NSLocalizedString("onboarding.page3.header", comment: "")
-    static let onboardingStart = NSLocalizedString("onboarding.start", comment: "")
+    static var onboardingContinue: String { localized("onboarding.continue") }
+    static var onboardingPage1Description: String { localized("onboarding.page1.description") }
+    static var onboardingPage1Header: String { localized("onboarding.page1.header") }
+    static var onboardingPage2Description: String { localized("onboarding.page2.description") }
+    static var onboardingPage2Header: String { localized("onboarding.page2.header") }
+    static var onboardingPage3Description: String { localized("onboarding.page3.description") }
+    static var onboardingPage3Header: String { localized("onboarding.page3.header") }
+    static var onboardingStart: String { localized("onboarding.start") }
 
-    static let welcomeScreenHeader = NSLocalizedString("welcomeScreen.header", comment: "")
+    static var welcomeScreenHeader: String { localized("welcomeScreen.header") }
 
-    static let tabBarTabsArchiveView = NSLocalizedString("tabBar.archiveView", comment: "")
-    static let tabBarTabsMainView = NSLocalizedString("tabBar.mainView", comment: "")
-    static let tabBarTabsSettingsView = NSLocalizedString("tabBar.settingsView", comment: "")
+    static var tabBarTabsArchiveView: String { localized("tabBar.archiveView") }
+    static var tabBarTabsMainView: String { localized("tabBar.mainView") }
+    static var tabBarTabsSettingsView: String { localized("tabBar.settingsView") }
 
-    static let mainScreenActiveSwipeHint = NSLocalizedString("mainScreenViewController.active.swipeHint", comment: "")
-    static let mainScreenActiveTitle = NSLocalizedString("mainScreenViewController.active.title", comment: "")
-    static let mainScreenCompletedSwipeHint = NSLocalizedString("mainScreenViewController.completed.swipeHint", comment: "")
-    static let mainScreenCompletedTitle = NSLocalizedString("mainScreenViewController.completed.title", comment: "")
-    static let mainScreenStub = NSLocalizedString("mainScreenViewController.stub", comment: "")
+    static var mainScreenActiveSwipeHint: String { localized("mainScreenViewController.active.swipeHint") }
+    static var mainScreenActiveTitle: String { localized("mainScreenViewController.active.title") }
+    static var mainScreenCompletedSwipeHint: String { localized("mainScreenViewController.completed.swipeHint") }
+    static var mainScreenCompletedTitle: String { localized("mainScreenViewController.completed.title") }
+    static var mainScreenStub: String { localized("mainScreenViewController.stub") }
 
-    static let newListAddProductHint = NSLocalizedString("newListViewController.addProductHint", comment: "")
-    static let newListCreationTitle = NSLocalizedString("newListViewController.title", comment: "")
-    static let newListEmptyName = NSLocalizedString("newListViewController.emptyName", comment: "")
-    static let newListItemPlaceholder = NSLocalizedString("newListViewController.itemPlaceholder", comment: "")
-    static let newListNameAlreadyUsed = NSLocalizedString("newListViewController.nameAlreadyUsed", comment: "")
-    static let newListTitlePlaceholder = NSLocalizedString("newListViewController.titlePlaceholder", comment: "")
-    static let newListWrongName = NSLocalizedString("newListViewController.wrongName", comment: "")
+    static var newListAddProductHint: String { localized("newListViewController.addProductHint") }
+    static var newListCreationTitle: String { localized("newListViewController.title") }
+    static var newListEmptyName: String { localized("newListViewController.emptyName") }
+    static var newListItemPlaceholder: String { localized("newListViewController.itemPlaceholder") }
+    static var newListNameAlreadyUsed: String { localized("newListViewController.nameAlreadyUsed") }
+    static var newListTitlePlaceholder: String { localized("newListViewController.titlePlaceholder") }
+    static var newListWrongName: String { localized("newListViewController.wrongName") }
 
-    static let shoppingListVCcheckAll = NSLocalizedString("shoppingListViewController.checkAll", comment: "")
-    static let successViewAdditional = NSLocalizedString("successView.additional", comment: "")
-    static let successViewCongratulations = NSLocalizedString("successView.congratulations", comment: "")
+    static var shoppingListVCcheckAll: String { localized("shoppingListViewController.checkAll") }
+    static var successViewAdditional: String { localized("successView.additional") }
+    static var successViewCongratulations: String { localized("successView.congratulations") }
 
-    static let datePickerViewTitle = NSLocalizedString("datePickerView.title", comment: "")
+    static var datePickerViewTitle: String { localized("datePickerView.title") }
 
-    static let errorTitle = NSLocalizedString("errors.title", comment: "")
-    static let listDuplicatedMessage = NSLocalizedString("shoppingList.duplicatedMessage", comment: "")
-    static let notificationInvalidDate = NSLocalizedString("notifications.invalidDate", comment: "")
-    static let notificationPermissionDenied = NSLocalizedString("notifications.permissionDenied", comment: "")
-    static let notificationScheduledMessage = NSLocalizedString("notifications.scheduledMessage", comment: "")
-    static let notificationScheduledTitle = NSLocalizedString("notifications.scheduledTitle", comment: "")
-    static let storageListAlreadyExists = NSLocalizedString("storage.listAlreadyExists", comment: "")
-    static let storageListNotFound = NSLocalizedString("storage.listNotFound", comment: "")
+    static var errorTitle: String { localized("errors.title") }
+    static var listDuplicatedMessage: String { localized("shoppingList.duplicatedMessage") }
+    static var notificationInvalidDate: String { localized("notifications.invalidDate") }
+    static var notificationPermissionDenied: String { localized("notifications.permissionDenied") }
+    static var notificationSchedulingFailed: String { localized("notifications.schedulingFailed") }
+    static var notificationScheduledMessage: String { localized("notifications.scheduledMessage") }
+    static var notificationScheduledTitle: String { localized("notifications.scheduledTitle") }
+    static var storageListAlreadyExists: String { localized("storage.listAlreadyExists") }
+    static var storageListNotFound: String { localized("storage.listNotFound") }
 
-    static let settingsAlertMessage = NSLocalizedString("settings.alert.message", comment: "")
-    static let settingsAlertTitle = NSLocalizedString("settings.alert.title", comment: "")
-    static let settingsLanguageSectionTitle = NSLocalizedString("settings.languageSettings.title", comment: "")
-    static let settingsThemeSectionTitle = NSLocalizedString("settings.themeSettings.title", comment: "")
+    static var settingsAlertMessage: String { localized("settings.alert.message") }
+    static var settingsAlertTitle: String { localized("settings.alert.title") }
+    static var settingsLanguageSectionTitle: String { localized("settings.languageSettings.title") }
+    static var settingsThemeSectionTitle: String { localized("settings.themeSettings.title") }
+
+    // MARK: - Private Methods
+    private static func localized(_ key: String) -> String {
+        LanguageManager.languageManager.localizedString(forKey: key)
+    }
 }

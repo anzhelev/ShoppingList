@@ -135,7 +135,6 @@ final class NewListViewModel: NewListViewModelProtocol {
             existingListNames = try storageService.getExistingListNames(excluding: editListID)
             try loadListItems()
             hasLoaded = true
-            _ = validateAllNames()
             completeButtonState = validateList()
             newListBinding.value = [.reloadTable, .updateCompleteButtonState]
         } catch {
@@ -315,7 +314,6 @@ extension NewListViewModel: NewListCellDelegate {
                 id: UUID(),
                 quantity: 1,
                 unit: .piece,
-                error: .newListEmptyName,
                 startEditing: true
             ),
             at: index

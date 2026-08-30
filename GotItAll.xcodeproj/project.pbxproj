@@ -17,8 +17,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GotItAllTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4BBACB72D638E7C00A59869 /* GotItAll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GotItAll.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = GotItAllTests.xctest; path = "/Users/andreyzhelev/Projects/ShoppingList/build/Debug-iphoneos/GotItAll.app/PlugIns/GotItAllTests.xctest"; sourceTree = "<absolute>"; };
+		D4BBACB72D638E7C00A59869 /* GotItAll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = GotItAll.app; path = "/Users/andreyzhelev/Projects/ShoppingList/build/Debug-iphoneos/GotItAll.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -70,8 +70,6 @@
 			children = (
 				D46AA59D2CF889B700B81D86 /* GotItAll */,
 				D4A000022E00000100000001 /* GotItAllTests */,
-				D4BBACB72D638E7C00A59869 /* GotItAll.app */,
-				D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */,
 			);
 			sourceTree = "<group>";
 		};

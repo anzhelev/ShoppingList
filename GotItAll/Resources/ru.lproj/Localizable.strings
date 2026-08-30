@@ -43,6 +43,8 @@
 "themes.automatic" = "Авто";
 "themes.dark" = "Тёмная";
 
+"splashScreen.logo.imageName" = "launchScreenLogoRu";
+
 "onboarding.page1.header" = "Удобно и просто";
 "onboarding.page1.description" = "Создавай списки покупок, чтобы не забыть ничего важного.";
 "onboarding.page2.header" = "Ты точно не забудешь";
@@ -87,6 +89,7 @@
 "errors.title" = "Что-то пошло не так";
 "notifications.invalidDate" = "Выберите будущие дату и время.";
 "notifications.permissionDenied" = "Уведомления отключены. Разрешите их для приложения в Настройках.";
+"notifications.schedulingFailed" = "Не удалось запланировать напоминание. Попробуйте ещё раз.";
 "notifications.scheduledMessage" = "Напоминание запланировано.";
 "notifications.scheduledTitle" = "Напоминание готово";
 "storage.listAlreadyExists" = "Список с таким идентификатором уже существует.";

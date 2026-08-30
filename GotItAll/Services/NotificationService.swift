@@ -6,6 +6,7 @@ enum NotificationServiceError: LocalizedError, Equatable {
     // MARK: - Constants
     case invalidDate
     case permissionDenied
+    case schedulingFailed
 
     // MARK: - Public Properties
     var errorDescription: String? {
@@ -14,6 +15,8 @@ enum NotificationServiceError: LocalizedError, Equatable {
             return .notificationInvalidDate
         case .permissionDenied:
             return .notificationPermissionDenied
+        case .schedulingFailed:
+            return .notificationSchedulingFailed
         }
     }
 }
@@ -47,16 +50,17 @@ final class NotificationService: NotificationServiceProtocol {
 
         try await requestAuthorizationIfNeeded()
 
+        let timeInterval = date.timeIntervalSinceNow
+        guard timeInterval >= 1 else {
+            throw NotificationServiceError.invalidDate
+        }
+
         let content = UNMutableNotificationContent()
         content.body = String(format: .notificationText, listTitle)
         content.sound = .default
         content.title = .appName
 
-        let dateComponents = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second],
-            from: date
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
         let request = UNNotificationRequest(
             identifier: notificationIdentifier(for: listID),
             content: content,
@@ -64,6 +68,11 @@ final class NotificationService: NotificationServiceProtocol {
         )
 
         try await notificationCenter.add(request)
+
+        let pendingRequests = await notificationCenter.pendingNotificationRequests()
+        guard pendingRequests.contains(where: { $0.identifier == request.identifier }) else {
+            throw NotificationServiceError.schedulingFailed
+        }
     }
 
     // MARK: - Private Methods
@@ -76,7 +85,9 @@ final class NotificationService: NotificationServiceProtocol {
 
         switch settings.authorizationStatus {
         case .authorized, .ephemeral, .provisional:
-            return
+            guard settings.alertSetting == .enabled else {
+                throw NotificationServiceError.permissionDenied
+            }
         case .notDetermined:
             guard try await notificationCenter.requestAuthorization(options: [.alert, .sound]) else {
                 throw NotificationServiceError.permissionDenied

@@ -5,9 +5,11 @@ final class DatePickerView: UIView {
     // MARK: - Private Properties
     private lazy var datePicker = {
         let datePicker = UIDatePicker()
+        let minimumDate = Date().addingTimeInterval(5 * 60)
         datePicker.datePickerMode = .dateAndTime
-        datePicker.minimumDate = Calendar.current.date(byAdding: .minute, value: 5, to: Date())
-        datePicker.maximumDate = Calendar.current.date(byAdding: .day, value: 365, to: Date())
+        datePicker.date = minimumDate
+        datePicker.minimumDate = minimumDate
+        datePicker.maximumDate = Date().addingTimeInterval(365 * 24 * 60 * 60)
         datePicker.minuteInterval = 5
         datePicker.preferredDatePickerStyle = .wheels
         datePicker.roundsToMinuteInterval = true

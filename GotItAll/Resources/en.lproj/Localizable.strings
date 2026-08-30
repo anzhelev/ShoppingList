@@ -43,6 +43,8 @@
 "themes.automatic" = "Automatic";
 "themes.dark" = "Dark";
 
+"splashScreen.logo.imageName" = "launchScreenLogoEn";
+
 "onboarding.page1.header" = "Easy and Convenient";
 "onboarding.page1.description" = "Create shopping lists so you never forget what you want to buy.";
 "onboarding.page2.header" = "You Won't Forget a Thing";
@@ -87,6 +89,7 @@
 "errors.title" = "Something went wrong";
 "notifications.invalidDate" = "Select a future date and time.";
 "notifications.permissionDenied" = "Notifications are disabled. Enable them for this app in Settings.";
+"notifications.schedulingFailed" = "The reminder could not be scheduled. Please try again.";
 "notifications.scheduledMessage" = "The reminder has been scheduled.";
 "notifications.scheduledTitle" = "Reminder ready";
 "storage.listAlreadyExists" = "A list with this identifier already exists.";

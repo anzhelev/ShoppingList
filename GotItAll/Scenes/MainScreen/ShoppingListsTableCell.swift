@@ -44,7 +44,7 @@ final class ShoppingListsTableCell: UITableViewCell {
 
         separatorInset = params.separator
         ? UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
-        : UIEdgeInsets(top: 0, left: self.bounds.width + 40, bottom: 0, right: 0)
+        : UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
     }
 
     // MARK: - Private Methods

@@ -20,6 +20,10 @@ enum Units: String, CaseIterable {
         self == .kg || self == .liter
     }
 
+    var localizedName: String {
+        LanguageManager.languageManager.localizedString(forKey: rawValue)
+    }
+
     var minimumQuantity: Float {
         allowsFraction ? 0.1 : 1
     }

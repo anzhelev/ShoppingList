@@ -10,13 +10,7 @@ final class PopUpVC: UIViewController {
     private let decimalSeparator = Locale.current.decimalSeparator ?? "."
 
     private lazy var unitSelector = {
-        let selector = UISegmentedControl(
-            items: [NSLocalizedString(Units.kg.rawValue, comment: ""),
-                    NSLocalizedString(Units.liter.rawValue, comment: ""),
-                    NSLocalizedString(Units.pack.rawValue, comment: ""),
-                    NSLocalizedString(Units.piece.rawValue, comment: "")
-                   ]
-        )
+        let selector = UISegmentedControl(items: Units.allCases.map(\.localizedName))
         selector.setTitleTextAttributes(
             [
                 NSAttributedString.Key.foregroundColor: UIColor.white,

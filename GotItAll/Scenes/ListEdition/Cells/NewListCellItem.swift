@@ -73,7 +73,7 @@ final class NewListCellItem: UITableViewCell {
         itemNameField.textColor = params.error == nil ? .textColorPrimary : .buttonBgrSecondary
 
         quantityLabel.text = QuantityFormatter.string(from: quantity)
-            + " \(NSLocalizedString(unit.rawValue, comment: ""))"
+            + " \(unit.localizedName)"
         separatorView.backgroundColor = params.error == nil ? .tableSeparator : .buttonBgrSecondary
         errorLabel.text = params.error
         errorLabel.isHidden = params.error == nil
