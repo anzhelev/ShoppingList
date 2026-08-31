@@ -223,7 +223,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GotItAll/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Got It All";
+				INFOPLIST_KEY_CFBundleDisplayName = "Got It All!";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
@@ -236,7 +236,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.GotItAll;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.ShoppingList;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -257,7 +257,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GotItAll/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Got It All";
+				INFOPLIST_KEY_CFBundleDisplayName = "Got It All!";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.shopping";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
@@ -270,7 +270,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.1;
-				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.GotItAll;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.andreyzhelev.ShoppingList;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
