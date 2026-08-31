@@ -19,6 +19,7 @@ final class ShoppingListViewModelTests: XCTestCase {
 
         viewModel.textFieldDidBeginEditing(cellID: itemID)
         XCTAssertFalse(viewModel.getCheckAllSwitchAvailability())
+        XCTAssertFalse(viewModel.isDropAllowed(for: 0))
 
         viewModel.checkAllSwitchIs(on: true)
         XCTAssertFalse(viewModel.getBottomButtonState())
@@ -60,6 +61,34 @@ final class ShoppingListViewModelTests: XCTestCase {
         viewModel.viewWillAppear()
 
         XCTAssertEqual(viewModel.getTableRowCount(), 2)
+    }
+
+    func testRowMovedUpdatesVisibleAndStoredOrder() {
+        let list = ShopList(
+            info: ListInfo(
+                listId: UUID(),
+                title: "Test list",
+                date: Date(),
+                completed: false,
+                pinned: false
+            ),
+            items: ["Milk", "Bread", "Apples"].map {
+                ListItem(name: $0, quantity: 1, unit: Units.piece.rawValue, checked: false)
+            }
+        )
+        let storage = MockStorageService(list: list)
+        let viewModel = ShoppingListViewModel(
+            coordinator: MockCoordinator(storageService: storage),
+            listInfo: list.info
+        )
+        viewModel.viewWillAppear()
+
+        viewModel.rowMoved(from: 0, to: 2)
+
+        XCTAssertEqual(viewModel.getCellParams(for: 0).1.title, "Bread")
+        XCTAssertEqual(viewModel.getCellParams(for: 1).1.title, "Apples")
+        XCTAssertEqual(viewModel.getCellParams(for: 2).1.title, "Milk")
+        XCTAssertEqual(storage.list.items.map(\.name), ["Bread", "Apples", "Milk"])
     }
 
     func testCompletionButtonRequiresAllProductsChecked() {

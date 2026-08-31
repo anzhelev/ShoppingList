@@ -8,6 +8,7 @@ final class DatePickerView: UIView {
         let minimumDate = Date().addingTimeInterval(5 * 60)
         datePicker.datePickerMode = .dateAndTime
         datePicker.date = minimumDate
+        datePicker.locale = viewModel.locale
         datePicker.minimumDate = minimumDate
         datePicker.maximumDate = Date().addingTimeInterval(365 * 24 * 60 * 60)
         datePicker.minuteInterval = 5

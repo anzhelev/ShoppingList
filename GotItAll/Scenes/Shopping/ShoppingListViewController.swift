@@ -39,6 +39,7 @@ final class ShoppingListViewController: UIViewController, KeyboardHandler {
         table.delegate = self
         table.dataSource = self
         table.dragInteractionEnabled = true
+        table.dragDelegate = self
         table.dropDelegate = self
         table.showsVerticalScrollIndicator = false
         table.separatorStyle = .none
@@ -130,6 +131,21 @@ final class ShoppingListViewController: UIViewController, KeyboardHandler {
                 return
             }
         }
+    }
+
+    private func dropDestinationIndexPath(for proposedIndexPath: IndexPath?) -> IndexPath? {
+        guard let proposedIndexPath, viewModel.getTableRowCount() > 0 else {
+            return nil
+        }
+
+        let proposedRow = min(proposedIndexPath.row, viewModel.getTableRowCount() - 1)
+        guard let allowedRow = stride(from: proposedRow, through: 0, by: -1).first(where: {
+            viewModel.isDropAllowed(for: $0)
+        }) else {
+            return nil
+        }
+
+        return IndexPath(row: allowedRow, section: proposedIndexPath.section)
     }
 
     private func reloadItem(index: [IndexPath], animated: Bool) {
@@ -390,14 +406,28 @@ extension ShoppingListViewController: UITableViewDelegate {
 
         return UISwipeActionsConfiguration(actions: [primaryAction])
     }
+}
 
-    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        viewModel.isDropAllowed(for: indexPath.row)
+// MARK: - UITableViewDragDelegate
+extension ShoppingListViewController: UITableViewDragDelegate {
+
+    func tableView(
+        _ tableView: UITableView,
+        itemsForBeginning session: UIDragSession,
+        at indexPath: IndexPath
+    ) -> [UIDragItem] {
+        guard viewModel.isDropAllowed(for: indexPath.row) else {
+            return []
+        }
+
+        let itemProvider = NSItemProvider(object: String(indexPath.row) as NSString)
+        let dragItem = UIDragItem(itemProvider: itemProvider)
+        dragItem.localObject = indexPath
+        return [dragItem]
     }
 
-    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        self.viewModel.rowMoved(from: sourceIndexPath.row, to: destinationIndexPath.row)
-        self.listItemsTable.reloadData()
+    func tableView(_ tableView: UITableView, dragSessionIsRestrictedToDraggingApplication session: UIDragSession) -> Bool {
+        true
     }
 }
 
@@ -405,7 +435,7 @@ extension ShoppingListViewController: UITableViewDelegate {
 extension ShoppingListViewController: UITableViewDropDelegate {
 
     func tableView(_ tableView: UITableView, canHandle session: UIDropSession) -> Bool {
-        true
+        session.localDragSession != nil && session.items.count == 1
     }
 
     func tableView(
@@ -414,13 +444,34 @@ extension ShoppingListViewController: UITableViewDropDelegate {
         withDestinationIndexPath destinationIndexPath: IndexPath?
     ) -> UITableViewDropProposal {
 
-        let isDropAllowed = viewModel.isDropAllowed(for: destinationIndexPath?.row ?? viewModel.getTableRowCount() - 1)
+        guard dropDestinationIndexPath(for: destinationIndexPath) != nil else {
+            return UITableViewDropProposal(operation: .cancel)
+        }
 
-        return session.items.count == 1 && tableView.hasActiveDrag && isDropAllowed
+        return tableView.hasActiveDrag
         ? UITableViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
         : UITableViewDropProposal(operation: .cancel)
     }
 
     func tableView(_ tableView: UITableView, performDropWith coordinator: UITableViewDropCoordinator) {
+        guard coordinator.proposal.operation == .move,
+              let dropItem = coordinator.items.first,
+              let sourceIndexPath = dropItem.sourceIndexPath,
+              let destinationIndexPath = dropDestinationIndexPath(for: coordinator.destinationIndexPath),
+              viewModel.isDropAllowed(for: sourceIndexPath.row) else {
+            return
+        }
+
+        guard sourceIndexPath != destinationIndexPath else {
+            coordinator.drop(dropItem.dragItem, toRowAt: destinationIndexPath)
+            return
+        }
+
+        viewModel.rowMoved(from: sourceIndexPath.row, to: destinationIndexPath.row)
+        tableView.performBatchUpdates {
+            tableView.deleteRows(at: [sourceIndexPath], with: .automatic)
+            tableView.insertRows(at: [destinationIndexPath], with: .automatic)
+        }
+        coordinator.drop(dropItem.dragItem, toRowAt: destinationIndexPath)
     }
 }

@@ -63,13 +63,6 @@ final class NewListViewController: UIViewController, KeyboardHandler {
         updateCompleteButton()
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        if isMovingFromParent {
-            viewModel.viewWillDisappear()
-        }
-    }
-
     deinit {
         removeKeyboardHandling()
     }

@@ -42,7 +42,7 @@ extension String {
     static var themeAutomatic: String { localized("themes.automatic") }
     static var themeDark: String { localized("themes.dark") }
     static var themeLight: String { localized("themes.light") }
-    
+
     static var splashScreenLogoImage: String { localized("splashScreen.logo.imageName") }
 
     static var onboardingContinue: String { localized("onboarding.continue") }

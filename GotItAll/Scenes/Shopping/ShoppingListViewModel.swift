@@ -175,7 +175,7 @@ final class ShoppingListViewModel: ShoppingListViewModelProtocol {
     }
 
     func isDropAllowed(for row: Int) -> Bool {
-        !currentListInfo.completed && row >= 0 && row < uncheckedItemsCount
+        !currentListInfo.completed && !userIsTyping && row >= 0 && row < uncheckedItemsCount
     }
 
     func listIsCompleted() -> Bool {

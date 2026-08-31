@@ -6,6 +6,7 @@ final class DatePickerViewModel {
     weak var delegate: DatePickerViewDelegate?
     let cancelButtonTitle: String = .buttonCancel
     let confirmButtonTitle: String = .buttonApply
+    let locale: Locale = LanguageManager.languageManager.currentLocale
     let titleLabel: String = .datePickerViewTitle
 
     // MARK: - Initializers

@@ -17,6 +17,12 @@ final class LanguageManager {
         set { saveLanguage(at: newValue) }
     }
 
+    var currentLocale: Locale {
+        savedLanguageCode == languageCodes[0]
+            ? .autoupdatingCurrent
+            : Locale(identifier: savedLanguageCode)
+    }
+
     var languages: [Language] {
         [
             Language(code: languageCodes[0], name: localizedString(forKey: "languages.system")),

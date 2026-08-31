@@ -4,6 +4,18 @@ import XCTest
 final class NewListViewModelTests: XCTestCase {
 
     // MARK: - Public Methods
+    func testEmptyProductShowsValidationErrorAfterEditingEnds() {
+        let viewModel = makeViewModel()
+        viewModel.viewWillAppear()
+        viewModel.updateNewListTitle(with: "Weekly shopping")
+        viewModel.addNewItemButtonPressed()
+        let productID = viewModel.getCellParams(for: 1).1.id
+
+        viewModel.updateNewListItem(id: productID, with: "")
+
+        XCTAssertEqual(viewModel.getCellParams(for: 1).1.error, String.newListEmptyName)
+    }
+
     func testInitialListTitleDoesNotShowValidationError() {
         let viewModel = makeViewModel()
 
@@ -23,16 +35,22 @@ final class NewListViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.getCellParams(for: 1).1.startEditing, true)
     }
 
-    func testEmptyProductShowsValidationErrorAfterEditingEnds() {
-        let viewModel = makeViewModel()
+    func testValidListIsSavedOnlyAfterSaveButtonPressed() {
+        let storage = NewListMockStorageService()
+        let viewModel = NewListViewModel(
+            coordinator: NewListMockCoordinator(storageService: storage),
+            editList: nil
+        )
         viewModel.viewWillAppear()
+
         viewModel.updateNewListTitle(with: "Weekly shopping")
-        viewModel.addNewItemButtonPressed()
-        let productID = viewModel.getCellParams(for: 1).1.id
 
-        viewModel.updateNewListItem(id: productID, with: "")
+        XCTAssertTrue(storage.savedLists.isEmpty)
 
-        XCTAssertEqual(viewModel.getCellParams(for: 1).1.error, String.newListEmptyName)
+        viewModel.completeButtonPressed()
+
+        XCTAssertEqual(storage.savedLists.count, 1)
+        XCTAssertEqual(storage.savedLists.first?.info.title, "Weekly shopping")
     }
 
     // MARK: - Private Methods
@@ -81,6 +99,10 @@ private final class NewListMockNotificationService: NotificationServiceProtocol 
 
 private final class NewListMockStorageService: StorageServiceProtocol {
 
+    // MARK: - Public Properties
+    var savedLists: [ShopList] = []
+
+    // MARK: - Public Methods
     func deleteList(with id: UUID) throws {}
     func deleteLists(with ids: [UUID]) throws {}
     func getExistingListNames(excluding listID: UUID?) throws -> Set<String> { [] }
@@ -88,7 +110,7 @@ private final class NewListMockStorageService: StorageServiceProtocol {
     func getList(by id: UUID) throws -> ShopList? { nil }
     func getListsWithStatus(isCompleted: Bool) throws -> [ListInfo] { [] }
     func restoreList(with id: UUID) throws {}
-    func saveNewList(list: ShopList) throws {}
+    func saveNewList(list: ShopList) throws { savedLists.append(list) }
     func updateList(list: ShopList) throws {}
     func updateListInfo(listInfo: ListInfo) throws {}
 }

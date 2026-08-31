@@ -12,13 +12,13 @@
 			containerPortal = D46AA5932CF889B700B81D86 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = D46AA59A2CF889B700B81D86;
-			remoteInfo = ShoppingList;
+			remoteInfo = GotItAll;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = GotItAllTests.xctest; path = "/Users/andreyzhelev/Projects/ShoppingList/build/Debug-iphoneos/GotItAll.app/PlugIns/GotItAllTests.xctest"; sourceTree = "<absolute>"; };
-		D4BBACB72D638E7C00A59869 /* GotItAll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = GotItAll.app; path = "/Users/andreyzhelev/Projects/ShoppingList/build/Debug-iphoneos/GotItAll.app"; sourceTree = "<absolute>"; };
+		D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GotItAllTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4BBACB72D638E7C00A59869 /* GotItAll.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GotItAll.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -70,7 +70,17 @@
 			children = (
 				D46AA59D2CF889B700B81D86 /* GotItAll */,
 				D4A000022E00000100000001 /* GotItAllTests */,
+				D4A0000C2E00000100000001 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		D4A0000C2E00000100000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D4BBACB72D638E7C00A59869 /* GotItAll.app */,
+				D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -94,7 +104,7 @@
 			name = GotItAll;
 			packageProductDependencies = (
 			);
-			productName = ShoppingList;
+			productName = GotItAll;
 			productReference = D4BBACB72D638E7C00A59869 /* GotItAll.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -117,7 +127,7 @@
 			name = GotItAllTests;
 			packageProductDependencies = (
 			);
-			productName = ShoppingListTests;
+			productName = GotItAllTests;
 			productReference = D4A3371A3044CF28002794D5 /* GotItAllTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -151,7 +161,7 @@
 			mainGroup = D46AA5922CF889B700B81D86;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = D46AA5922CF889B700B81D86;
+			productRefGroup = D4A0000C2E00000100000001 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -326,7 +336,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -386,7 +396,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

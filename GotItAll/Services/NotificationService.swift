@@ -1,6 +1,20 @@
 import Foundation
 import UserNotifications
 
+protocol NotificationServiceProtocol {
+    func cancelNotification(for listID: UUID)
+    func scheduleNotification(for listID: UUID, listTitle: String, date: Date) async throws
+}
+
+protocol UserNotificationCenterProtocol {
+    func add(_ request: UNNotificationRequest) async throws
+    func notificationSettings() async -> UserNotificationSettings
+    func pendingNotificationRequests() async -> [UNNotificationRequest]
+    func removeDeliveredNotifications(withIdentifiers identifiers: [String])
+    func removePendingNotificationRequests(withIdentifiers identifiers: [String])
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
+}
+
 enum NotificationServiceError: LocalizedError, Equatable {
 
     // MARK: - Constants
@@ -21,18 +35,60 @@ enum NotificationServiceError: LocalizedError, Equatable {
     }
 }
 
-protocol NotificationServiceProtocol {
-    func cancelNotification(for listID: UUID)
-    func scheduleNotification(for listID: UUID, listTitle: String, date: Date) async throws
+struct UserNotificationSettings {
+
+    // MARK: - Public Properties
+    let alertSetting: UNNotificationSetting
+    let authorizationStatus: UNAuthorizationStatus
 }
 
-final class NotificationService: NotificationServiceProtocol {
+final class SystemUserNotificationCenter: UserNotificationCenterProtocol {
 
     // MARK: - Private Properties
     private let notificationCenter: UNUserNotificationCenter
 
     // MARK: - Initializers
     init(notificationCenter: UNUserNotificationCenter = .current()) {
+        self.notificationCenter = notificationCenter
+    }
+
+    // MARK: - Public Methods
+    func add(_ request: UNNotificationRequest) async throws {
+        try await notificationCenter.add(request)
+    }
+
+    func notificationSettings() async -> UserNotificationSettings {
+        let settings = await notificationCenter.notificationSettings()
+        return UserNotificationSettings(
+            alertSetting: settings.alertSetting,
+            authorizationStatus: settings.authorizationStatus
+        )
+    }
+
+    func pendingNotificationRequests() async -> [UNNotificationRequest] {
+        await notificationCenter.pendingNotificationRequests()
+    }
+
+    func removeDeliveredNotifications(withIdentifiers identifiers: [String]) {
+        notificationCenter.removeDeliveredNotifications(withIdentifiers: identifiers)
+    }
+
+    func removePendingNotificationRequests(withIdentifiers identifiers: [String]) {
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiers)
+    }
+
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+        try await notificationCenter.requestAuthorization(options: options)
+    }
+}
+
+final class NotificationService: NotificationServiceProtocol {
+
+    // MARK: - Private Properties
+    private let notificationCenter: UserNotificationCenterProtocol
+
+    // MARK: - Initializers
+    init(notificationCenter: UserNotificationCenterProtocol = SystemUserNotificationCenter()) {
         self.notificationCenter = notificationCenter
     }
 

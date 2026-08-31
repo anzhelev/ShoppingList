@@ -32,7 +32,8 @@ final class MainScreenViewModel: MainScreenViewModelProtocol {
 
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.setLocalizedDateFormatFromTemplate("yMd")
+        formatter.locale = LanguageManager.languageManager.currentLocale
+        formatter.dateFormat = .dateFormat
         return formatter
     }()
 

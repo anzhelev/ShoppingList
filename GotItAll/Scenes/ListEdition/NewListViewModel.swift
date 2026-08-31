@@ -12,7 +12,6 @@ protocol NewListViewModelProtocol: AnyObject {
     func getTableRowCount() -> Int
     func tableFinishedUpdating()
     func viewWillAppear()
-    func viewWillDisappear()
 }
 
 final class NewListViewModel: NewListViewModelProtocol {
@@ -27,7 +26,6 @@ final class NewListViewModel: NewListViewModelProtocol {
     private let notificationService: NotificationServiceProtocol
     private let storageService: StorageServiceProtocol
     private var completeButtonState = false
-    private var completeButtonWasPressed = false
     private var editedList: ShopList?
     private var existingListNames = Set<String>()
     private var hasLoaded = false
@@ -68,11 +66,9 @@ final class NewListViewModel: NewListViewModelProtocol {
         }
 
         do {
-            completeButtonWasPressed = true
             try saveList()
             coordinator.popToMainView()
         } catch {
-            completeButtonWasPressed = false
             show(error)
         }
     }
@@ -137,18 +133,6 @@ final class NewListViewModel: NewListViewModelProtocol {
             hasLoaded = true
             completeButtonState = validateList()
             newListBinding.value = [.reloadTable, .updateCompleteButtonState]
-        } catch {
-            show(error)
-        }
-    }
-
-    func viewWillDisappear() {
-        guard !completeButtonWasPressed, validateList() else {
-            return
-        }
-
-        do {
-            try saveList()
         } catch {
             show(error)
         }
