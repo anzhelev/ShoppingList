@@ -202,7 +202,9 @@ extension MainScreenViewController: UITableViewDelegate {
             completion(true)
         }
         editAction.backgroundColor = .buttonBgrPrimary
-        return UISwipeActionsConfiguration(actions: [editAction])
+        return viewModel.completeMode
+        ? nil
+        : UISwipeActionsConfiguration(actions: [editAction])
     }
 
     func tableView(

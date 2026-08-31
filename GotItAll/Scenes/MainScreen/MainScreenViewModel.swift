@@ -1,6 +1,7 @@
 import Foundation
 
 protocol MainScreenViewModelProtocol: AnyObject {
+    var completeMode: Bool { get }
     var mainScreenBinding: Observable<MainScreenBinding> { get set }
 
     func addNewListButtonPressed()
@@ -20,10 +21,10 @@ protocol MainScreenViewModelProtocol: AnyObject {
 final class MainScreenViewModel: MainScreenViewModelProtocol {
 
     // MARK: - Public Properties
+    let completeMode: Bool
     var mainScreenBinding: Observable<MainScreenBinding> = Observable(nil)
 
     // MARK: - Private Properties
-    private let completeMode: Bool
     private let coordinator: Coordinator
     private let notificationService: NotificationServiceProtocol
     private let storageService: StorageServiceProtocol
